@@ -7,10 +7,8 @@ using System.Net;
 using System.Windows.Forms;
 using UnityEngine;
 
-namespace Lovense_Remote
-{
-    public class LovenseRemote : MelonMod
-    {
+namespace Lovense_Remote {
+    public class LovenseRemote : MelonMod {
 
         public static ArrayList toys = new ArrayList();
         string findButton = null;
@@ -29,8 +27,7 @@ namespace Lovense_Remote
         int buttonX;
         int buttonY;
 
-        public override void OnApplicationStart()
-        {
+        public override void OnApplicationStart() {
             MelonPrefs.RegisterCategory("LovenseRemote", "Lovense Remote");
             MelonPrefs.RegisterInt("LovenseRemote", "lockButton", 0, "Button to lock speed");
             MelonPrefs.RegisterInt("LovenseRemote", "holdButton", 0, "Button to hold to use toy");
@@ -47,14 +44,11 @@ namespace Lovense_Remote
             buttonY = MelonPrefs.GetInt("LovenseRemote", "buttonY");
         }
 
-        public override void VRChat_OnUiManagerInit()
-        {
+        public override void VRChat_OnUiManagerInit() {
             menu = new QMNestedButton(subMenu, buttonX, buttonY, "Lovense\nRemote", "Lovense remote settings");
 
-            LockButtonUI = new QMSingleButton(menu, 1, 0, "Lock Speed\nButton", delegate ()
-            {
-                if (findButton == "lockButton")
-                {
+            LockButtonUI = new QMSingleButton(menu, 1, 0, "Lock Speed\nButton", delegate () {
+                if (findButton == "lockButton") {
                     lockButton = KeyCode.None;
                     findButton = null;
                     LockButtonUI.setButtonText("Lock Speed\nButton\nCleared");
@@ -65,18 +59,15 @@ namespace Lovense_Remote
             }, "Click than press button on controller to set button to lock vibraton speed", null, null);
 
             // LockKey keybind 
-            LockKeyBind = new QMSingleButton(menu, 1, 1, "none", new System.Action(() =>
-            {
+            LockKeyBind = new QMSingleButton(menu, 1, 1, "none", new System.Action(() => {
 
             }), "Shows current Lock Speed Button keybind", null, null);
             LockKeyBind.getGameObject().GetComponent<RectTransform>().sizeDelta /= new Vector2(1f, 2.0175f);
             LockKeyBind.getGameObject().GetComponent<RectTransform>().anchoredPosition += new Vector2(0f, 96f);
             LockKeyBind.setIntractable(false);
 
-            HoldButtonUI = new QMSingleButton(menu, 2, 0, "Hold\nButton", delegate ()
-            {
-                if (findButton == "holdButton")
-                {
+            HoldButtonUI = new QMSingleButton(menu, 2, 0, "Hold\nButton", delegate () {
+                if (findButton == "holdButton") {
                     holdButton = KeyCode.None;
                     findButton = null;
                     HoldButtonUI.setButtonText("Hold\nButton\nCleared");
@@ -87,34 +78,28 @@ namespace Lovense_Remote
             }, "Click than press button on controller to set button to hold to use toy", null, null);
 
             // LockKey keybind 
-            HoldKeyBind = new QMSingleButton(menu, 2, 1, "none", new System.Action(() =>
-            {
+            HoldKeyBind = new QMSingleButton(menu, 2, 1, "none", new System.Action(() => {
 
             }), "Shows current Hold Button keybind", null, null);
             HoldKeyBind.getGameObject().GetComponent<RectTransform>().sizeDelta /= new Vector2(1f, 2.0175f);
             HoldKeyBind.getGameObject().GetComponent<RectTransform>().anchoredPosition += new Vector2(0f, 96f);
             HoldKeyBind.setIntractable(false);
 
-            addButtonUI = new QMSingleButton(menu, 3, 0, "Add\nToys", delegate ()
-            {
+            addButtonUI = new QMSingleButton(menu, 3, 0, "Add\nToys", delegate () {
                 string token = getToken();//gets id from link in clipboard
                 string[] idName = getIDandName(token);//name, id
-                if (token == null || idName == null)
-                {
+                if (token == null || idName == null) {
                     addButtonUI.setButtonText("Add\nToys\nFailed");
-                }
-                else new Toy(idName[0], token, idName[1]);
+                } else new Toy(idName[0], token, idName[1]);
 
             }, "Click to paste your friend's Long Distance Control Link code", null, null);
 
-            holdToggle = new QMToggleButton(menu, 5, -1, "Hold on", delegate ()
-            {
+            holdToggle = new QMToggleButton(menu, 5, -1, "Hold on", delegate () {
                 HoldButtonUI.setActive(true);
                 HoldKeyBind.setActive(true);
                 requireHold = true;
                 MelonPrefs.SetBool("LovenseRemote", "Requirehold", true);
-            }, "Hold off", delegate ()
-            {
+            }, "Hold off", delegate () {
                 HoldButtonUI.setActive(false);
                 HoldKeyBind.setActive(false);
                 requireHold = false;
@@ -127,22 +112,18 @@ namespace Lovense_Remote
 
         }
 
-        public override void OnUpdate()
-        {
-            if (HoldKeyBind != null)
-            {
+        public override void OnUpdate() {
+            if (HoldKeyBind != null) {
                 HoldKeyBind.setButtonText(holdButton.ToString());
             }
 
-            if (LockKeyBind != null)
-            {
+            if (LockKeyBind != null) {
                 LockKeyBind.setButtonText(lockButton.ToString());
             }
 
             if (findButton != null) getButton();
 
-            if (Input.GetKeyDown(lockButton))
-            {
+            if (Input.GetKeyDown(lockButton)) {
                 if (lockSpeed) lockSpeed = false;
                 else lockSpeed = true;
             }
@@ -150,18 +131,15 @@ namespace Lovense_Remote
             if (lockSpeed) return;
 
             if (requireHold)
-                if (!Input.GetKey(holdButton))
-                {
+                if (!Input.GetKey(holdButton)) {
                     foreach (Toy toy in toys)
                         toy.setSpeed(0);
                     return;
                 }
 
-            foreach (Toy toy in toys)
-            {
+            foreach (Toy toy in toys) {
                 float speed = 0;
-                switch (toy.hand)
-                {
+                switch (toy.hand) {
                     case "none":
                         break;
                     case "left":
@@ -183,12 +161,10 @@ namespace Lovense_Remote
 
 
 
-        public void getButton()
-        {
+        public void getButton() {
             //A-Z
             for (int i = 97; i <= 122; i++)
-                if (Input.GetKey((KeyCode)i))
-                {
+                if (Input.GetKey((KeyCode)i)) {
                     setButton((KeyCode)i);
                     return;
                 }
@@ -210,16 +186,12 @@ namespace Lovense_Remote
             else if (Input.GetKey(KeyCode.Joystick1Button9)) setButton(KeyCode.Joystick1Button9);
         }
 
-        public void setButton(KeyCode button)
-        {
-            if (findButton.Equals("lockButton"))
-            {
+        public void setButton(KeyCode button) {
+            if (findButton.Equals("lockButton")) {
                 lockButton = button;
                 LockButtonUI.setButtonText("Lock Speed\nButton Set");
                 MelonPrefs.SetInt("LovenseRemote", "lockButton", button.GetHashCode());
-            }
-            else if (findButton.Equals("holdButton"))
-            {
+            } else if (findButton.Equals("holdButton")) {
                 holdButton = button;
                 HoldButtonUI.setButtonText("Hold\nButton Set");
                 MelonPrefs.SetInt("LovenseRemote", "holdButton", button.GetHashCode());
@@ -227,8 +199,7 @@ namespace Lovense_Remote
             findButton = null;
         }
 
-        static string[] getIDandName(string token)
-        {
+        static string[] getIDandName(string token) {
             if (token == null) return null;
             var url = "https://c.lovense.com/app/ws2/play/" + token;
             var httpRequest = (HttpWebRequest)WebRequest.Create(url);
@@ -245,19 +216,15 @@ namespace Lovense_Remote
             httpRequest.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9";
             httpRequest.Referer = "https://c.lovense.com/app/ws/play/" + token;
             var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
-            using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
-            {
+            using (var streamReader = new StreamReader(httpResponse.GetResponseStream())) {
                 var result = streamReader.ReadToEnd();
                 int start = result.IndexOf("JSON.parse('") + 12;
                 int end = result.IndexOf("')");
                 if (end == -1) return null;
                 JObject json = JObject.Parse(result.Substring(start, end - start));
-                if (json.Count == 0)
-                {
+                if (json.Count == 0) {
                     return null;
-                }
-                else
-                {
+                } else {
                     string id = (string)json.First.First["id"];
                     string name = (string)json.First.First["name"];
                     name = char.ToUpper(name[0]) + name.Substring(1);//make first letter uppercase
@@ -266,25 +233,19 @@ namespace Lovense_Remote
             }
         }
 
-        public static string getToken()
-        {
+        public static string getToken() {
             string url = Clipboard.GetText();
             if (!url.Contains("https://c.lovense.com/c/")) return null;
             HttpWebResponse resp = null;
-            try
-            {
+            try {
                 HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(url);
                 req.Method = "HEAD";
                 req.AllowAutoRedirect = false;
                 resp = (HttpWebResponse)req.GetResponse();
                 url = resp.Headers["Location"];
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 return null;
-            }
-            finally
-            {
+            } finally {
                 if (resp != null) resp.Close();
             }
             int pos = url.LastIndexOf("/") + 1;
@@ -293,8 +254,7 @@ namespace Lovense_Remote
 
     }
 
-    public class Toy
-    {
+    public class Toy {
         public string hand = "none";
         private static int x = 1;
         private QMSingleButton button;
@@ -303,32 +263,26 @@ namespace Lovense_Remote
         private string token;
         private string id;
 
-        public Toy(string name, string token, string id)
-        {
+        public Toy(string name, string token, string id) {
             this.token = token;
             this.id = id;
             this.name = name;
-            button = new QMSingleButton(LovenseRemote.menu, x++, 0, name + "\nClick to\nSet", delegate ()
-            {
+            button = new QMSingleButton(LovenseRemote.menu, x++, 2, name + "\nClick to\nSet", delegate () {
                 changeHand();
             }, "Click to set controll mode", null, null);
             LovenseRemote.toys.Add(this);
         }
 
-        public void setSpeed(float speed)
-        {
+        public void setSpeed(float speed) {
             speed = (int)(speed * 10);
-            if (speed != lastSpeed)
-            {
+            if (speed != lastSpeed) {
                 lastSpeed = speed;
                 send((int)speed);
             }
         }
 
-        public void changeHand()
-        {
-            switch (hand)
-            {
+        public void changeHand() {
+            switch (hand) {
                 case "none":
                     hand = "left";
                     button.setButtonText(name + "\nLeft Trigger");
@@ -346,7 +300,6 @@ namespace Lovense_Remote
             case "either":
                 hand = "slider";
                 button.setButtonText(name + "\nSlider");
-
                 //disable "Lock Speed Button" button when this is on for all connected toys
                 foreach (Toy toy in LovenseRemote.toys)
                     if (toy.hand != "slider" || toy.hand != "none") break;
@@ -362,18 +315,15 @@ namespace Lovense_Remote
             }
         }
 
-        private void send(int speed)
-        {
+        private void send(int speed) {
             var httpRequest = (HttpWebRequest)WebRequest.Create("https://c.lovense.com/app/ws/command/" + token);
             httpRequest.Method = "POST";
             httpRequest.ContentType = "application/x-www-form-urlencoded";
-            using (var streamWriter = new StreamWriter(httpRequest.GetRequestStream()))
-            {
+            using (var streamWriter = new StreamWriter(httpRequest.GetRequestStream())) {
                 streamWriter.Write("order=%7B%22cate%22%3A%22id%22%2C%22id%22%3A%7B%22" + id + "%22%3A%7B%22v%22%3A" + speed + "%2C%22p%22%3A-1%2C%22r%22%3A-1%7D%7D%7D");
             }
             var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
-            using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
-            {
+            using (var streamReader = new StreamReader(httpResponse.GetResponseStream())) {
                 var result = streamReader.ReadToEnd();
                 //Console.WriteLine(result);
             }
