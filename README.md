@@ -7,7 +7,7 @@ Lets you control your friends lovense using your vr controllers.
 2. Click `Add Toy` in the in game menu
 
 ### How to get control link code
-0. Person that has the toy should follow these steps
+* Person that has the toy should follow these steps
 1. Download / open the Lovense Remote app (the blue one)
 2. Pair device
 3. Click `Long Distance`
