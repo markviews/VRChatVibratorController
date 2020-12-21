@@ -77,7 +77,7 @@ namespace Lovense_Remote {
                 HoldButtonUI.setButtonText("Press Now");
             }, "Click than press button on controller to set button to hold to use toy", null, null);
 
-            // LockKey keybind 
+            // HoldKey keybind 
             HoldKeyBind = new QMSingleButton(menu, 2, 1, "none", new System.Action(() => {
 
             }), "Shows current Hold Button keybind", null, null);
@@ -89,7 +89,7 @@ namespace Lovense_Remote {
                 string token = getToken();//gets id from link in clipboard
                 string[] idName = getIDandName(token);//name, id
                 if (token == null || idName == null) {
-                    addButtonUI.setButtonText("Add\nToys\nFailed");
+                    addButtonUI.setButtonText("Add\nToys\n<color=#FF0000>Failed</color>");
                 } else new Toy(idName[0], token, idName[1]);
 
             }, "Click to paste your friend's Long Distance Control Link code", null, null);
