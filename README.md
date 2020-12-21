@@ -26,6 +26,7 @@ You can change the menu location by changing `buttonX` and `buttonY` to desired 
 * Lock Speed Button: Press the button you set to keep the current vibration speed until you press it or the set controller trigger again.
 
 #### Planned Features
+* Desktop support (currently only work with vr controller triggers)
 * Stroke control: speed based on how fast you stroke your controllers (with customizable thresholds)
 * Slider control: speed based on slider
 * Support for edge's multiple vibrators
