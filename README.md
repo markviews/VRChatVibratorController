@@ -25,7 +25,7 @@ You can change the menu location by changing `buttonX` and `buttonY` to desired 
 * Hold Button:  If set to `Hold On` you will need to hold the button you set along with the trigger to use toy
 * Lock Speed Button: Press the button you set to keep the current vibration speed until you press it or the set controller trigger again.
 
-#### Planned Features
+### Planned Features
 * Desktop support (currently only work with vr controller triggers)
 * Stroke control: speed based on how fast you stroke your controllers (with customizable thresholds)
 * Slider control: speed based on slider
@@ -33,5 +33,5 @@ You can change the menu location by changing `buttonX` and `buttonY` to desired 
 * Support for nora's rotation
 * Support for max's functions
 
-#### Credits
+### Credits
 DubyaDude for [RubyButtonAPI](https://github.com/DubyaDude/RubyButtonAPI)
