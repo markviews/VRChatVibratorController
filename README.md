@@ -16,17 +16,17 @@ Lets you control your friends lovense using your vr controllers.
 6. Send the link to your friend with the mod (DO NOT open the link in a web browser, it will take control and the mod won't be able to)
 
 ### Mod menu location
-You can change the menu location by changing `buttonX` and `buttonY` to desired coordinates and `subMenu` for in `modprefs.ini` to:
+You can change the menu location by changing `buttonX` and `buttonY` to desired coordinates and `subMenu` in `modprefs.ini` to:
 `ShortcutMenu` (Main menu), `UserInteractMenu` (Menu when you select someone), `UserIconCameraMenu` (VRC+ menu to take pictures), `EmoteMenu`, `EmojiMenu`, `CameraMenu`, `UIElementsMenu`, or `AvatarStatsMenu`
 
 ### Customizable controls setup
 1. Click `Hold Button` or `Lock Speed Button` in the mod menu
 2. Press a button on your keyboard or controller
 * Hold Button:  If set to `Hold On` you will need to hold the button you set along with the trigger to use toy
-* Lock Speed Button: Press the button you set to keep the current vibration speed until you press it or the set controller trigger again.
+* Lock Speed Button: Press the button you set to keep the current vibration speed until you press it again
 
 ### Planned Features
-* Desktop support (currently only work with vr controller triggers)
+* Desktop support (currently only works with vr controller triggers)
 * Stroke control: speed based on how fast you stroke your controllers (with customizable thresholds)
 * Slider control: speed based on slider
 * Support for edge's multiple vibrators
