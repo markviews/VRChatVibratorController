@@ -4,7 +4,7 @@ Lets you control your friends lovense using your vr controllers.
 
 ### How to add toy to mod
 1. Copy control link code that your friend sent to you to your clipboard (the whole link, like https://c.lovense.com/c/01abc2)
-2. Click Add Toy in the in game menu
+2. Click `Add Toy` in the in game menu
 
 ### How to get control link code
 0. Person that has the toy should follow these steps
