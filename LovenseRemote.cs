@@ -146,9 +146,10 @@ namespace Lovense_Remote {
             foreach (Toy toy in toys) {
 
                 if (toy.maxSlider != null) {
-                    if (toy.lastMax != toy.maxSlider.value) {
-                        toy.lastMax = toy.maxSlider.value;
-                        toy.maxSliderText.text = "Max Contraction: " + toy.lastMax;
+                    if (toy.contraction != toy.maxSlider.value) {
+                        toy.contraction = toy.maxSlider.value;
+                        toy.maxSliderText.text = "Max Contraction: " + toy.contraction;
+                        toy.send((int)toy.lastSpeed, toy.contraction);
                     }
                 }
 
@@ -157,7 +158,7 @@ namespace Lovense_Remote {
                         toy.setSpeed(0);
                     }
 
-                        float speed = 0;
+                float speed = 0;
                 switch (toy.hand) {
                     case "none":
                         break;
@@ -281,7 +282,7 @@ namespace Lovense_Remote {
         private static int x = 1;
         private QMSingleButton button;
         public float lastSpeed = 0;
-        public float lastMax = 0;
+        public float contraction = -1;
         public string name;
         private string token;
         private string id;
@@ -289,6 +290,7 @@ namespace Lovense_Remote {
         public UnityEngine.UI.Text speedSliderText;
         public UnityEngine.UI.Slider maxSlider;//slider for max's contractions
         public UnityEngine.UI.Text maxSliderText;
+        
 
         public Toy(string name, string token, string id) {
             this.token = token;
@@ -323,6 +325,7 @@ namespace Lovense_Remote {
                 maxSliderText = textTransform.GetComponent<UnityEngine.UI.Text>();
                 maxSliderText.text = "Max Contraction: 0";
                 maxSliderObject.SetActive(false);
+                fixSliders();
             }
         }
 
@@ -335,7 +338,7 @@ namespace Lovense_Remote {
             speed = (int)(speed * 10);
             if (speed != lastSpeed) {
                 lastSpeed = speed;
-                send((int)speed);
+                send((int)speed, contraction);
                 if (hand.Equals("slider"))
                     speedSliderText.text = name + " Speed: " + (speed * 10) + "%";
             }
@@ -345,19 +348,23 @@ namespace Lovense_Remote {
             float sliderY = 0;
             int sliders = 0;
             foreach (Toy toy in LovenseRemote.toys) {
-                if (toy.hand.Equals("slider")) {
+
+                if (toy.hand.Equals("slider") || toy.name.Equals("Max")) {
                     sliders++;
-                    toy.speedSlider.gameObject.SetActive(true);
-                    toy.speedSlider.transform.localPosition = new Vector3(-348.077f, 343.046f - sliderY, 0);
-                    if (toy.maxSlider != null) {
+                    if (toy.hand.Equals("slider")) {
+                        toy.speedSlider.gameObject.SetActive(true);
+                        toy.speedSlider.transform.localPosition = new Vector3(-348.077f, 343.046f - sliderY, 0);
+                    }
+                    if (toy.name.Equals("Max") && !toy.hand.Equals("none")) {
                         toy.maxSlider.gameObject.SetActive(true);
                         toy.maxSlider.transform.localPosition = new Vector3(492.955f, 343.046f - sliderY, 0);
                     }
                     sliderY += 160;
-                } else {
+                }
+
+                if (!toy.hand.Equals("slider"))
                     toy.speedSlider.gameObject.SetActive(false);
-                    if (toy.maxSlider != null) toy.maxSlider.gameObject.SetActive(false);
-                    }
+                
             }
                 float add = 160 * sliders;
                 BoxCollider collider = GameObject.Find("UserInterface/QuickMenu").GetComponent<BoxCollider>();
@@ -384,7 +391,6 @@ namespace Lovense_Remote {
                     hand = "slider";
                     button.setButtonText(name + "\nSlider");
 
-                    fixSliders();
                     //disable "Lock Speed Button" button when this is on for all connected toys
                     foreach (Toy toy in LovenseRemote.toys)
                         if (toy.hand != "slider" || toy.hand != "none") break;
@@ -392,24 +398,23 @@ namespace Lovense_Remote {
                     break;
                 case "slider":
                     hand = "none";
-                    fixSliders();
                     button.setButtonText(name + "\nClick to\nSet");
                     LovenseRemote.LockButtonUI.setActive(true);//in case this was disabled
                     if (maxSlider != null) maxSlider.gameObject.SetActive(false);//hide 'Max' slider
                     break;
             }
+            fixSliders();
         }
 
-        private void send(int speed) {
+        public void send(int speed, float contraction) {
             new Thread(() => {
                 Thread.CurrentThread.IsBackground = true;
 
-            MelonLogger.Log(speed);
             var httpRequest = (HttpWebRequest)WebRequest.Create("https://c.lovense.com/app/ws/command/" + token);
             httpRequest.Method = "POST";
             httpRequest.ContentType = "application/x-www-form-urlencoded";
             using (var streamWriter = new StreamWriter(httpRequest.GetRequestStream())) {
-                streamWriter.Write("order=%7B%22cate%22%3A%22id%22%2C%22id%22%3A%7B%22" + id + "%22%3A%7B%22v%22%3A" + speed + "%2C%22p%22%3A-1%2C%22r%22%3A-1%7D%7D%7D");
+                streamWriter.Write("order=%7B%22cate%22%3A%22id%22%2C%22id%22%3A%7B%22" + id + "%22%3A%7B%22v%22%3A" + speed + "%2C%22p%22%3A" + contraction  + "% 2C%22r%22%3A-1%7D%7D%7D");
             }
             var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
             using (var streamReader = new StreamReader(httpResponse.GetResponseStream())) {
