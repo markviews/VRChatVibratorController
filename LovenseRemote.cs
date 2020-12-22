@@ -93,7 +93,7 @@ namespace Lovense_Remote {
                 string token = getToken();//gets id from link in clipboard
                 string[] idName = getIDandName(token);//name, id
                 if (token == null || idName == null) {
-                    addButtonUI.setButtonText("Add\nToy\nFailed");
+                    addButtonUI.setButtonText("Add\nToys\n<color=#FF0000>Failed</color>");
                 } else new Toy(idName[0], token, idName[1]);
 
             }, "Click to paste your friend's Long Distance Control Link code", null, null);
