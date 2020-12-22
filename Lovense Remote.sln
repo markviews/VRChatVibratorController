@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
-VisualStudioVersion = 16.0.30621.155
+VisualStudioVersion = 16.0.30717.126
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lovense Remote", "Lovense Remote\Lovense Remote.csproj", "{53985F75-81A8-494D-995B-3BCBC5D0D867}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lovense Remote", "Lovense Remote.csproj", "{53985F75-81A8-494D-995B-3BCBC5D0D867}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,6 +20,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {7D95266B-317C-4FD7-89BD-622915BB3C90}
+		SolutionGuid = {D282D682-B2CA-4975-A032-B8D91F97B4B6}
 	EndGlobalSection
 EndGlobal

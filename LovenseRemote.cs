@@ -21,6 +21,7 @@ namespace Lovense_Remote {
         QMSingleButton HoldKeyBind;
         QMSingleButton addButtonUI;
         QMToggleButton holdToggle;
+        QMSingleButton HowToUse;
         KeyCode lockButton;//button to lock speed
         KeyCode holdButton;//button to hold with other controll to use toy (if enabled)
         public static string subMenu;
@@ -45,13 +46,14 @@ namespace Lovense_Remote {
         }
 
         public override void VRChat_OnUiManagerInit() {
-            menu = new QMNestedButton(subMenu, buttonX, buttonY, "Lovense\nRemote", "Lovense remote settings");
+            menu = new QMNestedButton(subMenu, buttonX, buttonY, "<color=#f13e8d>Lovense</color>\nRemote", "Lets you control your partner's lovense toy using your bindable vr controllers");
 
             LockButtonUI = new QMSingleButton(menu, 1, 0, "Lock Speed\nButton", delegate () {
                 if (findButton == "lockButton") {
                     lockButton = KeyCode.None;
                     findButton = null;
                     LockButtonUI.setButtonText("Lock Speed\nButton\nCleared");
+                    MelonPrefs.SetInt("LovenseRemote", "lockButton", lockButton.GetHashCode());
                     return;
                 }
                 findButton = "lockButton";
@@ -71,6 +73,7 @@ namespace Lovense_Remote {
                     holdButton = KeyCode.None;
                     findButton = null;
                     HoldButtonUI.setButtonText("Hold\nButton\nCleared");
+                    MelonPrefs.SetInt("LovenseRemote", "holdButton", holdButton.GetHashCode());
                     return;
                 }
                 findButton = "holdButton";
@@ -93,6 +96,14 @@ namespace Lovense_Remote {
                 } else new Toy(idName[0], token, idName[1]);
 
             }, "Click to paste your friend's Long Distance Control Link code", null, null);
+
+            // How To Use Button
+            HowToUse = new QMSingleButton(menu, 3, 1, "How To Use", new System.Action(() =>
+            {
+                System.Diagnostics.Process.Start("https://github.com/markviews/VRChatLovenseRemote/blob/main/README.md");
+            }), "Opens a documentation by markviews", null, null);
+            HowToUse.getGameObject().GetComponent<RectTransform>().sizeDelta /= new Vector2(1f, 2.0175f);
+            HowToUse.getGameObject().GetComponent<RectTransform>().anchoredPosition += new Vector2(0f, 96f);
 
             holdToggle = new QMToggleButton(menu, 5, -1, "Hold on", delegate () {
                 HoldButtonUI.setActive(true);
