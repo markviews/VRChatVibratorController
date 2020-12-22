@@ -1,4 +1,4 @@
-# VRChat Lovense Remote
+# VRChat Vibrator Controller
 Lets you control your friends lovense using your vr controllers.
 <br>Mod menu can be found under `UI Elements` by default, read below for instructions to change it's location.
 
