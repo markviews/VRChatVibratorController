@@ -32,4 +32,4 @@ You can change the menu location by changing `buttonX` and `buttonY` to desired 
 
 ### Credits
 DubyaDude for [RubyButtonAPI](https://github.com/DubyaDude/RubyButtonAPI)
-abbeybabbey for UI improvments
+<br>abbeybabbey for UI improvments
