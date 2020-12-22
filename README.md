@@ -26,12 +26,9 @@ You can change the menu location by changing `buttonX` and `buttonY` to desired 
 * Lock Speed Button: Press the button you set to keep the current vibration speed until you press it again
 
 ### Planned Features
-* Desktop support (currently only works with vr controller triggers)
 * Stroke control: speed based on how fast you stroke your controllers (with customizable thresholds)
-* Slider control: speed based on slider
 * Support for edge's multiple vibrators
 * Support for nora's rotation
-* Support for max's functions
 
 ### Credits
 DubyaDude for [RubyButtonAPI](https://github.com/DubyaDude/RubyButtonAPI)

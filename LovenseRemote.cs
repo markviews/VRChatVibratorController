@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.IO;
 using System.Net;
+using System.Threading;
 using System.Windows.Forms;
 using UnityEngine;
 
@@ -13,7 +14,7 @@ namespace Lovense_Remote {
         public static ArrayList toys = new ArrayList();
         string findButton = null;
         bool lockSpeed = false;
-        bool requireHold = false;
+        bool requireHold;
         public static QMNestedButton menu;
         public static QMSingleButton LockButtonUI;
         QMSingleButton LockKeyBind;
@@ -46,7 +47,7 @@ namespace Lovense_Remote {
         }
 
         public override void VRChat_OnUiManagerInit() {
-            menu = new QMNestedButton(subMenu, buttonX, buttonY, "<color=#f13e8d>Lovense</color>\nRemote", "Lets you control your partner's lovense toy using your bindable vr controllers");
+            menu = new QMNestedButton(subMenu, buttonX, buttonY, "Lovense\nRemote", "Lovense remote settings");
 
             LockButtonUI = new QMSingleButton(menu, 1, 0, "Lock Speed\nButton", delegate () {
                 if (findButton == "lockButton") {
@@ -73,14 +74,14 @@ namespace Lovense_Remote {
                     holdButton = KeyCode.None;
                     findButton = null;
                     HoldButtonUI.setButtonText("Hold\nButton\nCleared");
-                    MelonPrefs.SetInt("LovenseRemote", "holdButton", holdButton.GetHashCode());
+                    MelonPrefs.SetInt("LovenseRemote", "lockButton", holdButton.GetHashCode());
                     return;
                 }
                 findButton = "holdButton";
                 HoldButtonUI.setButtonText("Press Now");
             }, "Click than press button on controller to set button to hold to use toy", null, null);
 
-            // HoldKey keybind 
+            // LockKey keybind 
             HoldKeyBind = new QMSingleButton(menu, 2, 1, "none", new System.Action(() => {
 
             }), "Shows current Hold Button keybind", null, null);
@@ -88,18 +89,17 @@ namespace Lovense_Remote {
             HoldKeyBind.getGameObject().GetComponent<RectTransform>().anchoredPosition += new Vector2(0f, 96f);
             HoldKeyBind.setIntractable(false);
 
-            addButtonUI = new QMSingleButton(menu, 3, 0, "Add\nToys", delegate () {
+            addButtonUI = new QMSingleButton(menu, 3, 0, "Add\nToy", delegate () {
                 string token = getToken();//gets id from link in clipboard
                 string[] idName = getIDandName(token);//name, id
                 if (token == null || idName == null) {
-                    addButtonUI.setButtonText("Add\nToys\n<color=#FF0000>Failed</color>");
+                    addButtonUI.setButtonText("Add\nToy\nFailed");
                 } else new Toy(idName[0], token, idName[1]);
 
             }, "Click to paste your friend's Long Distance Control Link code", null, null);
 
             // How To Use Button
-            HowToUse = new QMSingleButton(menu, 3, 1, "How To Use", new System.Action(() =>
-            {
+            HowToUse = new QMSingleButton(menu, 3, 1, "How To Use", new System.Action(() => {
                 System.Diagnostics.Process.Start("https://github.com/markviews/VRChatLovenseRemote/blob/main/README.md");
             }), "Opens a documentation by markviews", null, null);
             HowToUse.getGameObject().GetComponent<RectTransform>().sizeDelta /= new Vector2(1f, 2.0175f);
@@ -115,12 +115,14 @@ namespace Lovense_Remote {
                 HoldKeyBind.setActive(false);
                 requireHold = false;
                 MelonPrefs.SetBool("LovenseRemote", "Requirehold", false);
-
             }, "Require holding a button to use toy?");
 
             holdToggle.setToggleState(requireHold);
             HoldButtonUI.setActive(requireHold);
 
+            new Toy("Lol", "", "");
+            new Toy("Hush", "", "");
+            new Toy("Max", "", "");
         }
 
         public override void OnUpdate() {
@@ -141,15 +143,21 @@ namespace Lovense_Remote {
 
             if (lockSpeed) return;
 
-            if (requireHold)
-                if (!Input.GetKey(holdButton)) {
-                    foreach (Toy toy in toys)
-                        toy.setSpeed(0);
-                    return;
+            foreach (Toy toy in toys) {
+
+                if (toy.maxSlider != null) {
+                    if (toy.lastMax != toy.maxSlider.value) {
+                        toy.lastMax = toy.maxSlider.value;
+                        toy.maxSliderText.text = "Max Contraction: " + toy.lastMax;
+                    }
                 }
 
-            foreach (Toy toy in toys) {
-                float speed = 0;
+                if (toy.hand != "slider" && requireHold)
+                    if (!Input.GetKey(holdButton)) {
+                        toy.setSpeed(0);
+                    }
+
+                        float speed = 0;
                 switch (toy.hand) {
                     case "none":
                         break;
@@ -164,6 +172,9 @@ namespace Lovense_Remote {
                         float right = Input.GetAxis("Oculus_CrossPlatform_SecondaryIndexTrigger");
                         if (left > right) speed = left;
                         else speed = right;
+                        break;
+                    case "slider":
+                        speed = toy.speedSlider.value / 10;
                         break;
                 }
                 toy.setSpeed(speed);
@@ -269,10 +280,15 @@ namespace Lovense_Remote {
         public string hand = "none";
         private static int x = 1;
         private QMSingleButton button;
-        private float lastSpeed;
-        private string name;
+        public float lastSpeed = 0;
+        public float lastMax = 0;
+        public string name;
         private string token;
         private string id;
+        public UnityEngine.UI.Slider speedSlider;//slider for vibrator speed
+        public UnityEngine.UI.Text speedSliderText;
+        public UnityEngine.UI.Slider maxSlider;//slider for max's contractions
+        public UnityEngine.UI.Text maxSliderText;
 
         public Toy(string name, string token, string id) {
             this.token = token;
@@ -282,6 +298,37 @@ namespace Lovense_Remote {
                 changeHand();
             }, "Click to set controll mode", null, null);
             LovenseRemote.toys.Add(this);
+
+            GameObject slider = GameObject.Find("UserInterface/QuickMenu/UserInteractMenu/User Volume/VolumeSlider");
+            GameObject quickmenu = GameObject.Find("UserInterface/QuickMenu/ShortcutMenu");
+
+            GameObject speedSliderObject = GameObject.Instantiate(slider, quickmenu.transform, true);
+            speedSlider = speedSliderObject.GetComponent<UnityEngine.UI.Slider>();
+            speedSlider.maxValue = 10;
+            speedSlider.wholeNumbers = true;
+            speedSlider.value = 0;
+            speedSliderText = speedSlider.transform.Find("Fill Area/VolumeNumberText").GetComponent<UnityEngine.UI.Text>();
+            speedSliderText.text = name + " Speed: 0%";
+            speedSliderObject.SetActive(false);
+
+            if (name.Equals("Max")) {
+                GameObject maxSliderObject = GameObject.Instantiate(slider, quickmenu.transform, true);
+                maxSliderObject.transform.localScale = new Vector3(0.7f, 1, 1);
+                maxSlider = maxSliderObject.GetComponent<UnityEngine.UI.Slider>();
+                maxSlider.maxValue = 3;
+                maxSlider.wholeNumbers = true;
+                maxSlider.value = 0;
+                Transform textTransform = maxSlider.transform.Find("Fill Area/VolumeNumberText");
+                textTransform.localScale = new Vector3(1, 1, 1);
+                maxSliderText = textTransform.GetComponent<UnityEngine.UI.Text>();
+                maxSliderText.text = "Max Contraction: 0";
+                maxSliderObject.SetActive(false);
+            }
+        }
+
+        public void showSlider(bool toggle) {
+            speedSlider.gameObject.SetActive(toggle);
+            if (maxSlider != null) maxSlider.gameObject.SetActive(toggle);
         }
 
         public void setSpeed(float speed) {
@@ -289,7 +336,32 @@ namespace Lovense_Remote {
             if (speed != lastSpeed) {
                 lastSpeed = speed;
                 send((int)speed);
+                if (hand.Equals("slider"))
+                    speedSliderText.text = name + " Speed: " + (speed * 10) + "%";
             }
+        }
+
+        public void fixSliders() {
+            float sliderY = 0;
+            int sliders = 0;
+            foreach (Toy toy in LovenseRemote.toys) {
+                if (toy.hand.Equals("slider")) {
+                    sliders++;
+                    toy.speedSlider.gameObject.SetActive(true);
+                    toy.speedSlider.transform.localPosition = new Vector3(-348.077f, 343.046f - sliderY, 0);
+                    if (toy.maxSlider != null) {
+                        toy.maxSlider.gameObject.SetActive(true);
+                        toy.maxSlider.transform.localPosition = new Vector3(492.955f, 343.046f - sliderY, 0);
+                    }
+                    sliderY += 160;
+                } else {
+                    toy.speedSlider.gameObject.SetActive(false);
+                    if (toy.maxSlider != null) toy.maxSlider.gameObject.SetActive(false);
+                    }
+            }
+                float add = 160 * sliders;
+                BoxCollider collider = GameObject.Find("UserInterface/QuickMenu").GetComponent<BoxCollider>();
+                collider.size = new Vector3(collider.size.x, collider.size.y + add, collider.size.z);
         }
 
         public void changeHand() {
@@ -297,7 +369,8 @@ namespace Lovense_Remote {
                 case "none":
                     hand = "left";
                     button.setButtonText(name + "\nLeft Trigger");
-                    //LovenseRemote.LockButtonUI.setActive(true);//in case this was disabled
+                    LovenseRemote.LockButtonUI.setActive(true);//in case this was disabled
+                    if (maxSlider != null) maxSlider.gameObject.SetActive(true);//in case this was disabled
                     break;
                 case "left":
                     hand = "right";
@@ -307,26 +380,31 @@ namespace Lovense_Remote {
                     hand = "either";
                     button.setButtonText(name + "\nEither Trigger");
                     break;
-                /*
-            case "either":
-                hand = "slider";
-                button.setButtonText(name + "\nSlider");
-                //disable "Lock Speed Button" button when this is on for all connected toys
-                foreach (Toy toy in LovenseRemote.toys)
-                    if (toy.hand != "slider" || toy.hand != "none") break;
-                LovenseRemote.LockButtonUI.setActive(false);
-                    break;
-            case "slider":
-                */
                 case "either":
+                    hand = "slider";
+                    button.setButtonText(name + "\nSlider");
+
+                    fixSliders();
+                    //disable "Lock Speed Button" button when this is on for all connected toys
+                    foreach (Toy toy in LovenseRemote.toys)
+                        if (toy.hand != "slider" || toy.hand != "none") break;
+                    LovenseRemote.LockButtonUI.setActive(false);
+                    break;
+                case "slider":
                     hand = "none";
+                    fixSliders();
                     button.setButtonText(name + "\nClick to\nSet");
                     LovenseRemote.LockButtonUI.setActive(true);//in case this was disabled
+                    if (maxSlider != null) maxSlider.gameObject.SetActive(false);//hide 'Max' slider
                     break;
             }
         }
 
         private void send(int speed) {
+            new Thread(() => {
+                Thread.CurrentThread.IsBackground = true;
+
+            MelonLogger.Log(speed);
             var httpRequest = (HttpWebRequest)WebRequest.Create("https://c.lovense.com/app/ws/command/" + token);
             httpRequest.Method = "POST";
             httpRequest.ContentType = "application/x-www-form-urlencoded";
@@ -338,7 +416,8 @@ namespace Lovense_Remote {
                 var result = streamReader.ReadToEnd();
                 //Console.WriteLine(result);
             }
-            //Console.WriteLine(httpResponse.StatusCode);
+                //Console.WriteLine(httpResponse.StatusCode);
+            }).Start();
         }
 
 
