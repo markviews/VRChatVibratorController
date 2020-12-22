@@ -119,10 +119,6 @@ namespace Lovense_Remote {
 
             holdToggle.setToggleState(requireHold);
             HoldButtonUI.setActive(requireHold);
-
-            new Toy("Lol", "", "");
-            new Toy("Hush", "", "");
-            new Toy("Max", "", "");
         }
 
         public override void OnUpdate() {
