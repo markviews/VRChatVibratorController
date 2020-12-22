@@ -29,6 +29,7 @@ You can change the menu location by changing `buttonX` and `buttonY` to desired 
 * Stroke control: speed based on how fast you stroke your controllers (with customizable thresholds)
 * Support for edge's multiple vibrators
 * Support for nora's rotation
+* Disable trigger controlls when menu is open
 
 ### Credits
 DubyaDude for [RubyButtonAPI](https://github.com/DubyaDude/RubyButtonAPI)
