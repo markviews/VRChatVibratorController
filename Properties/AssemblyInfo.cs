@@ -1,7 +1,7 @@
 ﻿using MelonLoader;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using Lovense_Remote;
+using Vibrator_Controller;
 
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information

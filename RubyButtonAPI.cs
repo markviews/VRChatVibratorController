@@ -7,8 +7,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-namespace Lovense_Remote
-{
+namespace Vibrator_Controller {
 
     //Firstly, thanks to Emilia for helping me update this to the unhollower.
     //This adds a couple of new functions compared to the old one, however,
@@ -21,7 +20,7 @@ namespace Lovense_Remote
     public static class QMButtonAPI
     {
         //REPLACE THIS STRING SO YOUR MENU DOESNT COLLIDE WITH OTHER MENUS
-        public static string identifier = "Lovense Remote";
+        public static string identifier = "Vibrator Controller";
         public static Color mBackground = Color.red;
         public static Color mForeground = Color.white;
         public static Color bBackground = Color.red;
@@ -500,7 +499,7 @@ namespace Lovense_Remote
             {
                 GameObject shortcutMenu = quickmenu.transform.Find("ShortcutMenu").gameObject;
                 if (!shortcutMenu.activeInHierarchy)
-                    shortcutMenu = quickmenu.transform.Find(LovenseRemote.subMenu).gameObject;//I (MarkViews) edited this line for the menu to work in other menus
+                    shortcutMenu = quickmenu.transform.Find(VibratorController.subMenu).gameObject;//I (MarkViews) edited this line for the menu to work in other menus
 
                 FieldInfo[] fis = Il2CppType.Of<QuickMenu>().GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Where((fi) => fi.FieldType == Il2CppType.Of<GameObject>()).ToArray();
                 //MelonLoader.MelonModLogger.Log("[QMStuff] GameObject Fields in QuickMenu:");

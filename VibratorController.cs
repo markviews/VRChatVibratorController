@@ -1,26 +1,22 @@
 ﻿using MelonLoader;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
-using System.IO;
-using System.Net;
-using System.Threading;
-using System.Windows.Forms;
 using UnityEngine;
 
-namespace Lovense_Remote {
+namespace Vibrator_Controller {
     public class VibratorController : MelonMod {
 
         public static ArrayList toys = new ArrayList();
         string findButton = null;
         bool lockSpeed = false;
         bool requireHold;
+
         public static QMNestedButton menu;
         public static QMSingleButton LockButtonUI;
         QMSingleButton LockKeyBind;
         QMSingleButton HoldButtonUI;
         QMSingleButton HoldKeyBind;
-        QMSingleButton addButtonUI;
+        public static QMSingleButton addButtonUI;
         QMToggleButton holdToggle;
         QMSingleButton HowToUse;
         KeyCode lockButton;//button to lock speed
@@ -30,31 +26,31 @@ namespace Lovense_Remote {
         int buttonY;
 
         public override void OnApplicationStart() {
-            MelonPrefs.RegisterCategory("LovenseRemote", "Lovense Remote");
-            MelonPrefs.RegisterInt("LovenseRemote", "lockButton", 0, "Button to lock speed");
-            MelonPrefs.RegisterInt("LovenseRemote", "holdButton", 0, "Button to hold to use toy");
-            MelonPrefs.RegisterBool("LovenseRemote", "Requirehold", false, "If enabled you will need to hold set button to use toy");
-            MelonPrefs.RegisterString("LovenseRemote", "subMenu", "UIElementsMenu", "Menu to put the mod button on");
-            MelonPrefs.RegisterInt("LovenseRemote", "buttonX", 0, "x position to put the mod button");
-            MelonPrefs.RegisterInt("LovenseRemote", "buttonY", 0, "y position to put the mod button");
+            MelonPrefs.RegisterCategory("VibratorController", "Vibrator Controller");
+            MelonPrefs.RegisterInt("VibratorController", "lockButton", 0, "Button to lock speed");
+            MelonPrefs.RegisterInt("VibratorController", "holdButton", 0, "Button to hold to use toy");
+            MelonPrefs.RegisterBool("VibratorController", "Requirehold", false, "If enabled you will need to hold set button to use toy");
+            MelonPrefs.RegisterString("VibratorController", "subMenu", "UIElementsMenu", "Menu to put the mod button on");
+            MelonPrefs.RegisterInt("VibratorController", "buttonX", 0, "x position to put the mod button");
+            MelonPrefs.RegisterInt("VibratorController", "buttonY", 0, "y position to put the mod button");
 
-            lockButton = (KeyCode)MelonPrefs.GetInt("LovenseRemote", "lockButton");
-            holdButton = (KeyCode)MelonPrefs.GetInt("LovenseRemote", "holdButton");
-            requireHold = MelonPrefs.GetBool("LovenseRemote", "Requirehold");
-            subMenu = MelonPrefs.GetString("LovenseRemote", "subMenu");
-            buttonX = MelonPrefs.GetInt("LovenseRemote", "buttonX");
-            buttonY = MelonPrefs.GetInt("LovenseRemote", "buttonY");
+            lockButton = (KeyCode)MelonPrefs.GetInt("VibratorController", "lockButton");
+            holdButton = (KeyCode)MelonPrefs.GetInt("VibratorController", "holdButton");
+            requireHold = MelonPrefs.GetBool("VibratorController", "Requirehold");
+            subMenu = MelonPrefs.GetString("VibratorController", "subMenu");
+            buttonX = MelonPrefs.GetInt("VibratorController", "buttonX");
+            buttonY = MelonPrefs.GetInt("VibratorController", "buttonY");
         }
 
         public override void VRChat_OnUiManagerInit() {
-            menu = new QMNestedButton(subMenu, buttonX, buttonY, "Lovense\nRemote", "Lovense remote settings");
+            menu = new QMNestedButton(subMenu, buttonX, buttonY, "Vibrator\nController", "Vibrator Controller Settings");
 
             LockButtonUI = new QMSingleButton(menu, 1, 0, "Lock Speed\nButton", delegate () {
                 if (findButton == "lockButton") {
                     lockButton = KeyCode.None;
                     findButton = null;
                     LockButtonUI.setButtonText("Lock Speed\nButton\nCleared");
-                    MelonPrefs.SetInt("LovenseRemote", "lockButton", lockButton.GetHashCode());
+                    MelonPrefs.SetInt("VibratorController", "lockButton", lockButton.GetHashCode());
                     return;
                 }
                 findButton = "lockButton";
@@ -74,7 +70,7 @@ namespace Lovense_Remote {
                     holdButton = KeyCode.None;
                     findButton = null;
                     HoldButtonUI.setButtonText("Hold\nButton\nCleared");
-                    MelonPrefs.SetInt("LovenseRemote", "lockButton", holdButton.GetHashCode());
+                    MelonPrefs.SetInt("VibratorController", "lockButton", holdButton.GetHashCode());
                     return;
                 }
                 findButton = "holdButton";
@@ -90,17 +86,22 @@ namespace Lovense_Remote {
             HoldKeyBind.setIntractable(false);
 
             addButtonUI = new QMSingleButton(menu, 3, 0, "Add\nToy", delegate () {
-                string token = getToken();//gets id from link in clipboard
-                string[] idName = getIDandName(token);//name, id
-                if (token == null || idName == null) {
-                    addButtonUI.setButtonText("Add\nToys\n<color=#FF0000>Failed</color>");
-                } else new Toy(idName[0], token, idName[1]);
+
+                string text = System.Windows.Forms.Clipboard.GetText();
+
+                if (text.Length != 4) {
+                    addButtonUI.setButtonText("Add\nToys\n<color=#FF0000>Invalid Code</color>");
+                    return;
+                }
+
+                Client.setupClient();
+                Client.send("join " + text);
 
             }, "Click to paste your friend's Long Distance Control Link code", null, null);
 
             // How To Use Button
             HowToUse = new QMSingleButton(menu, 3, 1, "How To Use", new System.Action(() => {
-                System.Diagnostics.Process.Start("https://github.com/markviews/VRChatLovenseRemote/blob/main/README.md");
+                System.Diagnostics.Process.Start("https://github.com/markviews/VRChatVibratorController");
             }), "Opens a documentation by markviews", null, null);
             HowToUse.getGameObject().GetComponent<RectTransform>().sizeDelta /= new Vector2(1f, 2.0175f);
             HowToUse.getGameObject().GetComponent<RectTransform>().anchoredPosition += new Vector2(0f, 96f);
@@ -109,12 +110,12 @@ namespace Lovense_Remote {
                 HoldButtonUI.setActive(true);
                 HoldKeyBind.setActive(true);
                 requireHold = true;
-                MelonPrefs.SetBool("LovenseRemote", "Requirehold", true);
+                MelonPrefs.SetBool("VibratorController", "Requirehold", true);
             }, "Hold off", delegate () {
                 HoldButtonUI.setActive(false);
                 HoldKeyBind.setActive(false);
                 requireHold = false;
-                MelonPrefs.SetBool("LovenseRemote", "Requirehold", false);
+                MelonPrefs.SetBool("VibratorController", "Requirehold", false);
             }, "Require holding a button to use toy?");
 
             holdToggle.setToggleState(requireHold);
@@ -145,7 +146,7 @@ namespace Lovense_Remote {
                     if (toy.contraction != toy.maxSlider.value) {
                         toy.contraction = toy.maxSlider.value;
                         toy.maxSliderText.text = "Max Contraction: " + toy.contraction;
-                        toy.send((int)toy.lastSpeed, toy.contraction);
+                        //toy.send((int)toy.lastSpeed, toy.contraction);
                     }
                 }
 
@@ -178,7 +179,37 @@ namespace Lovense_Remote {
             }
         }
 
-
+        //message from server
+        public static void message(string msg) {
+            MelonLogger.Log(msg);
+            String[] args = msg.Split(' ');
+            switch (args[0]) {
+                case "toys":
+                case "add":
+                    for (int i = 1; i < args.Length; i++) {
+                        string[] toyData = args[i].Split(':');
+                        string name = toyData[0];
+                        string id = toyData[1];
+                        MelonLogger.Log("Adding: " + name + ":" + id);
+                        new Toy(name, id);
+                    }
+                    break;
+                case "remove": {
+                        string[] toyData = args[1].Split(':');
+                        string name = toyData[0];
+                        string id = toyData[1];
+                        MelonLogger.Log("Removing: " + name + ":" + id);
+                    }
+                    break;
+                case "notFound":
+                    MelonLogger.Log("Invalid code");
+                    addButtonUI.setButtonText("Add\nToys\n<color=#FF0000>Invalid Code</color>");
+                    break;
+                case "left":
+                    MelonLogger.Log("User disconnected");
+                    break;
+            }
+        }
 
         public void getButton() {
             //A-Z
@@ -209,218 +240,14 @@ namespace Lovense_Remote {
             if (findButton.Equals("lockButton")) {
                 lockButton = button;
                 LockButtonUI.setButtonText("Lock Speed\nButton Set");
-                MelonPrefs.SetInt("LovenseRemote", "lockButton", button.GetHashCode());
+                MelonPrefs.SetInt("VibratorController", "lockButton", button.GetHashCode());
             } else if (findButton.Equals("holdButton")) {
                 holdButton = button;
                 HoldButtonUI.setButtonText("Hold\nButton Set");
-                MelonPrefs.SetInt("LovenseRemote", "holdButton", button.GetHashCode());
+                MelonPrefs.SetInt("VibratorController", "holdButton", button.GetHashCode());
             }
             findButton = null;
         }
-
-        static string[] getIDandName(string token) {
-            if (token == null) return null;
-            var url = "https://c.lovense.com/app/ws2/play/" + token;
-            var httpRequest = (HttpWebRequest)WebRequest.Create(url);
-            httpRequest.Headers["authority"] = "c.lovense.com";
-            httpRequest.Headers["sec-ch-ua"] = "\"Google Chrome\";v=\"87\", \" Not; A Brand\";v=\"99\", \"Chromium\";v=\"87\"";
-            httpRequest.Headers["sec-ch-ua-mobile"] = "?0";
-            httpRequest.Headers["upgrade-insecure-requests"] = "1";
-            httpRequest.Headers["sec-fetch-site"] = "same-origin";
-            httpRequest.Headers["sec-fetch-mode"] = "navigate";
-            httpRequest.Headers["sec-fetch-user"] = "?1";
-            httpRequest.Headers["sec-fetch-dest"] = "document";
-            httpRequest.Headers["accept-language"] = "en-US,en;q=0.9";
-            httpRequest.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36";
-            httpRequest.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9";
-            httpRequest.Referer = "https://c.lovense.com/app/ws/play/" + token;
-            var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
-            using (var streamReader = new StreamReader(httpResponse.GetResponseStream())) {
-                var result = streamReader.ReadToEnd();
-                int start = result.IndexOf("JSON.parse('") + 12;
-                int end = result.IndexOf("')");
-                if (end == -1) return null;
-                JObject json = JObject.Parse(result.Substring(start, end - start));
-                if (json.Count == 0) {
-                    return null;
-                } else {
-                    string id = (string)json.First.First["id"];
-                    string name = (string)json.First.First["name"];
-                    name = char.ToUpper(name[0]) + name.Substring(1);//make first letter uppercase
-                    return new string[] { name, id };
-                }
-            }
-        }
-
-        public static string getToken() {
-            string url = Clipboard.GetText();
-            if (!url.Contains("https://c.lovense.com/c/")) return null;
-            HttpWebResponse resp = null;
-            try {
-                HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(url);
-                req.Method = "HEAD";
-                req.AllowAutoRedirect = false;
-                resp = (HttpWebResponse)req.GetResponse();
-                url = resp.Headers["Location"];
-            } catch (Exception e) {
-                return null;
-            } finally {
-                if (resp != null) resp.Close();
-            }
-            int pos = url.LastIndexOf("/") + 1;
-            return url.Substring(pos, url.Length - pos);
-        }
-
-    }
-
-    public class Toy {
-        public string hand = "none";
-        private static int x = 1;
-        private QMSingleButton button;
-        public float lastSpeed = 0;
-        public float contraction = -1;
-        public string name;
-        private string token;
-        private string id;
-        public UnityEngine.UI.Slider speedSlider;//slider for vibrator speed
-        public UnityEngine.UI.Text speedSliderText;
-        public UnityEngine.UI.Slider maxSlider;//slider for max's contractions
-        public UnityEngine.UI.Text maxSliderText;
-        
-
-        public Toy(string name, string token, string id) {
-            this.token = token;
-            this.id = id;
-            this.name = name;
-            button = new QMSingleButton(VibratorController.menu, x++, 2, name + "\nClick to\nSet", delegate () {
-                changeHand();
-            }, "Click to set controll mode", null, null);
-            VibratorController.toys.Add(this);
-
-            GameObject slider = GameObject.Find("UserInterface/QuickMenu/UserInteractMenu/User Volume/VolumeSlider");
-            GameObject quickmenu = GameObject.Find("UserInterface/QuickMenu/ShortcutMenu");
-
-            GameObject speedSliderObject = GameObject.Instantiate(slider, quickmenu.transform, true);
-            speedSlider = speedSliderObject.GetComponent<UnityEngine.UI.Slider>();
-            speedSlider.maxValue = 10;
-            speedSlider.wholeNumbers = true;
-            speedSlider.value = 0;
-            speedSliderText = speedSlider.transform.Find("Fill Area/VolumeNumberText").GetComponent<UnityEngine.UI.Text>();
-            speedSliderText.text = name + " Speed: 0%";
-            speedSliderObject.SetActive(false);
-
-            if (name.Equals("Max")) {
-                GameObject maxSliderObject = GameObject.Instantiate(slider, quickmenu.transform, true);
-                maxSliderObject.transform.localScale = new Vector3(0.7f, 1, 1);
-                maxSlider = maxSliderObject.GetComponent<UnityEngine.UI.Slider>();
-                maxSlider.maxValue = 3;
-                maxSlider.wholeNumbers = true;
-                maxSlider.value = 0;
-                Transform textTransform = maxSlider.transform.Find("Fill Area/VolumeNumberText");
-                textTransform.localScale = new Vector3(1, 1, 1);
-                maxSliderText = textTransform.GetComponent<UnityEngine.UI.Text>();
-                maxSliderText.text = "Max Contraction: 0";
-                maxSliderObject.SetActive(false);
-                fixSliders();
-            }
-        }
-
-        public void showSlider(bool toggle) {
-            speedSlider.gameObject.SetActive(toggle);
-            if (maxSlider != null) maxSlider.gameObject.SetActive(toggle);
-        }
-
-        public void setSpeed(float speed) {
-            speed = (int)(speed * 10);
-            if (speed != lastSpeed) {
-                lastSpeed = speed;
-                send((int)speed, contraction);
-                if (hand.Equals("slider"))
-                    speedSliderText.text = name + " Speed: " + (speed * 10) + "%";
-            }
-        }
-
-        public void fixSliders() {
-            float sliderY = 0;
-            int sliders = 0;
-            foreach (Toy toy in VibratorController.toys) {
-
-                if (toy.hand.Equals("slider") || toy.name.Equals("Max")) {
-                    sliders++;
-                    if (toy.hand.Equals("slider")) {
-                        toy.speedSlider.gameObject.SetActive(true);
-                        toy.speedSlider.transform.localPosition = new Vector3(-348.077f, 343.046f - sliderY, 0);
-                    }
-                    if (toy.name.Equals("Max") && !toy.hand.Equals("none")) {
-                        toy.maxSlider.gameObject.SetActive(true);
-                        toy.maxSlider.transform.localPosition = new Vector3(492.955f, 343.046f - sliderY, 0);
-                    }
-                    sliderY += 160;
-                }
-
-                if (!toy.hand.Equals("slider"))
-                    toy.speedSlider.gameObject.SetActive(false);
-                
-            }
-                float add = 160 * sliders;
-                BoxCollider collider = GameObject.Find("UserInterface/QuickMenu").GetComponent<BoxCollider>();
-                collider.size = new Vector3(collider.size.x, collider.size.y + add, collider.size.z);
-        }
-
-        public void changeHand() {
-            switch (hand) {
-                case "none":
-                    hand = "left";
-                    button.setButtonText(name + "\nLeft Trigger");
-                    VibratorController.LockButtonUI.setActive(true);//in case this was disabled
-                    if (maxSlider != null) maxSlider.gameObject.SetActive(true);//in case this was disabled
-                    break;
-                case "left":
-                    hand = "right";
-                    button.setButtonText(name + "\nRight Trigger");
-                    break;
-                case "right":
-                    hand = "either";
-                    button.setButtonText(name + "\nEither Trigger");
-                    break;
-                case "either":
-                    hand = "slider";
-                    button.setButtonText(name + "\nSlider");
-
-                    //disable "Lock Speed Button" button when this is on for all connected toys
-                    foreach (Toy toy in VibratorController.toys)
-                        if (toy.hand != "slider" || toy.hand != "none") break;
-                    VibratorController.LockButtonUI.setActive(false);
-                    break;
-                case "slider":
-                    hand = "none";
-                    button.setButtonText(name + "\nClick to\nSet");
-                    VibratorController.LockButtonUI.setActive(true);//in case this was disabled
-                    if (maxSlider != null) maxSlider.gameObject.SetActive(false);//hide 'Max' slider
-                    break;
-            }
-            fixSliders();
-        }
-
-        public void send(int speed, float contraction) {
-            new Thread(() => {
-                Thread.CurrentThread.IsBackground = true;
-
-            var httpRequest = (HttpWebRequest)WebRequest.Create("https://c.lovense.com/app/ws/command/" + token);
-            httpRequest.Method = "POST";
-            httpRequest.ContentType = "application/x-www-form-urlencoded";
-            using (var streamWriter = new StreamWriter(httpRequest.GetRequestStream())) {
-                streamWriter.Write("order=%7B%22cate%22%3A%22id%22%2C%22id%22%3A%7B%22" + id + "%22%3A%7B%22v%22%3A" + speed + "%2C%22p%22%3A" + contraction  + "% 2C%22r%22%3A-1%7D%7D%7D");
-            }
-            var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
-            using (var streamReader = new StreamReader(httpResponse.GetResponseStream())) {
-                var result = streamReader.ReadToEnd();
-                //Console.WriteLine(result);
-            }
-                //Console.WriteLine(httpResponse.StatusCode);
-            }).Start();
-        }
-
 
     }
 }
