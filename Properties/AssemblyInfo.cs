@@ -7,7 +7,7 @@ using Vibrator_Controller;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Vibrator Controller")]
-[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.1", "MarkViews", "https://github.com/markviews/VRChatLovenseRemote")]
+[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.1", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
 [assembly: MelonGame("VRChat", "VRChat")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
