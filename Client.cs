@@ -11,20 +11,25 @@ namespace Vibrator_Controller {
         //Source https://codereview.stackexchange.com/questions/41591/websockets-client-code-and-making-it-production-ready
         static ClientWebSocket webSocket;
 
-        public static async void setupClient() {
-            if (webSocket != null) return;
+        internal static async void setupClient(string firstMsg) {
             try {
                 webSocket = new ClientWebSocket();
                 await webSocket.ConnectAsync(new Uri("ws://control.markstuff.net:8080"), CancellationToken.None);
-                await Task.WhenAll(Receive(webSocket));
+                await Task.WhenAll(Receive(webSocket), send(firstMsg));
             } catch (Exception ex) {
                 Console.WriteLine("Exception: {0}", ex);
             }
         }
 
-        public static async Task send(string msg) {
+        internal static async Task send(string msg) {
             MelonLogger.Log("Sending: " + msg);
-            byte[] buffer = Encoding.Default.GetBytes(msg);
+            if (webSocket == null) {
+                setupClient(msg);
+                return;
+            }
+
+            byte[] buffer = new byte[20];
+            buffer = Encoding.Unicode.GetBytes(msg);
             await webSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
         }
 

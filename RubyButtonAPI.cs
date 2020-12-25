@@ -499,7 +499,7 @@ namespace Vibrator_Controller {
             {
                 GameObject shortcutMenu = quickmenu.transform.Find("ShortcutMenu").gameObject;
                 if (!shortcutMenu.activeInHierarchy)
-                    shortcutMenu = quickmenu.transform.Find(VibratorController.subMenu).gameObject;//I (MarkViews) edited this line for the menu to work in other menus
+                    shortcutMenu = quickmenu.transform.Find(Interface.subMenu).gameObject;//I (MarkViews) edited this line for the menu to work in other menus
 
                 FieldInfo[] fis = Il2CppType.Of<QuickMenu>().GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Where((fi) => fi.FieldType == Il2CppType.Of<GameObject>()).ToArray();
                 //MelonLoader.MelonModLogger.Log("[QMStuff] GameObject Fields in QuickMenu:");

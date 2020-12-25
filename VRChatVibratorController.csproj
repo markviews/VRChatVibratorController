@@ -92,6 +92,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client.cs" />
+    <Compile Include="Interface.cs" />
     <Compile Include="Toy.cs" />
     <Compile Include="VibratorController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -99,7 +100,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

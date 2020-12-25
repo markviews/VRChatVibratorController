@@ -1,24 +1,24 @@
 ﻿using UnityEngine;
 
 namespace Vibrator_Controller {
-    public class Toy {
-        public string hand = "none";
+    class Toy {
+        internal string hand = "none";
         private static int x = 1;
         private QMSingleButton button;
-        public float lastSpeed = 0;
-        public float contraction = -1;
-        public string name;
+        private float lastSpeed = 0;
+        internal float contraction = -1;
+        private string name;
         private string id;
-        public UnityEngine.UI.Slider speedSlider;//slider for vibrator speed
-        public UnityEngine.UI.Text speedSliderText;
-        public UnityEngine.UI.Slider maxSlider;//slider for max's contractions
-        public UnityEngine.UI.Text maxSliderText;
+        internal UnityEngine.UI.Slider speedSlider;//slider for vibrator speed
+        internal UnityEngine.UI.Text speedSliderText;
+        internal UnityEngine.UI.Slider maxSlider;//slider for max's contractions
+        internal UnityEngine.UI.Text maxSliderText;
 
 
-        public Toy(string name, string id) {
+        internal Toy(string name, string id) {
             this.id = id;
             this.name = name;
-            button = new QMSingleButton(VibratorController.menu, x++, 2, name + "\nClick to\nSet", delegate () {
+            button = new QMSingleButton(Interface.menu, x++, 2, name + "\nClick to\nSet", delegate () {
                 changeHand();
             }, "Click to set controll mode", null, null);
             VibratorController.toys.Add(this);
@@ -51,12 +51,12 @@ namespace Vibrator_Controller {
             }
         }
 
-        public void showSlider(bool toggle) {
+        internal void showSlider(bool toggle) {
             speedSlider.gameObject.SetActive(toggle);
             if (maxSlider != null) maxSlider.gameObject.SetActive(toggle);
         }
 
-        public void setSpeed(float speed) {
+        internal void setSpeed(float speed) {
             speed = (int)(speed * 10);
             if (speed != lastSpeed) {
                 lastSpeed = speed;
@@ -66,7 +66,7 @@ namespace Vibrator_Controller {
             }
         }
 
-        public void fixSliders() {
+        internal void fixSliders() {
             float sliderY = 0;
             int sliders = 0;
             foreach (Toy toy in VibratorController.toys) {
@@ -93,7 +93,7 @@ namespace Vibrator_Controller {
             collider.size = new Vector3(collider.size.x, collider.size.y + add, collider.size.z);
         }
 
-        public void changeHand() {
+        internal void changeHand() {
             switch (hand) {
                 case "none":
                     hand = "left";
