@@ -1,7 +1,9 @@
 # VRChat Vibrator Controller
 
 #### Mod not currently working, I should have it working and i will post an update in a few days.
-This mod is not developed by or associated with Lovense or Hytto, i'm just using their API.
+Getting server setup with SSL and DDOS protection.. that's why i'm taking so long -_-
+<br><br>
+This mod is not developed by or associated with Lovense or Hytto.
 
 Lets you control your friends lovense using your vr controllers.
 <br>Mod menu can be found under `UI Elements` by default, read below for instructions to change it's location.
