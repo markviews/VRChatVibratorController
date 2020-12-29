@@ -1,29 +1,41 @@
 # VRChat Vibrator Controller
 
-#### Mod not currently working, I should have it working and i will post an update in a few days.
-Getting server setup with SSL and DDOS protection.. that's why i'm taking so long -_-
-<br><br>
-This mod is not developed by or associated with Lovense or Hytto.
+### Mod almost ready for use.
 
 Lets you control your friends lovense using your vr controllers.
 <br>Mod menu can be found under `UI Elements` by default, read below for instructions to change it's location.
 
-### Mod menu location
+## How to use
+1. Ask friend to follow instructions below to get a code
+2. Copy the code from your friend to your clipboard
+3. Click `Add Toy` in the mod menu
+
+## How to get a code
+* Friend that has toy should follow these instructions
+1. Download / open the Lovense Connect app (the pink one)
+2. Connect your toy to the app
+3. Connect your phone to the same wifi as your computer
+4. Open the mod webpage (i will post link soon)
+5. Click `Search for toys`
+
+## Mod menu location
 You can change the menu location by changing `buttonX` and `buttonY` to desired coordinates and `subMenu` in `modprefs.ini` to:
 `ShortcutMenu` (Main menu), `UserInteractMenu` (Menu when you select someone), `UserIconCameraMenu` (VRC+ menu to take pictures), `EmoteMenu`, `EmojiMenu`, `CameraMenu`, `UIElementsMenu`, or `AvatarStatsMenu`
 
-### Customizable controls setup
+## Customizable controls setup
 1. Click `Hold Button` or `Lock Speed Button` in the mod menu
 2. Press a button on your keyboard or controller
 * Hold Button:  If set to `Hold On` you will need to hold the button you set along with the trigger to use toy
 * Lock Speed Button: Press the button you set to keep the current vibration speed until you press it again
 
-### Planned Features
+## Planned Features
 * Stroke control: speed based on how fast you stroke your controllers (with customizable thresholds)
-* Support for edge's multiple vibrators
-* Support for nora's rotation
-* Disable trigger controlls when menu is open
+* Input textbox instead of scuffed clipboard input
+* If friend with toy has this mod they won't have to open the webpage
+* More than one connection per mod user (You can currently only connect to one person at a time)
 
-### Credits
+This mod is not developed by or associated with Lovense or Hytto.
+
+## Credits
 DubyaDude for [RubyButtonAPI](https://github.com/DubyaDude/RubyButtonAPI)
 <br>abbeybabbey for UI improvments
