@@ -3,12 +3,11 @@
 ### Mod almost ready for use.
 
 Lets you control your friends lovense using your vr controllers.
-<br>Mod menu can be found under `UI Elements` by default, read below for instructions to change it's location.
 
 ## How to use
 1. Ask friend to follow instructions below to get a code
 2. Copy the code from your friend to your clipboard
-3. Click `Add Toy` in the mod menu
+3. Click `Add Toy` in the mod menu (under `UI Elements` by default)
 
 ## How to get a code
 * Friend that has toy should follow these instructions
