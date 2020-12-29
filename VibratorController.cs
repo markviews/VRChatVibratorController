@@ -17,6 +17,9 @@ namespace Vibrator_Controller {
         internal static QMSingleButton addButtonUI;
         internal static KeyCode lockButton;//button to lock speed
         internal static KeyCode holdButton;//button to hold with other controll to use toy (if enabled)
+        internal static GameObject quickMenu;
+        internal static GameObject menuContent;
+        bool pauseControl = false;//pause controls untill trigger is pressed
 
         public override void OnApplicationStart() {
             MelonPrefs.RegisterCategory("VibratorController", "Vibrator Controller");
@@ -27,9 +30,9 @@ namespace Vibrator_Controller {
             MelonPrefs.RegisterInt("VibratorController", "buttonX", 0, "x position to put the mod button");
             MelonPrefs.RegisterInt("VibratorController", "buttonY", 0, "y position to put the mod button");
 
-            VibratorController.lockButton = (KeyCode)MelonPrefs.GetInt("VibratorController", "lockButton");
-            VibratorController.holdButton = (KeyCode)MelonPrefs.GetInt("VibratorController", "holdButton");
-            VibratorController.requireHold = MelonPrefs.GetBool("VibratorController", "Requirehold");
+            lockButton = (KeyCode)MelonPrefs.GetInt("VibratorController", "lockButton");
+            holdButton = (KeyCode)MelonPrefs.GetInt("VibratorController", "holdButton");
+            requireHold = MelonPrefs.GetBool("VibratorController", "Requirehold");
             Interface.subMenu = MelonPrefs.GetString("VibratorController", "subMenu");
             Interface.buttonX = MelonPrefs.GetInt("VibratorController", "buttonX");
             Interface.buttonY = MelonPrefs.GetInt("VibratorController", "buttonY");
@@ -37,17 +40,11 @@ namespace Vibrator_Controller {
 
         public override void VRChat_OnUiManagerInit() {
             Interface.setupUI();
+            quickMenu = GameObject.Find("UserInterface/QuickMenu/QuickMenu_NewElements");
+            menuContent = GameObject.Find("UserInterface/MenuContent/Backdrop/Backdrop");
         }
 
         public override void OnUpdate() {
-            if (HoldKeyBind != null) {
-                HoldKeyBind.setButtonText(holdButton.ToString());
-            }
-
-            if (LockKeyBind != null) {
-                LockKeyBind.setButtonText(lockButton.ToString());
-            }
-
             if (findButton != null) getButton();
 
             if (Input.GetKeyDown(lockButton)) {
@@ -55,78 +52,106 @@ namespace Vibrator_Controller {
                 else lockSpeed = true;
             }
 
-            if (lockSpeed) return;
-
             foreach (Toy toy in toys) {
+                if (menuOpen()) {
+                    toy.setSpeed((int)toy.speedSlider.value);
 
-                if (toy.maxSlider != null) {
-                    if (toy.contraction != toy.maxSlider.value) {
-                        toy.contraction = toy.maxSlider.value;
-                        toy.maxSliderText.text = "Max Contraction: " + toy.contraction;
-                        //toy.send((int)toy.lastSpeed, toy.contraction);
+                    if (toy.maxSlider != null)
+                        toy.setContraction();
+                    if (toy.edgeSlider != null) {
+                        if (toy.lastEdgeSpeed != toy.edgeSlider.value)
+                            toy.setEdgeSpeed(toy.edgeSlider.value);
                     }
-                }
+                    pauseControl = true;
+                } else {
+                    int speed = 0;
+                    if (lockSpeed) return;
+                    if (requireHold && !pauseControl)
+                        if (!Input.GetKey(holdButton)) {
+                            toy.setSpeed(0);
+                            return;
+                        }
+                            int left = (int)(10 * Input.GetAxis("Oculus_CrossPlatform_PrimaryIndexTrigger"));
+                            int right = (int)(10 * Input.GetAxis("Oculus_CrossPlatform_SecondaryIndexTrigger"));
 
-                if (toy.hand != "slider" && requireHold)
-                    if (!Input.GetKey(holdButton)) {
-                        toy.setSpeed(0);
-                    }
+                            if (pauseControl) {
+                                 if (left != 0 || right != 0) {
+                                     Console.WriteLine(left + " " + right);
+                                     pauseControl = false;
+                                 } else return;
+                            }
 
-                float speed = 0;
-                switch (toy.hand) {
-                    case "none":
-                        break;
-                    case "left":
-                        speed = Input.GetAxis("Oculus_CrossPlatform_PrimaryIndexTrigger");
-                        break;
-                    case "right":
-                        speed = Input.GetAxis("Oculus_CrossPlatform_SecondaryIndexTrigger");
-                        break;
-                    case "either":
-                        float left = Input.GetAxis("Oculus_CrossPlatform_PrimaryIndexTrigger");
-                        float right = Input.GetAxis("Oculus_CrossPlatform_SecondaryIndexTrigger");
-                        if (left > right) speed = left;
-                        else speed = right;
-                        break;
-                    case "slider":
-                        speed = toy.speedSlider.value / 10;
-                        break;
+                            switch (toy.hand) {
+                                case "left":
+                                    speed = left;
+                                    break;
+                                case "right":
+                                    speed = right;
+                                    break;
+                                case "either":
+                                    if (left > right) speed = left;
+                                    else speed = right;
+                                    break;
+                                case "both":
+                                    speed = left;
+                                    toy.setEdgeSpeed(right);
+                                    break;
+                            }
+                    toy.setSpeed(speed);
                 }
-                toy.setSpeed(speed);
             }
+        }
+
+        internal static bool menuOpen() {
+            if (quickMenu.active || menuContent.active)
+                return true;
+            return false;
         }
 
         //message from server
         internal static void message(string msg) {
-            MelonLogger.Log(msg);
-            String[] args = msg.Split(' ');
+            String[] args = msg.Replace(((char)0).ToString(), "").Split(' ');
             switch (args[0]) {
                 case "toys":
                 case "add":
+                    if (args[1] == "") {
+                        MelonLogger.Log("Connected but no toys found..");
+                        return;
+                    }
                     for (int i = 1; i < args.Length; i++) {
                         string[] toyData = args[i].Split(':');
                         string name = toyData[0];
                         string id = toyData[1];
+
+                            foreach (Toy toy in toys)
+                                if (toy.id.Contains(id)) {
+                                    toy.enable();
+                                    return;
+                                }
+
                         MelonLogger.Log("Adding: " + name + ":" + id);
                         new Toy(name, id);
                     }
                     break;
                 case "remove": {
-                        string[] toyData = args[1].Split(':');
-                        string name = toyData[0];
-                        string id = toyData[1];
-                        MelonLogger.Log("Removing: " + name + ":" + id);
-                        //TODO add this feature
+                    string[] toyData = args[1].Split(':');
+                    string name = toyData[0];
+                    string id = toyData[1];
+                        foreach (Toy toy in toys)
+                            if (toy.id.Contains(id)) {
+                                toy.disable();//TODO display this somehow
+                                break;
+                            }
                     }
                     break;
                 case "notFound":
                     MelonLogger.Log("Invalid code");
-                    addButtonUI.setButtonText("Add\nToys\n<color=#FF0000>Invalid Code</color>");
-                    //TODO fix button after a second
+                    addButtonUI.setButtonText("Add\nToys\n<color=#FF0000>Invalid Code</color>");//TODO fix button text after a second
                     break;
                 case "left":
-                    MelonLogger.Log("User disconnected");
-                    //TODO display this somehow
+                    MelonLogger.Log("User disconnected");//TODO display this somehow
+                    foreach (Toy toy in toys)
+                        toy.disable();
                     break;
             }
         }
@@ -160,10 +185,12 @@ namespace Vibrator_Controller {
             if (findButton.Equals("lockButton")) {
                 lockButton = button;
                 LockButtonUI.setButtonText("Lock Speed\nButton Set");
+                LockKeyBind.setButtonText(lockButton.ToString());
                 MelonPrefs.SetInt("VibratorController", "lockButton", button.GetHashCode());
             } else if (findButton.Equals("holdButton")) {
                 holdButton = button;
                 HoldButtonUI.setButtonText("Hold\nButton Set");
+                HoldKeyBind.setButtonText(holdButton.ToString());
                 MelonPrefs.SetInt("VibratorController", "holdButton", button.GetHashCode());
             }
             findButton = null;

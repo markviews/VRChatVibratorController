@@ -28,11 +28,11 @@ namespace Vibrator_Controller {
 
             // LockKey keybind 
             VibratorController.LockKeyBind = new QMSingleButton(menu, 1, 1, "none", new System.Action(() => {
-
             }), "Shows current Lock Speed Button keybind", null, null);
             VibratorController.LockKeyBind.getGameObject().GetComponent<RectTransform>().sizeDelta /= new Vector2(1f, 2.0175f);
             VibratorController.LockKeyBind.getGameObject().GetComponent<RectTransform>().anchoredPosition += new Vector2(0f, 96f);
             VibratorController.LockKeyBind.setIntractable(false);
+            VibratorController.LockKeyBind.setButtonText(VibratorController.lockButton.ToString());
 
             VibratorController.HoldButtonUI = new QMSingleButton(menu, 2, 0, "Hold\nButton", delegate () {
                 if (VibratorController.findButton == "holdButton") {
@@ -48,11 +48,11 @@ namespace Vibrator_Controller {
 
             // LockKey keybind 
             VibratorController.HoldKeyBind = new QMSingleButton(menu, 2, 1, "none", new System.Action(() => {
-
             }), "Shows current Hold Button keybind", null, null);
             VibratorController.HoldKeyBind.getGameObject().GetComponent<RectTransform>().sizeDelta /= new Vector2(1f, 2.0175f);
             VibratorController.HoldKeyBind.getGameObject().GetComponent<RectTransform>().anchoredPosition += new Vector2(0f, 96f);
             VibratorController.HoldKeyBind.setIntractable(false);
+            VibratorController.HoldKeyBind.setButtonText(VibratorController.holdButton.ToString());
 
             VibratorController.addButtonUI = new QMSingleButton(menu, 3, 0, "Add\nToy", delegate () {
 
@@ -65,7 +65,7 @@ namespace Vibrator_Controller {
 
                 Client.send("join " + text);
 
-            }, "Click to paste your friend's Long Distance Control Link code", null, null);
+            }, "Click to paste your friend's code", null, null);
 
             // How To Use Button
             HowToUse = new QMSingleButton(menu, 3, 1, "How To Use", new System.Action(() => {
@@ -74,22 +74,17 @@ namespace Vibrator_Controller {
             HowToUse.getGameObject().GetComponent<RectTransform>().sizeDelta /= new Vector2(1f, 2.0175f);
             HowToUse.getGameObject().GetComponent<RectTransform>().anchoredPosition += new Vector2(0f, 96f);
 
+
             holdToggle = new QMToggleButton(menu, 5, -1, "Hold on", delegate () {
-                VibratorController.HoldButtonUI.setActive(true);
-                VibratorController.HoldKeyBind.setActive(true);
                 VibratorController.requireHold = true;
                 MelonPrefs.SetBool("VibratorController", "Requirehold", true);
             }, "Hold off", delegate () {
-                VibratorController.HoldButtonUI.setActive(false);
-                VibratorController.HoldKeyBind.setActive(false);
                 VibratorController.requireHold = false;
                 MelonPrefs.SetBool("VibratorController", "Requirehold", false);
             }, "Require holding a button to use toy?");
 
             holdToggle.setToggleState(VibratorController.requireHold);
-            VibratorController.HoldButtonUI.setActive(VibratorController.requireHold);
+
         }
-
-
     }
 }
