@@ -183,6 +183,10 @@ namespace Vibrator_Controller {
                     button.setButtonText(name + "\nLeft/Right\n(for edge)");
                     break;
                 case "both":
+                    hand = "slider";
+                    button.setButtonText(name + "\nSlider only");
+                    break;
+                case "slider":
                     hand = "none";
                     button.setButtonText(name + "\nClick to\nSet");
                     break;
