@@ -12,11 +12,10 @@ Lets you control your friends lovense using your vr controllers.
 
 ## How to get a code
 * Friend that has toy should follow these instructions
-1. Download / open the Lovense Connect app (the pink one)
-2. Connect your toy to the app
-3. Connect your phone to the same wifi as your computer
-4. Open the mod webpage (i will post link soon)
-5. Click `Search for toys`
+1. Connect your phone to the same wifi as your computer
+2. Connect your toy to the Lovense Connect app (the pink one)
+3. Open the [mod webpage](https://remote.markstuff.net/)
+4. Click `Search for toys`
 
 ## Mod menu location
 You can change the menu location by changing `buttonX` and `buttonY` to desired coordinates and `subMenu` in `modprefs.ini` to:
