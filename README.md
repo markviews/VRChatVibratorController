@@ -32,5 +32,5 @@ You can change the menu location by changing `buttonX` and `buttonY` to desired 
 This mod is not developed by or associated with Lovense or Hytto.
 
 ## Credits
-Plague for [PlagueButtonAPI](https://github.com/OFWModz/PlagueButtonAPI)
+Plague for [PlagueButtonAPI](https://github.com/OFWModz/PlagueButtonAPI) and helping me with the project a bunch
 <br>abbeybabbey for UI improvments
