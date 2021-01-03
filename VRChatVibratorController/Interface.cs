@@ -8,16 +8,13 @@ using UnityEngine.UI;
 
 namespace Vibrator_Controller {
     class Interface {
-
         internal static int buttonX;
         internal static int buttonY;
         internal static string subMenu;
 
-        //TODO fix button connections in main class
-
         internal static void setupUI() {
             ButtonAPI.CustomTransform = GameObject.Find("/UserInterface/QuickMenu/" + subMenu).transform;
-            ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "new button", "Vibrator Controller Settings", ButtonAPI.HorizontalPosition.LeftOfMenu, ButtonAPI.VerticalPosition.SecondButton, null, delegate (bool a) {
+            ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Vibrator\nController", "Vibrator Controller Settings", ButtonAPI.HorizontalPosition.LeftOfMenu, ButtonAPI.VerticalPosition.TopButton, null, delegate (bool a) {
                 ButtonAPI.EnterSubMenu(ButtonAPI.MakeEmptyPage("SubMenu_1"));
             }, Color.white, Color.magenta, null, true, false, false, false, null, true);
 
