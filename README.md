@@ -21,7 +21,7 @@ You can change the menu location by changing `buttonX` and `buttonY` to desired 
 ## Customizable controls setup
 1. Click `Hold Button` or `Lock Speed Button` in the mod menu
 2. Press a button on your keyboard or controller
-* Hold Button:  If set to `Hold On` you will need to hold the button you set along with the trigger to use toy
+* Hold Button:  If set you will need to hold the button you set along with the trigger to use toy
 * Lock Speed Button: Press the button you set to keep the current vibration speed until you press it again
 
 ## Planned Features
