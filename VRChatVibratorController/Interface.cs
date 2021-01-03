@@ -14,7 +14,7 @@ namespace Vibrator_Controller {
 
         internal static void setupUI() {
             ButtonAPI.CustomTransform = GameObject.Find("/UserInterface/QuickMenu/" + subMenu).transform;
-            ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Vibrator\nController", "Vibrator Controller Settings", ButtonAPI.HorizontalPosition.LeftOfMenu, ButtonAPI.VerticalPosition.TopButton, null, delegate (bool a) {
+            ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Vibrator\nController", "Vibrator Controller Settings", (ButtonAPI.HorizontalPosition)buttonX - 4, (ButtonAPI.VerticalPosition)buttonY + 3, null, delegate (bool a) {
                 ButtonAPI.EnterSubMenu(ButtonAPI.MakeEmptyPage("SubMenu_1"));
             }, Color.white, Color.magenta, null, true, false, false, false, null, true);
 

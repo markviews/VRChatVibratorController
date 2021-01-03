@@ -20,14 +20,14 @@ namespace Vibrator_Controller {
         internal static KeyCode holdButton;//button to hold with other controll to use toy (if enabled)
         internal static GameObject quickMenu;
         internal static GameObject menuContent;
-        bool pauseControl = false;//pause controls untill trigger is pressed
+        internal bool pauseControl = false;//pause controls untill trigger is pressed
 
         public override void OnApplicationStart() {
             MelonPrefs.RegisterCategory("VibratorController", "Vibrator Controller");
             MelonPrefs.RegisterInt("VibratorController", "lockButton", 0, "Button to lock speed");
             MelonPrefs.RegisterInt("VibratorController", "holdButton", 0, "Button to hold to use toy");
             MelonPrefs.RegisterBool("VibratorController", "Requirehold", false, "If enabled you will need to hold set button to use toy");
-            MelonPrefs.RegisterString("VibratorController", "subMenu", "UIElementsMenu", "Menu to put the mod button on");
+            MelonPrefs.RegisterString("VibratorController", "subMenu", "ShortcutMenu", "Menu to put the mod button on");
             MelonPrefs.RegisterInt("VibratorController", "buttonX", 0, "x position to put the mod button");
             MelonPrefs.RegisterInt("VibratorController", "buttonY", 0, "y position to put the mod button");
 
