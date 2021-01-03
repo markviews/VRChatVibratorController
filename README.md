@@ -6,7 +6,7 @@ Lets you control your friends lovense using your vr controllers.
 
 ## How to use
 1. Ask friend to follow instructions below to get a code
-2. Click `Add Toy` in the mod menu (under `UI Elements` by default)
+2. Click `Add Toy` and type code
 
 ## How to get a code
 * Friend that has toy should follow these instructions
@@ -32,5 +32,5 @@ You can change the menu location by changing `buttonX` and `buttonY` to desired 
 This mod is not developed by or associated with Lovense or Hytto.
 
 ## Credits
-DubyaDude for [RubyButtonAPI](https://github.com/DubyaDude/RubyButtonAPI)
+Plague for [PlagueButtonAPI](https://github.com/OFWModz/PlagueButtonAPI) and helping me with the project a bunch
 <br>abbeybabbey for UI improvments
