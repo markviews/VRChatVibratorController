@@ -18,6 +18,10 @@ namespace Vibrator_Controller {
                 ButtonAPI.EnterSubMenu(ButtonAPI.MakeEmptyPage("SubMenu_1"));
             }, Color.white, Color.magenta, null, true, false, false, false, null, true);
 
+            VibratorController.LockButtonUI = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Back", "exit this menu", ButtonAPI.HorizontalPosition.RightOfMenu, ButtonAPI.VerticalPosition.BottomButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a) {
+                ButtonAPI.EnterSubMenu(GameObject.Find("/UserInterface/QuickMenu/" + subMenu));
+            }, Color.yellow, Color.magenta, null, true, false, false, false, null, true);
+
             //Lock button
             VibratorController.LockButtonUI = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Lock Speed\nButton", "Click than press button on controller to set button to lock vibraton speed (click twice to disable)", ButtonAPI.HorizontalPosition.FirstButtonPos, ButtonAPI.VerticalPosition.TopButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a) {
                 if (VibratorController.findButton == "lockButton") {
@@ -32,8 +36,10 @@ namespace Vibrator_Controller {
                 VibratorController.LockButtonUI.SetText("Press Now");
             }, Color.white, Color.magenta, null, true, false, false, false, null, true);
 
-            VibratorController.LockKeyBind = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "-", "Lock Speed Keybind", ButtonAPI.HorizontalPosition.FirstButtonPos, ButtonAPI.VerticalPosition.SecondButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a) {
+            VibratorController.LockKeyBind = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "", "Lock Speed Keybind", ButtonAPI.HorizontalPosition.FirstButtonPos, ButtonAPI.VerticalPosition.SecondButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a) {
             }, Color.white, Color.grey, null, false, false, false, false, null, false);
+            if (VibratorController.lockButton != 0)
+                VibratorController.LockKeyBind.SetText(VibratorController.lockButton.ToString());
 
             //Hold button
             VibratorController.HoldButtonUI = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Hold\nButton", "Click than press button on controller to set button to hold to use toy (click twice to disable)", ButtonAPI.HorizontalPosition.SecondButtonPos, ButtonAPI.VerticalPosition.TopButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a) {
@@ -49,8 +55,10 @@ namespace Vibrator_Controller {
                 VibratorController.HoldButtonUI.SetText("Press Now");
             }, Color.white, Color.magenta, null, true, false, false, false, null, true);
 
-            VibratorController.HoldKeyBind = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "-", "Hold Keybind", ButtonAPI.HorizontalPosition.SecondButtonPos, ButtonAPI.VerticalPosition.SecondButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a) {
+            VibratorController.HoldKeyBind = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "", "Hold Keybind", ButtonAPI.HorizontalPosition.SecondButtonPos, ButtonAPI.VerticalPosition.SecondButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a) {
             }, Color.white, Color.grey, null, false, false, false, false, null, false);
+            if (VibratorController.holdButton != 0)
+            VibratorController.HoldKeyBind.SetText(VibratorController.holdButton.ToString());
 
             //Add toy
             VibratorController.addButtonUI = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Add\nToy", "Click to pair with a friend's toy", ButtonAPI.HorizontalPosition.ThirdButtonPos, ButtonAPI.VerticalPosition.TopButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a) {
@@ -68,7 +76,6 @@ namespace Vibrator_Controller {
                 System.Diagnostics.Process.Start("https://github.com/markviews/VRChatVibratorController");
             }, Color.white, Color.grey, null, false, false, false, false, null, false);
 
-            new Toy("Nora", "eee");
         }
 
         //thanks to Plague#2850 for helping me with this
