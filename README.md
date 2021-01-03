@@ -6,8 +6,7 @@ Lets you control your friends lovense using your vr controllers.
 
 ## How to use
 1. Ask friend to follow instructions below to get a code
-2. Copy the code from your friend to your clipboard
-3. Click `Add Toy` in the mod menu (under `UI Elements` by default)
+2. Click `Add Toy` in the mod menu (under `UI Elements` by default)
 
 ## How to get a code
 * Friend that has toy should follow these instructions
