@@ -1,12 +1,13 @@
 ﻿using MelonLoader;
+using PlagueButtonAPI;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Vibrator_Controller {
     class Toy {
         internal string hand = "none";
-        private static int x = 1;
-        internal QMSingleButton button;
+        private static int x = -3;
+        internal ButtonAPI.PlagueButton button;
         private string name;
         internal string id;
         internal UnityEngine.UI.Slider speedSlider;//slider for vibrator speed
@@ -15,14 +16,16 @@ namespace Vibrator_Controller {
         internal UnityEngine.UI.Text maxSliderText;
         internal UnityEngine.UI.Slider edgeSlider;//slider for edge's 2nd speed
         internal UnityEngine.UI.Text edgeSliderText;
-        internal QMSingleButton rotateButton;
+        internal ButtonAPI.PlagueButton rotateButton;
 
         internal Toy(string name, string id) {
             this.id = id;
             this.name = name;
-            button = new QMSingleButton(Interface.menu, x++, 2, name + "\nClick to\nSet", delegate () {
+
+            button = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, name + "\nClick to\nSet", "Click to set controll mode", (ButtonAPI.HorizontalPosition)x++, ButtonAPI.VerticalPosition.BottomButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a) {
                 changeHand();
-            }, "Click to set controll mode", null, null);
+            }, Color.white, Color.magenta, null, true, false, false, false, null, true);
+
             VibratorController.toys.Add(this);
 
             GameObject slider = GameObject.Find("UserInterface/QuickMenu/UserInteractMenu/User Volume/VolumeSlider");
@@ -50,11 +53,11 @@ namespace Vibrator_Controller {
                 maxSliderText.text = "Max Contraction: 0";
                 maxSliderObject.SetActive(false);
             } else if (name.Equals("Nora")) {
-                rotateButton = new QMSingleButton("ShortcutMenu", 3, 3, "Rotate", new System.Action(() => {
+                rotateButton = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Rotate", "Rotate Nora", ButtonAPI.HorizontalPosition.LeftOfMenu, ButtonAPI.VerticalPosition.BelowBottomButton, ButtonAPI.ShortcutMenuTransform, delegate (bool a) {
                     rotate();
-                }), "Rotate Nora", null, null);
-                rotateButton.getGameObject().GetComponent<RectTransform>().sizeDelta = new Vector2(720, 190);
-                rotateButton.setActive(false);
+                }, Color.white, Color.magenta, null, true, false, false, false, null, true);
+                rotateButton.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(720, 190);
+                rotateButton.gameObject.SetActive(false);
             } else if (name.Equals("Edge")) {
                 speedSlider.GetComponent<RectTransform>().sizeDelta = new Vector2(850, 160);
                 GameObject edgeSliderObject = GameObject.Instantiate(slider, quickmenu.transform, true);
@@ -74,14 +77,14 @@ namespace Vibrator_Controller {
         internal void disable() {
             MelonLogger.Log("Disabled toy: " + id);
             hand = "none";
-            button.setButtonText(name + "\nClick to\nSet");
-            button.setActive(false);
+            button.SetText(name + "\nClick to\nSet");
+            button.gameObject.SetActive(false);
             fixSliders();
         }
 
         internal void enable() {
             MelonLogger.Log("Enabled toy: " + id);
-            button.setActive(true);
+            button.gameObject.SetActive(true);
         }
 
         internal void showSlider(bool toggle) {
@@ -142,8 +145,8 @@ namespace Vibrator_Controller {
                             toy.maxSlider.gameObject.SetActive(true);
                             break;
                         case "Nora":
-                            toy.rotateButton.getGameObject().GetComponent<RectTransform>().anchoredPosition = new Vector2(1330, -1340 - sliderY);
-                            toy.rotateButton.setActive(true);
+                            toy.rotateButton.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(1330, -1340 - sliderY);
+                            toy.rotateButton.gameObject.SetActive(true);
                             break;
                     }
 
@@ -152,7 +155,7 @@ namespace Vibrator_Controller {
                     toy.speedSlider.gameObject.SetActive(false);
                     if (toy.speedSlider != null) toy.speedSlider.gameObject.SetActive(false);
                     if (toy.maxSlider != null) toy.maxSlider.gameObject.SetActive(false);
-                    if (toy.rotateButton != null) toy.rotateButton.setActive(false);
+                    if (toy.rotateButton != null) toy.rotateButton.gameObject.SetActive(false);
                 }
 
             }
@@ -164,15 +167,15 @@ namespace Vibrator_Controller {
             switch (hand) {
                 case "none":
                     hand = "left";
-                    button.setButtonText(name + "\nLeft Trigger");
+                    button.SetText(name + "\nLeft Trigger");
                     break;
                 case "left":
                     hand = "right";
-                    button.setButtonText(name + "\nRight Trigger");
+                    button.SetText(name + "\nRight Trigger");
                     break;
                 case "right":
                     hand = "either";
-                    button.setButtonText(name + "\nEither Trigger");
+                    button.SetText(name + "\nEither Trigger");
                     break;
                 case "either":
                     hand = "both";
@@ -180,15 +183,15 @@ namespace Vibrator_Controller {
                         changeHand();
                         break;
                     }
-                    button.setButtonText(name + "\nLeft/Right\n(for edge)");
+                    button.SetText(name + "\nLeft/Right\n(for edge)");
                     break;
                 case "both":
                     hand = "slider";
-                    button.setButtonText(name + "\nSlider only");
+                    button.SetText(name + "\nSlider only");
                     break;
                 case "slider":
                     hand = "none";
-                    button.setButtonText(name + "\nClick to\nSet");
+                    button.SetText(name + "\nClick to\nSet");
                     break;
             }
             fixSliders();

@@ -1,4 +1,5 @@
 ﻿using MelonLoader;
+using PlagueButtonAPI;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -10,11 +11,11 @@ namespace Vibrator_Controller {
         internal static string findButton = null;
         internal static bool lockSpeed = false;
         internal static bool requireHold;
-        internal static QMSingleButton LockButtonUI;
-        internal static QMSingleButton LockKeyBind;
-        internal static QMSingleButton HoldButtonUI;
-        internal static QMSingleButton HoldKeyBind;
-        internal static QMSingleButton addButtonUI;
+        internal static ButtonAPI.PlagueButton LockButtonUI;
+        internal static ButtonAPI.PlagueButton LockKeyBind;
+        internal static ButtonAPI.PlagueButton HoldButtonUI;
+        internal static ButtonAPI.PlagueButton HoldKeyBind;
+        internal static ButtonAPI.PlagueButton addButtonUI;
         internal static KeyCode lockButton;//button to lock speed
         internal static KeyCode holdButton;//button to hold with other controll to use toy (if enabled)
         internal static GameObject quickMenu;
@@ -45,12 +46,11 @@ namespace Vibrator_Controller {
         }
 
         public override void OnUpdate() {
-            if (Interface.popup != null)
-            if (Interface.popup.active && !Interface.backdrop.active) {
-                Interface.popup.SetActive(false);
+            if (RoomManager.prop_Boolean_3) {
+                ButtonAPI.SubMenuHandler(); // Routine Delay Is Built In
             }
 
-            if (findButton != null) getButton();
+                if (findButton != null) getButton();
 
             if (Input.GetKeyDown(lockButton)) {
                 if (lockSpeed) lockSpeed = false;
@@ -151,7 +151,7 @@ namespace Vibrator_Controller {
                     break;
                 case "notFound":
                     MelonLogger.Log("Invalid code");
-                    addButtonUI.setButtonText("Add\nToys\n<color=#FF0000>Invalid Code</color>");//TODO fix button text after a second
+                    addButtonUI.SetText("Add\nToys\n<color=#FF0000>Invalid Code</color>");//TODO fix button text after a second
                     break;
                 case "left":
                     MelonLogger.Log("User disconnected");//TODO display this somehow
@@ -189,13 +189,13 @@ namespace Vibrator_Controller {
         internal void setButton(KeyCode button) {
             if (findButton.Equals("lockButton")) {
                 lockButton = button;
-                LockButtonUI.setButtonText("Lock Speed\nButton Set");
-                LockKeyBind.setButtonText(lockButton.ToString());
+                LockButtonUI.SetText("Lock Speed\nButton Set");
+                LockKeyBind.SetText(lockButton.ToString());
                 MelonPrefs.SetInt("VibratorController", "lockButton", button.GetHashCode());
             } else if (findButton.Equals("holdButton")) {
                 holdButton = button;
-                HoldButtonUI.setButtonText("Hold\nButton Set");
-                HoldKeyBind.setButtonText(holdButton.ToString());
+                HoldButtonUI.SetText("Hold\nButton Set");
+                HoldKeyBind.SetText(holdButton.ToString());
                 MelonPrefs.SetInt("VibratorController", "holdButton", button.GetHashCode());
             }
             findButton = null;
