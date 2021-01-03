@@ -45,6 +45,11 @@ namespace Vibrator_Controller {
         }
 
         public override void OnUpdate() {
+            if (Interface.popup != null)
+            if (Interface.popup.active && !Interface.backdrop.active) {
+                Interface.popup.SetActive(false);
+            }
+
             if (findButton != null) getButton();
 
             if (Input.GetKeyDown(lockButton)) {
