@@ -50,7 +50,7 @@ namespace Vibrator_Controller {
                 ButtonAPI.SubMenuHandler(); // Routine Delay Is Built In
             }
 
-                if (findButton != null) getButton();
+            if (findButton != null) getButton();
 
             if (Input.GetKeyDown(lockButton)) {
                 if (lockSpeed) lockSpeed = false;

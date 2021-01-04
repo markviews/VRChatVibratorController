@@ -14,10 +14,11 @@ namespace Vibrator_Controller {
 
         internal static void setupUI() {
             ButtonAPI.CustomTransform = GameObject.Find("/UserInterface/QuickMenu/" + subMenu).transform;
-            ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Vibrator\nController", "Vibrator Controller Settings", (ButtonAPI.HorizontalPosition)buttonX - 4, (ButtonAPI.VerticalPosition)buttonY + 3, null, delegate (bool a) {
+            ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Vibrator\nController", "Vibrator Controller Settings", buttonX - 4, buttonY + 3, null, delegate (bool a) {
                 ButtonAPI.EnterSubMenu(ButtonAPI.MakeEmptyPage("SubMenu_1"));
             }, Color.white, Color.magenta, null, true, false, false, false, null, true);
 
+            //Back
             VibratorController.LockButtonUI = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Back", "exit this menu", ButtonAPI.HorizontalPosition.RightOfMenu, ButtonAPI.VerticalPosition.BottomButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a) {
                 ButtonAPI.EnterSubMenu(GameObject.Find("/UserInterface/QuickMenu/" + subMenu));
             }, Color.yellow, Color.magenta, null, true, false, false, false, null, true);
@@ -88,7 +89,6 @@ namespace Vibrator_Controller {
                             okaction(s);
                         }), null, "...");
         }
-
 
     }
 }
