@@ -27,7 +27,6 @@ You can change the menu location by changing `buttonX` and `buttonY` to desired 
 ## Planned Features
 * Stroke control: speed based on how fast you stroke your controllers (with customizable thresholds)
 * If friend with toy has this mod they won't have to open the webpage
-* More than one connection per mod user (You can currently only connect to one person at a time)
 
 This mod is not developed by or associated with Lovense or Hytto.
 
