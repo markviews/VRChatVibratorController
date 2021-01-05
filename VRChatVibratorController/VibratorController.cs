@@ -2,7 +2,6 @@
 using MelonLoader;
 using PlagueButtonAPI;
 using System;
-using System.Collections;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.UI;
@@ -51,7 +50,7 @@ namespace Vibrator_Controller {
             }, Color.white, Color.magenta, null, true, false, false, false, null, true);
 
             //Back
-            LockButtonUI = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Back", "exit this menu", ButtonAPI.HorizontalPosition.RightOfMenu, ButtonAPI.VerticalPosition.BottomButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a) {
+            LockButtonUI = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Back", "Exit this menu", ButtonAPI.HorizontalPosition.RightOfMenu, ButtonAPI.VerticalPosition.BottomButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a) {
                 ButtonAPI.EnterSubMenu(GameObject.Find("/UserInterface/QuickMenu/" + subMenu));
             }, Color.yellow, Color.magenta, null, true, false, false, false, null, true);
 
@@ -111,7 +110,6 @@ namespace Vibrator_Controller {
                 System.Diagnostics.Process.Start("https://github.com/markviews/VRChatVibratorController");
             }, Color.white, Color.grey, null, false, false, false, false, null, false);
 
-
             quickMenu = GameObject.Find("UserInterface/QuickMenu/QuickMenu_NewElements");
             menuContent = GameObject.Find("UserInterface/MenuContent/Backdrop/Backdrop");
         }
@@ -129,7 +127,7 @@ namespace Vibrator_Controller {
 
         public override void OnUpdate() {
             if (RoomManager.prop_Boolean_3) {
-                ButtonAPI.SubMenuHandler(); // Routine Delay Is Built In
+                ButtonAPI.SubMenuHandler();
             }
 
             if (findButton != null) getButton();
