@@ -15,7 +15,7 @@ Lets you control your friends lovense using your vr controllers.
 3. Click `Search for toys` on the [mod webpage](https://remote.markstuff.net/)
 
 ### Mod menu location
-You can change the menu location by changing `buttonX` and `buttonY` to desired coordinates and `subMenu` in `modprefs.ini` to:
+You can change the menu location by changing `buttonX` and `buttonY` to desired [coordinates](https://i.ibb.co/bFWzzq8/Coordinates-1.png) and `subMenu` in `modprefs.ini` to:
 `ShortcutMenu` (Main menu), `UserInteractMenu` (Menu when you select someone), `UserIconCameraMenu` (VRC+ menu to take pictures), `EmoteMenu`, `EmojiMenu`, `CameraMenu`, `UIElementsMenu`, or `AvatarStatsMenu`
 
 ### Planned Features
@@ -23,8 +23,8 @@ You can change the menu location by changing `buttonX` and `buttonY` to desired 
 * If friend with toy has this mod they won't have to open the webpage
 
 ### Credits
-* Plague for [PlagueButtonAPI](https://github.com/OFWModz/PlagueButtonAPI) and helping me with the project a bunch
-* abbeybabbey for UI improvments
+Plague for [PlagueButtonAPI](https://github.com/OFWModz/PlagueButtonAPI) and helping me with the project a bunch
+<br>abbeybabbey for UI improvments
 
 ### Note
 This mod is not developed by or associated with Lovense or Hytto.
