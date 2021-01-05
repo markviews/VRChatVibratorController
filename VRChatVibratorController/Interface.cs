@@ -39,9 +39,10 @@ namespace Vibrator_Controller {
 
             VibratorController.LockKeyBind = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "", "Lock Speed Keybind", ButtonAPI.HorizontalPosition.FirstButtonPos, ButtonAPI.VerticalPosition.SecondButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a) {
             }, Color.white, Color.grey, null, false, false, false, false, null, false);
+            VibratorController.LockKeyBind.SetInteractivity(false);
             if (VibratorController.lockButton != 0)
                 VibratorController.LockKeyBind.SetText(VibratorController.lockButton.ToString());
-
+            
             //Hold button
             VibratorController.HoldButtonUI = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Hold\nButton", "Click than press button on controller to set button to hold to use toy (click twice to disable)", ButtonAPI.HorizontalPosition.SecondButtonPos, ButtonAPI.VerticalPosition.TopButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a) {
                 if (VibratorController.findButton == "holdButton") {
@@ -58,6 +59,7 @@ namespace Vibrator_Controller {
 
             VibratorController.HoldKeyBind = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "", "Hold Keybind", ButtonAPI.HorizontalPosition.SecondButtonPos, ButtonAPI.VerticalPosition.SecondButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a) {
             }, Color.white, Color.grey, null, false, false, false, false, null, false);
+            VibratorController.HoldKeyBind.SetInteractivity(false);
             if (VibratorController.holdButton != 0)
             VibratorController.HoldKeyBind.SetText(VibratorController.holdButton.ToString());
 
