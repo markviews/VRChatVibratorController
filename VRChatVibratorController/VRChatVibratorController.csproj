@@ -87,7 +87,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client.cs" />
-    <Compile Include="Interface.cs" />
     <Compile Include="PlagueButtonAPI\PlagueButtonAPI.cs" />
     <Compile Include="Toy.cs" />
     <Compile Include="VibratorController.cs" />

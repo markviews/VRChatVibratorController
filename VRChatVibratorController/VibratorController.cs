@@ -1,26 +1,31 @@
-﻿using MelonLoader;
+﻿using Il2CppSystem.Collections.Generic;
+using MelonLoader;
 using PlagueButtonAPI;
 using System;
 using System.Collections;
+using UnhollowerRuntimeLib;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Vibrator_Controller {
     internal class VibratorController : MelonMod {
 
-        internal static ArrayList toys = new ArrayList();
-        internal static string findButton = null;
-        internal static bool lockSpeed = false;
-        internal static bool requireHold;
-        internal static ButtonAPI.PlagueButton LockButtonUI;
-        internal static ButtonAPI.PlagueButton LockKeyBind;
-        internal static ButtonAPI.PlagueButton HoldButtonUI;
-        internal static ButtonAPI.PlagueButton HoldKeyBind;
-        internal static ButtonAPI.PlagueButton addButtonUI;
-        internal static KeyCode lockButton;//button to lock speed
-        internal static KeyCode holdButton;//button to hold with other controll to use toy (if enabled)
-        internal static GameObject quickMenu;
-        internal static GameObject menuContent;
-        internal bool pauseControl = false;//pause controls untill trigger is pressed
+        private static string findButton = null;
+        private static bool lockSpeed = false;
+        private static bool requireHold;
+        private static int buttonX;
+        private static int buttonY;
+        private static string subMenu;
+        private static ButtonAPI.PlagueButton LockButtonUI;
+        private static ButtonAPI.PlagueButton LockKeyBind;
+        private static ButtonAPI.PlagueButton HoldButtonUI;
+        private static ButtonAPI.PlagueButton HoldKeyBind;
+        private static ButtonAPI.PlagueButton addButtonUI;
+        private static KeyCode lockButton;//button to lock speed
+        private static KeyCode holdButton;//button to hold with other controll to use toy (if enabled)
+        private static GameObject quickMenu;
+        private static GameObject menuContent;
+        private bool pauseControl = false;//pause controls untill trigger is pressed
 
         public override void OnApplicationStart() {
             MelonPrefs.RegisterCategory("VibratorController", "Vibrator Controller");
@@ -34,15 +39,92 @@ namespace Vibrator_Controller {
             lockButton = (KeyCode)MelonPrefs.GetInt("VibratorController", "lockButton");
             holdButton = (KeyCode)MelonPrefs.GetInt("VibratorController", "holdButton");
             requireHold = MelonPrefs.GetBool("VibratorController", "Requirehold");
-            Interface.subMenu = MelonPrefs.GetString("VibratorController", "subMenu");
-            Interface.buttonX = MelonPrefs.GetInt("VibratorController", "buttonX");
-            Interface.buttonY = MelonPrefs.GetInt("VibratorController", "buttonY");
+            subMenu = MelonPrefs.GetString("VibratorController", "subMenu");
+            buttonX = MelonPrefs.GetInt("VibratorController", "buttonX");
+            buttonY = MelonPrefs.GetInt("VibratorController", "buttonY");
         }
 
         public override void VRChat_OnUiManagerInit() {
-            Interface.setupUI();
+            ButtonAPI.CustomTransform = GameObject.Find("/UserInterface/QuickMenu/" + subMenu).transform;
+            ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Vibrator\nController", "Vibrator Controller Settings", buttonX - 4, buttonY + 3, null, delegate (bool a) {
+                ButtonAPI.EnterSubMenu(ButtonAPI.MakeEmptyPage("SubMenu_1"));
+            }, Color.white, Color.magenta, null, true, false, false, false, null, true);
+
+            //Back
+            LockButtonUI = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Back", "exit this menu", ButtonAPI.HorizontalPosition.RightOfMenu, ButtonAPI.VerticalPosition.BottomButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a) {
+                ButtonAPI.EnterSubMenu(GameObject.Find("/UserInterface/QuickMenu/" + subMenu));
+            }, Color.yellow, Color.magenta, null, true, false, false, false, null, true);
+
+            //Lock button
+            LockButtonUI = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Lock Speed\nButton", "Click than press button on controller to set button to lock vibraton speed (click twice to disable)", ButtonAPI.HorizontalPosition.FirstButtonPos, ButtonAPI.VerticalPosition.TopButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a) {
+                if (findButton == "lockButton") {
+                    lockButton = KeyCode.None;
+                    findButton = null;
+                    LockKeyBind.SetText("");
+                    LockButtonUI.SetText("Lock Speed\nButton");
+                    MelonPrefs.SetInt("VibratorController", "lockButton", lockButton.GetHashCode());
+                    return;
+                }
+                findButton = "lockButton";
+                LockButtonUI.SetText("Press Now");
+            }, Color.white, Color.magenta, null, true, false, false, false, null, true);
+
+            LockKeyBind = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "", "Lock Speed Keybind", ButtonAPI.HorizontalPosition.FirstButtonPos, ButtonAPI.VerticalPosition.SecondButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a) {
+            }, Color.white, Color.grey, null, false, false, false, false, null, false);
+            LockKeyBind.SetInteractivity(false);
+            if (lockButton != 0)
+                LockKeyBind.SetText(lockButton.ToString());
+
+            //Hold button
+            HoldButtonUI = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Hold\nButton", "Click than press button on controller to set button to hold to use toy (click twice to disable)", ButtonAPI.HorizontalPosition.SecondButtonPos, ButtonAPI.VerticalPosition.TopButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a) {
+                if (findButton == "holdButton") {
+                    holdButton = KeyCode.None;
+                    findButton = null;
+                    HoldKeyBind.SetText("");
+                    HoldButtonUI.SetText("Hold\nButton");
+                    MelonPrefs.SetInt("VibratorController", "lockButton", holdButton.GetHashCode());
+                    return;
+                }
+                findButton = "holdButton";
+                HoldButtonUI.SetText("Press Now");
+            }, Color.white, Color.magenta, null, true, false, false, false, null, true);
+
+            HoldKeyBind = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "", "Hold Keybind", ButtonAPI.HorizontalPosition.SecondButtonPos, ButtonAPI.VerticalPosition.SecondButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a) {
+            }, Color.white, Color.grey, null, false, false, false, false, null, false);
+            HoldKeyBind.SetInteractivity(false);
+            if (holdButton != 0)
+                HoldKeyBind.SetText(holdButton.ToString());
+
+            //Add toy
+            addButtonUI = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Add\nToy", "Click to pair with a friend's toy", ButtonAPI.HorizontalPosition.ThirdButtonPos, ButtonAPI.VerticalPosition.TopButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a) {
+                InputPopup("", delegate (string text) {
+                    if (text.Length != 4) {
+                        addButtonUI.SetText("Add\nToys\n<color=#FF0000>Invalid Code</color>");
+                    } else {
+                        Client.send("join " + text);
+                    }
+                });
+            }, Color.white, Color.magenta, null, true, false, false, false, null, true);
+
+            //How to use
+            ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "How To Use", "Opens instructions to use", ButtonAPI.HorizontalPosition.ThirdButtonPos, ButtonAPI.VerticalPosition.SecondButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a) {
+                System.Diagnostics.Process.Start("https://github.com/markviews/VRChatVibratorController");
+            }, Color.white, Color.grey, null, false, false, false, false, null, false);
+
+
             quickMenu = GameObject.Find("UserInterface/QuickMenu/QuickMenu_NewElements");
             menuContent = GameObject.Find("UserInterface/MenuContent/Backdrop/Backdrop");
+        }
+
+        //thanks to Plague#2850 for helping me with this
+        internal static void InputPopup(string title, Action<string> okaction) {
+            VRCUiPopupManager.field_Private_Static_VRCUiPopupManager_0
+                .Method_Public_Void_String_String_InputType_Boolean_String_Action_3_String_List_1_KeyCode_Text_Action_String_Boolean_Action_1_VRCUiPopup_0(
+                    title, "", InputField.InputType.Standard, false, "Confirm",
+                    DelegateSupport.ConvertDelegate<Il2CppSystem.Action<string, List<KeyCode>, Text>>(
+                        (Action<string, List<KeyCode>, Text>)delegate (string s, List<KeyCode> k, Text t) {
+                            okaction(s);
+                        }), null, "...");
         }
 
         public override void OnUpdate() {
@@ -57,7 +139,7 @@ namespace Vibrator_Controller {
                 else lockSpeed = true;
             }
 
-            foreach (Toy toy in toys) {
+            foreach (Toy toy in Toy.toys) {
                 if (menuOpen()) {
                     toy.setSpeed((int)toy.speedSlider.value);
 
@@ -128,7 +210,7 @@ namespace Vibrator_Controller {
                         string name = toyData[0];
                         string id = toyData[1];
 
-                            foreach (Toy toy in toys)
+                            foreach (Toy toy in Toy.toys)
                                 if (toy.id.Contains(id)) {
                                     toy.enable();
                                     return;
@@ -142,7 +224,7 @@ namespace Vibrator_Controller {
                     string[] toyData = args[1].Split(':');
                     string name = toyData[0];
                     string id = toyData[1];
-                        foreach (Toy toy in toys)
+                        foreach (Toy toy in Toy.toys)
                             if (toy.id.Contains(id)) {
                                 toy.disable();//TODO display this somehow
                                 break;
@@ -155,7 +237,7 @@ namespace Vibrator_Controller {
                     break;
                 case "left":
                     MelonLogger.Log("User disconnected");//TODO display this somehow
-                    foreach (Toy toy in toys)
+                    foreach (Toy toy in Toy.toys)
                         toy.disable();
                     break;
             }
@@ -189,12 +271,12 @@ namespace Vibrator_Controller {
         internal void setButton(KeyCode button) {
             if (findButton.Equals("lockButton")) {
                 lockButton = button;
-                LockButtonUI.SetText("Lock Speed\nButton Set");
+                LockButtonUI.SetText("Lock Speed\nButton");
                 LockKeyBind.SetText(lockButton.ToString());
                 MelonPrefs.SetInt("VibratorController", "lockButton", button.GetHashCode());
             } else if (findButton.Equals("holdButton")) {
                 holdButton = button;
-                HoldButtonUI.SetText("Hold\nButton Set");
+                HoldButtonUI.SetText("Hold\nButton");
                 HoldKeyBind.SetText(holdButton.ToString());
                 MelonPrefs.SetInt("VibratorController", "holdButton", button.GetHashCode());
             }

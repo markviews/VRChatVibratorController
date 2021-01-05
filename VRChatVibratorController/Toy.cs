@@ -1,10 +1,13 @@
 ﻿using MelonLoader;
 using PlagueButtonAPI;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Vibrator_Controller {
     class Toy {
+        internal static ArrayList toys = new ArrayList();
+
         internal string hand = "none";
         private static int x = -3;
         internal ButtonAPI.PlagueButton button;
@@ -26,7 +29,7 @@ namespace Vibrator_Controller {
                 changeHand();
             }, Color.white, Color.magenta, null, true, false, false, false, null, true);
 
-            VibratorController.toys.Add(this);
+            toys.Add(this);
 
             GameObject slider = GameObject.Find("UserInterface/QuickMenu/UserInteractMenu/User Volume/VolumeSlider");
             GameObject quickmenu = GameObject.Find("UserInterface/QuickMenu/ShortcutMenu");
@@ -128,7 +131,7 @@ namespace Vibrator_Controller {
 
         internal void fixSliders() {
             float sliderY = 0;
-            foreach (Toy toy in VibratorController.toys) {
+            foreach (Toy toy in toys) {
 
                 if (!toy.hand.Equals("none")) {
                     toy.speedSlider.transform.localPosition = new Vector3(-348.077f, 343.046f - sliderY, 0);
