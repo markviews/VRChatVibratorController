@@ -1,17 +1,24 @@
-﻿using Il2CppSystem.Collections.Generic;
-using MelonLoader;
+﻿using MelonLoader;
 using PlagueButtonAPI;
 using System;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.UI;
+using UIExpansionKit.API;
+using System.Collections;
+using Vibrator_Controller;
+using System.Linq;
+using Il2CppSystem.Collections.Generic;
+
+[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.2", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
+[assembly: MelonGame("VRChat", "VRChat")]
+[assembly: MelonOptionalDependencies("UIExpansionKit")]
 
 namespace Vibrator_Controller {
     internal class VibratorController : MelonMod {
 
         private static string findButton = null;
         private static bool lockSpeed = false;
-        private static bool requireHold;
         private static int buttonX;
         private static int buttonY;
         private static string subMenu;
@@ -27,31 +34,62 @@ namespace Vibrator_Controller {
         private bool pauseControl = false;//pause controls untill trigger is pressed
 
         public override void OnApplicationStart() {
+            string defaultSubMenu = "ShortcutMenu";
+            if (MelonHandler.Mods.Any(mod => mod.Info.Name == "UI Expansion Kit"))
+                defaultSubMenu = "UIExpansionKit";
+
             MelonPrefs.RegisterCategory("VibratorController", "Vibrator Controller");
             MelonPrefs.RegisterInt("VibratorController", "lockButton", 0, "Button to lock speed");
             MelonPrefs.RegisterInt("VibratorController", "holdButton", 0, "Button to hold to use toy");
             MelonPrefs.RegisterBool("VibratorController", "Requirehold", false, "If enabled you will need to hold set button to use toy");
-            MelonPrefs.RegisterString("VibratorController", "subMenu", "ShortcutMenu", "Menu to put the mod button on");
+            MelonPrefs.RegisterString("VibratorController", "subMenu", defaultSubMenu, "Menu to put the mod button on");
             MelonPrefs.RegisterInt("VibratorController", "buttonX", 0, "x position to put the mod button");
-            MelonPrefs.RegisterInt("VibratorController", "buttonY", 0, "y position to put the mod button");
+            MelonPrefs.RegisterInt("VibratorController", "buttonY", 1, "y position to put the mod button");
 
             lockButton = (KeyCode)MelonPrefs.GetInt("VibratorController", "lockButton");
             holdButton = (KeyCode)MelonPrefs.GetInt("VibratorController", "holdButton");
-            requireHold = MelonPrefs.GetBool("VibratorController", "Requirehold");
             subMenu = MelonPrefs.GetString("VibratorController", "subMenu");
             buttonX = MelonPrefs.GetInt("VibratorController", "buttonX");
             buttonY = MelonPrefs.GetInt("VibratorController", "buttonY");
+
+            if (subMenu == "UIExpansionKit") {
+                if (defaultSubMenu == "UIExpansionKit") {
+                    setupUIExpansion();
+                } else {
+                    subMenu = "ShortcutMenu";
+                    MelonPrefs.SetString("VibratorController", "subMenu", subMenu);
+                    MelonLogger.Log("UIExpansionKit not found.. Moving menu button to 'ShortcutMenu'");
+                }
+            }
+
+        }
+
+        private static void setupUIExpansion() {
+            ExpansionKitApi.RegisterWaitConditionBeforeDecorating(createButton());
+        }
+
+        private static IEnumerator createButton() {
+            while (QuickMenu.prop_QuickMenu_0 == null) 
+                yield return null;
+            ExpansionKitApi.RegisterSimpleMenuButton(ExpandedMenu.QuickMenu, "Vibrator\nController", new Action(() => {
+                ButtonAPI.EnterSubMenu(ButtonAPI.MakeEmptyPage("SubMenu_1"));
+            }));
         }
 
         public override void VRChat_OnUiManagerInit() {
-            ButtonAPI.CustomTransform = GameObject.Find("/UserInterface/QuickMenu/" + subMenu).transform;
-            ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Vibrator\nController", "Vibrator Controller Settings", buttonX - 4, buttonY + 3, null, delegate (bool a) {
-                ButtonAPI.EnterSubMenu(ButtonAPI.MakeEmptyPage("SubMenu_1"));
-            }, Color.white, Color.magenta, null, true, false, false, false, null, true);
+            if (subMenu != "UIExpansionKit") {
+                ButtonAPI.CustomTransform = GameObject.Find("/UserInterface/QuickMenu/" + subMenu).transform;
+                ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Vibrator\nController", "Vibrator Controller Settings", buttonX - 4, 3 - buttonY, null, delegate (bool a) {
+                    ButtonAPI.EnterSubMenu(ButtonAPI.MakeEmptyPage("SubMenu_1"));
+                }, Color.white, Color.magenta, null, true, false, false, false, null, true);
+            }
 
             //Back
             LockButtonUI = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Back", "Exit this menu", ButtonAPI.HorizontalPosition.RightOfMenu, ButtonAPI.VerticalPosition.BottomButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a) {
-                ButtonAPI.EnterSubMenu(GameObject.Find("/UserInterface/QuickMenu/" + subMenu));
+            if (subMenu == "UIExpansionKit")
+                ButtonAPI.EnterSubMenu(GameObject.Find("/UserInterface/QuickMenu/ShortcutMenu"));
+            else
+               ButtonAPI.EnterSubMenu(GameObject.Find("/UserInterface/QuickMenu/" + subMenu));
             }, Color.yellow, Color.magenta, null, true, false, false, false, null, true);
 
             //Lock button
@@ -151,7 +189,7 @@ namespace Vibrator_Controller {
                 } else {
                     int speed = 0;
                     if (lockSpeed) return;
-                    if (requireHold && !pauseControl)
+                    if (holdButton != KeyCode.None && !pauseControl)
                         if (!Input.GetKey(holdButton)) {
                             toy.setSpeed(0);
                             return;

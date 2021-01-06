@@ -43,6 +43,11 @@
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\VRChat\MelonLoader\MelonLoader.ModHandler.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="UIExpansionKit, Version=0.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\VRChat\Mods not used\UIExpansionKit.dll</HintPath>
+      <Aliases>global</Aliases>
+    </Reference>
     <Reference Include="UnhollowerBaseLib, Version=0.4.10.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\VRChat\MelonLoader\Managed\UnhollowerBaseLib.dll</HintPath>
@@ -69,7 +74,6 @@
     <Compile Include="PlagueButtonAPI\PlagueButtonAPI.cs" />
     <Compile Include="Toy.cs" />
     <Compile Include="VibratorController.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PlagueButtonAPI\LICENSE" />
