@@ -1,7 +1,5 @@
 # VRChat Vibrator Controller
 
-### Mod almost ready for use.
-
 Lets you control your friends lovense using your vr controllers.
 
 ### How to use
