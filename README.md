@@ -2,7 +2,7 @@
 
 Lets you control your friends lovense using your vr controllers.
 
-If you find any bugs or have a feature request please [Submit a Issue report](https://github.com/markviews/VRChatVibratorController/issues/new)
+If you find any bugs or have a feature request please [submit an issue](https://github.com/markviews/VRChatVibratorController/issues/new)
 
 ### How to use
 1. Ask friend to follow instructions below to get a code
