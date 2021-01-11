@@ -170,7 +170,6 @@ namespace Vibrator_Controller {
         private static void ImmobilizePlayer(bool isTyping)
         {
             VRCPlayer.field_Internal_Static_VRCPlayer_0.field_Private_VRCPlayerApi_0.Immobilize(isTyping); // used for wasd movements
-            VRCTrackingManager.Method_Public_Static_Void_Boolean_2(isTyping); // makes you not move after unfreezing
             VRCTrackingManager.Method_Public_Static_Void_Boolean_4(isTyping); // used for vertical movement freezing
         }
 
