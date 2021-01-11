@@ -166,11 +166,12 @@ namespace Vibrator_Controller {
                         }), null, "...");
         }
 
-        // noobs freeze your player when typing so u can actually see the keyboard
+        // immobilize player when typing into input
         private static void ImmobilizePlayer(bool isTyping)
         {
-            VRCPlayer.field_Internal_Static_VRCPlayer_0.field_Private_VRCPlayerApi_0.Immobilize(isTyping);
-            VRCTrackingManager.Method_Public_Static_Void_Boolean_4(isTyping);
+            VRCPlayer.field_Internal_Static_VRCPlayer_0.field_Private_VRCPlayerApi_0.Immobilize(isTyping); // used for wasd movements
+            VRCTrackingManager.Method_Public_Static_Void_Boolean_2(isTyping); // makes you not move after unfreezing
+            VRCTrackingManager.Method_Public_Static_Void_Boolean_4(isTyping); // used for vertical movement freezing
         }
 
         public override void OnUpdate() {
