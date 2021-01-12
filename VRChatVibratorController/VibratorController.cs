@@ -152,9 +152,8 @@ namespace Vibrator_Controller {
             menuContent = GameObject.Find("UserInterface/MenuContent/Backdrop/Backdrop");
         }
 
-        //thanks to Plague#2850 for helping me with this
-        internal static void InputPopup(string title, Action<string> okaction) 
-        {
+        //thanks to Plague#2850 for helping with the popup and abbeybabbey for helping with the ImmobilizePlayer code
+        internal static void InputPopup(string title, Action<string> okaction) {
             ImmobilizePlayer(true);
             VRCUiPopupManager.field_Private_Static_VRCUiPopupManager_0
                 .Method_Public_Void_String_String_InputType_Boolean_String_Action_3_String_List_1_KeyCode_Text_Action_String_Boolean_Action_1_VRCUiPopup_0(
@@ -163,7 +162,7 @@ namespace Vibrator_Controller {
                         (Action<string, List<KeyCode>, Text>)delegate (string s, List<KeyCode> k, Text t) {
                             ImmobilizePlayer(false);
                             okaction(s);
-                        }), null, "...");
+                        }), new Action(() => { ImmobilizePlayer(false); }), "...");
         }
 
         // immobilize player when typing into input
