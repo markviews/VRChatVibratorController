@@ -153,14 +153,24 @@ namespace Vibrator_Controller {
         }
 
         //thanks to Plague#2850 for helping me with this
-        internal static void InputPopup(string title, Action<string> okaction) {
+        internal static void InputPopup(string title, Action<string> okaction) 
+        {
+            ImmobilizePlayer(true);
             VRCUiPopupManager.field_Private_Static_VRCUiPopupManager_0
                 .Method_Public_Void_String_String_InputType_Boolean_String_Action_3_String_List_1_KeyCode_Text_Action_String_Boolean_Action_1_VRCUiPopup_0(
                     title, "", InputField.InputType.Standard, false, "Confirm",
                     DelegateSupport.ConvertDelegate<Il2CppSystem.Action<string, List<KeyCode>, Text>>(
                         (Action<string, List<KeyCode>, Text>)delegate (string s, List<KeyCode> k, Text t) {
+                            ImmobilizePlayer(false);
                             okaction(s);
                         }), null, "...");
+        }
+
+        // immobilize player when typing into input
+        private static void ImmobilizePlayer(bool isTyping)
+        {
+            VRCPlayer.field_Internal_Static_VRCPlayer_0.field_Private_VRCPlayerApi_0.Immobilize(isTyping); // used for wasd movements
+            VRCTrackingManager.Method_Public_Static_Void_Boolean_4(isTyping); // used for vertical movement freezing
         }
 
         public override void OnUpdate() {
