@@ -173,7 +173,7 @@ namespace Vibrator_Controller {
         }
 
         public override void OnUpdate() {
-            if (RoomManager.prop_Boolean_3) {
+            if (RoomManager.prop_Boolean_4) {
                 ButtonAPI.SubMenuHandler();
             }
 
