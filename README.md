@@ -4,6 +4,11 @@ Lets you control your friends lovense using your vr controllers.
 
 If you find any bugs or have a feature request please [submit an issue](https://github.com/markviews/VRChatVibratorController/issues/new)
 
+### How to install
+1. Download and install [MellonLoader](https://melonwiki.xyz/#/README)
+2. Download [Vibrator.Controller.dll](https://github.com/markviews/VRChatVibratorController/releases)
+3. Drag `Vibrator.Controller.dll` into `VRChat/Mods`
+
 ### How to use
 1. Ask friend to follow instructions below to get a code
 2. Click `Add Toy` and type code
