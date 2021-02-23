@@ -33,5 +33,4 @@ Plague for [PlagueButtonAPI](https://github.com/OFWModz/PlagueButtonAPI) and hel
 
 ### Notes
 This mod is not developed by or associated with Lovense or Hytto.
-<br>
 <br>Simmaler tool/mod (Person with toy runs these programs): [RealFeel](https://krewella.co.uk/RealFeel) [VibeGoesBrrr](https://gitlab.com/jacefax/vibegoesbrrr/-/tree/master) 
