@@ -2,7 +2,10 @@
 
 Lets you control your friends lovense using your vr controllers.
 
-If you find any bugs or have a feature request please [submit an issue](https://github.com/markviews/VRChatVibratorController/issues/new)
+### How to install
+1. Download and install [MelonLoader](https://melonwiki.xyz/#/README)
+2. Download [Vibrator.Controller.dll](https://github.com/markviews/VRChatVibratorController/releases)
+3. Drag `Vibrator.Controller.dll` into `VRChat/Mods`
 
 ### How to use
 1. Ask friend to follow instructions below to get a code
@@ -18,10 +21,6 @@ If you find any bugs or have a feature request please [submit an issue](https://
 You can change the menu location by changing `buttonX` and `buttonY` to desired [coordinates](https://i.ibb.co/bFWzzq8/Coordinates-1.png) and `subMenu` in `modprefs.ini` to:
 `UIExpansionKit`, `ShortcutMenu` (Main menu), `UserInteractMenu` (Menu when you select someone), `UserIconCameraMenu` (VRC+ menu to take pictures), `EmoteMenu`, `EmojiMenu`, `CameraMenu`, `UIElementsMenu`, or `AvatarStatsMenu`
 <br><br>If you have UIExpansionKit when you first run this mod the mod button will be in the UIExpansionKit menu by default.
-
-### Planned Features
-* Stroke control: speed based on how fast you stroke your controllers (with customizable thresholds)
-* If friend with toy has this mod they won't have to open the webpage
 
 ### Credits
 Plague for [PlagueButtonAPI](https://github.com/OFWModz/PlagueButtonAPI) and helping me with the project a bunch
