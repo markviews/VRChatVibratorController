@@ -10,7 +10,7 @@ using Vibrator_Controller;
 using System.Linq;
 using Il2CppSystem.Collections.Generic;
 
-[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.2.1", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
+[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.2.2", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
 [assembly: MelonGame("VRChat", "VRChat")]
 [assembly: MelonOptionalDependencies("UIExpansionKit")]
 
@@ -169,7 +169,7 @@ namespace Vibrator_Controller {
         private static void ImmobilizePlayer(bool isTyping)
         {
             VRCPlayer.field_Internal_Static_VRCPlayer_0.field_Private_VRCPlayerApi_0.Immobilize(isTyping); // used for wasd movements
-            VRCTrackingManager.Method_Public_Static_Void_Boolean_4(isTyping); // used for vertical movement freezing
+            VRCTrackingManager.Method_Public_Static_Void_Boolean_1(isTyping); // used for vertical movement freezing
         }
 
         public override void OnUpdate() {
