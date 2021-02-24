@@ -10,7 +10,7 @@ using Vibrator_Controller;
 using System.Linq;
 using Il2CppSystem.Collections.Generic;
 
-[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.2.3", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
+[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.2.4", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
 [assembly: MelonGame("VRChat", "VRChat")]
 [assembly: MelonOptionalDependencies("UIExpansionKit")]
 
