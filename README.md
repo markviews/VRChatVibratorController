@@ -2,6 +2,10 @@
 
 Lets you control your friends lovense using your vr controllers.
 
+I do my best to keep this mod updated but I am busy with school and other projects.
+<br>I encourage you to check out simmilar mods at the bottom of this page.
+<br>If ur interested in takeing over this mod message me on discord: `MarkViews#0001`
+
 ### How to install
 1. Download and install [MelonLoader](https://melonwiki.xyz/#/README)
 2. Download [Vibrator.Controller.dll](https://github.com/markviews/VRChatVibratorController/releases)
@@ -27,5 +31,6 @@ Plague for [PlagueButtonAPI](https://github.com/OFWModz/PlagueButtonAPI) and hel
 <br>abbeybabbey for UI improvments
 <br>Knah for [UIExpansionKit](https://github.com/knah/VRCMods)
 
-### Note
+### Notes
 This mod is not developed by or associated with Lovense or Hytto.
+<br>Simmaler tool/mod (Person with toy runs these programs): [RealFeel](https://krewella.co.uk/RealFeel) [VibeGoesBrrr](https://gitlab.com/jacefax/vibegoesbrrr/-/tree/master) 
