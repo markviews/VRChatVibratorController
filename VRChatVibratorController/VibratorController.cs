@@ -10,7 +10,7 @@ using Vibrator_Controller;
 using System.Linq;
 using Il2CppSystem.Collections.Generic;
 
-[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.2.4", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
+[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.2.5", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
 [assembly: MelonGame("VRChat", "VRChat")]
 [assembly: MelonOptionalDependencies("UIExpansionKit")]
 
@@ -156,7 +156,7 @@ namespace Vibrator_Controller {
         internal static void InputPopup(string title, Action<string> okaction) {
             ImmobilizePlayer(true);
             VRCUiPopupManager.field_Private_Static_VRCUiPopupManager_0
-                .Method_Public_Void_String_String_InputType_Boolean_String_Action_3_String_List_1_KeyCode_Text_Action_String_Boolean_Action_1_VRCUiPopup_1(
+                .Method_Public_Void_String_String_InputType_Boolean_String_Action_3_String_List_1_KeyCode_Text_Action_String_Boolean_Action_1_VRCUiPopup_0(
                     title, "", InputField.InputType.Standard, false, "Confirm",
                     DelegateSupport.ConvertDelegate<Il2CppSystem.Action<string, List<KeyCode>, Text>>(
                         (Action<string, List<KeyCode>, Text>)delegate (string s, List<KeyCode> k, Text t) {
