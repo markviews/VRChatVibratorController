@@ -8,9 +8,11 @@ using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace PlagueButtonAPI {
+namespace PlagueButtonAPI
+{
     #region PlagueButtonAPI - Created By Plague#2850
-    internal class ButtonAPI {
+    internal class ButtonAPI
+    {
         #region Creditation And Disclaimer
 #pragma warning disable 414
 
@@ -28,38 +30,48 @@ namespace PlagueButtonAPI {
 
         #region PlagueButton Class
 
-        internal class PlagueButton {
+        internal class PlagueButton
+        {
             #region Constructor
-            public PlagueButton(GameObject gameObject = null, Button button = null, Text text = null, UiTooltip tooltip = null, Image image = null, RectTransform rect = null, Color? OffColour = null, Color? OnColour = null, Color? BorderColour = null, bool ToggleState = false, float xPos = 0f, float yPos = 0f) {
-                if (gameObject != null) {
+            public PlagueButton(GameObject gameObject = null, Button button = null, Text text = null, UiTooltip tooltip = null, Image image = null, RectTransform rect = null, Color? OffColour = null, Color? OnColour = null, Color? BorderColour = null, bool ToggleState = false, float xPos = 0f, float yPos = 0f)
+            {
+                if (gameObject != null)
+                {
                     this.gameObject = gameObject;
                 }
 
-                if (button != null) {
+                if (button != null)
+                {
                     this.button = button;
                 }
 
-                if (text != null) {
+                if (text != null)
+                {
                     this.text = text;
                 }
 
-                if (tooltip != null) {
+                if (tooltip != null)
+                {
                     this.tooltip = tooltip;
                 }
 
-                if (image != null) {
+                if (image != null)
+                {
                     this.image = image;
                 }
 
-                if (rect != null) {
+                if (rect != null)
+                {
                     this.rect = rect;
                 }
 
-                if (OffColour != null) {
+                if (OffColour != null)
+                {
                     this.OffColour = (Color)OffColour;
                 }
 
-                if (OnColour != null) {
+                if (OnColour != null)
+                {
                     this.OnColour = (Color)OnColour;
                 }
 
@@ -123,7 +135,8 @@ namespace PlagueButtonAPI {
 
         #region Slider Creation
 
-        internal class SliderRef {
+        internal class SliderRef
+        {
             internal GameObject SliderObject;
             internal Text SliderText;
         }
@@ -144,9 +157,11 @@ namespace PlagueButtonAPI {
         /// <param name="MinValue">The Minimum Value The Slider Can Go.</param>
         /// <returns>ButtonAPI.SliderRef</returns>
         internal static SliderRef CreateSlider(Transform Parent, Action<float> OnChanged, float X, float Y, string Text,
-            float InitialValue, float MaxValue, float MinValue) {
+            float InitialValue, float MaxValue, float MinValue)
+        {
             //Prevent Weird Bugs Due To A Invalid Parent - Set It To The Main QuickMenu
-            if (Parent == null) {
+            if (Parent == null)
+            {
                 Parent = CustomTransform;
             }
 
@@ -205,7 +220,8 @@ namespace PlagueButtonAPI {
             transform.GetComponentInChildren<Slider>().onValueChanged = new Slider.SliderEvent();
 
             //Update Text
-            transform.GetComponentInChildren<Slider>().onValueChanged.AddListener((Action<float>)delegate (float val) {
+            transform.GetComponentInChildren<Slider>().onValueChanged.AddListener((Action<float>)delegate (float val)
+            {
                 text2.text = Text + " (" + val.ToString("F", CultureInfo.CreateSpecificCulture("en-CA")) + ")";
 
                 transform.GetComponentInChildren<Slider>().transform.Find("Fill Area/Label").GetComponent<Text>().text = RangeConv(Convert.ToInt32(val), MinValue, MaxValue, 0, 100) + "%";
@@ -218,7 +234,8 @@ namespace PlagueButtonAPI {
             return new SliderRef { SliderObject = transform.gameObject, SliderText = text2 };
         }
 
-        private static int RangeConv(float input, float MinPossibleInput, float MaxPossibleInput, float MinConv, float MaxConv) {
+        private static int RangeConv(float input, float MinPossibleInput, float MaxPossibleInput, float MinConv, float MaxConv)
+        {
             return (int)((((input - MinPossibleInput) * (MaxConv - MinConv)) / (MaxPossibleInput - MinPossibleInput)) + MinConv);
         }
 
@@ -239,18 +256,22 @@ namespace PlagueButtonAPI {
         /// <param name="OnEnterKeyPressed">What Is Called When The Enter Key Is Pressed With The Control Visible, This Is Used As: delegate() { }</param>
         /// <param name="OnCloseMenu">What Is Called When The QuickMenu Is Closed With The Control Visible, This Is Used As: delegate() { }</param>
         /// <returns>UnityEngine.UI.InputField</returns>
-        internal static InputField CreateInputField(string PlaceHolderText, VerticalPosition Y, Transform Parent, Action<string> TextChanged, Action OnEnterKeyPressed = null, Action OnCloseMenu = null) {
+        internal static InputField CreateInputField(string PlaceHolderText, VerticalPosition Y, Transform Parent, Action<string> TextChanged, Action OnEnterKeyPressed = null, Action OnCloseMenu = null)
+        {
             //Prevent Weird Bugs Due To A Invalid Parent - Set It To The Main QuickMenu
-            if (Parent == null) {
+            if (Parent == null)
+            {
                 Parent = CustomTransform;
             }
 
-            if (Il2CppClassPointerStore<FreezeControls>.NativeClassPtr == IntPtr.Zero) {
+            if (Il2CppClassPointerStore<FreezeControls>.NativeClassPtr == IntPtr.Zero)
+            {
                 ClassInjector.RegisterTypeInIl2Cpp<FreezeControls>();
             }
 
             //Prevent Weird Bugs Due To A Invalid Parent - Set It To The Main QuickMenu
-            if (Parent == null) {
+            if (Parent == null)
+            {
                 Parent = QuickMenu.prop_QuickMenu_0.transform;
             }
 
@@ -265,11 +286,13 @@ namespace PlagueButtonAPI {
 
             FreezeControls SliderFreezer = inputfield.gameObject.AddComponent<FreezeControls>();
 
-            if (OnEnterKeyPressed != null) {
+            if (OnEnterKeyPressed != null)
+            {
                 SliderFreezer.OnEnterKeyPressed = OnEnterKeyPressed;
             }
 
-            if (OnCloseMenu != null) {
+            if (OnCloseMenu != null)
+            {
                 SliderFreezer.OnExit = OnCloseMenu;
             }
 
@@ -371,7 +394,8 @@ namespace PlagueButtonAPI {
         /// Only Set This To False If You Are Setting The Text's Text Colour In The TextListener - Or The Toggling Will Break!
         /// </param>
         internal static PlagueButton CreateText(ButtonType ButtonType, SizeType SizeType, string Text, string ToolTip, HorizontalPosition X,
-            VerticalPosition Y, Transform Parent, bool Clickable, bool ChangeColourOnClick, Action<bool> TextListener, bool CurrentToggleState, Color OnColour, Color OffColour) {
+            VerticalPosition Y, Transform Parent, bool Clickable, bool ChangeColourOnClick, Action<bool> TextListener, bool CurrentToggleState, Color OnColour, Color OffColour)
+        {
             PlagueButton button = CreateText(ButtonType, SizeType, Text, ToolTip, (float)X,
              (float)Y, Parent, Clickable, ChangeColourOnClick, TextListener, CurrentToggleState, OnColour, OffColour);
 
@@ -434,16 +458,19 @@ namespace PlagueButtonAPI {
         /// Only Set This To False If You Are Setting The Text's Text Colour In The TextListener - Or The Toggling Will Break!
         /// </param>
         internal static PlagueButton CreateText(ButtonType ButtonType, SizeType SizeType, string Text, string ToolTip, float X,
-            float Y, Transform Parent, bool Clickable, bool ChangeColourOnClick, Action<bool> TextListener, bool CurrentToggleState, Color OnColour, Color OffColour) {
+            float Y, Transform Parent, bool Clickable, bool ChangeColourOnClick, Action<bool> TextListener, bool CurrentToggleState, Color OnColour, Color OffColour)
+        {
             PlagueButton button = CreateButton(ButtonType, Text, ToolTip, X, Y, Parent, TextListener, OffColour, OnColour, null, false, false, false, CurrentToggleState, null, true);
 
             UnityEngine.Object.Destroy(button.image);
 
-            if (SizeType == SizeType.QuickMenuSize) {
+            if (SizeType == SizeType.QuickMenuSize)
+            {
                 button.rect.sizeDelta += new Vector2(5000f, 0f);
             }
 
-            if (!Clickable) {
+            if (!Clickable)
+            {
                 UnityEngine.Object.Destroy(button.button);
             }
 
@@ -530,9 +557,11 @@ namespace PlagueButtonAPI {
             VerticalPosition Y, Transform Parent, Action<bool> ButtonListener, Color ToggledOffTextColour,
             Color ToggledOnTextColour, Color? BorderColour, bool FullSizeButton = false, bool BottomHalf = true,
             bool HalfHorizontally = false, bool CurrentToggleState = false, Sprite SpriteForButton = null,
-            bool ChangeColourOnClick = true, KeyCode? ConditionalOrSinglePressKeyBind = null, KeyCode? OptionalKeyBind = null) {
+            bool ChangeColourOnClick = true, KeyCode? ConditionalOrSinglePressKeyBind = null, KeyCode? OptionalKeyBind = null)
+        {
             //Prevent Weird Bugs Due To A Invalid Parent - Set It To The Main QuickMenu
-            if (Parent == null) {
+            if (Parent == null)
+            {
                 Parent = CustomTransform;
             }
 
@@ -615,9 +644,11 @@ namespace PlagueButtonAPI {
         internal static PlagueButton CreateButton(ButtonType ButtonType, string Text, string ToolTip, float X, float Y,
             Transform Parent, Action<bool> ButtonListener, Color ToggledOffTextColour, Color ToggledOnTextColour,
             Color? BorderColour, bool FullSizeButton = false, bool BottomHalf = true, bool HalfHorizontally = false,
-            bool CurrentToggleState = false, Sprite SpriteForButton = null, bool ChangeColourOnClick = true, KeyCode? ConditionalOrSinglePressKeyBind = null, KeyCode? OptionalKeyBind = null) {
+            bool CurrentToggleState = false, Sprite SpriteForButton = null, bool ChangeColourOnClick = true, KeyCode? ConditionalOrSinglePressKeyBind = null, KeyCode? OptionalKeyBind = null)
+        {
             //Prevent Weird Bugs Due To A Invalid Parent - Set It To The Main QuickMenu
-            if (Parent == null) {
+            if (Parent == null)
+            {
                 Parent = CustomTransform;
             }
 
@@ -649,19 +680,28 @@ namespace PlagueButtonAPI {
             transform.transform.name = "PlagueButtonAPI_" + info.Name.Replace(" ", "_") + " By " + info.Author.Replace(" ", "_") + "_" + Text.Replace(" ", "_".Replace(",", "_").Replace(":", "_Button_") + "_" + X + "_" + Y + "_" + Parent.name);
 
             //Define Position To Place This Button In The Parent, Appended To Later
-            if (BottomHalf || FullSizeButton) {
-                if (Parent == UserInteractMenuTransform) {
+            if (BottomHalf || FullSizeButton)
+            {
+                if (Parent == UserInteractMenuTransform)
+                {
                     transform.localPosition = new Vector3(transform.localPosition.x + num * X,
                         transform.localPosition.y + num * (Y - 2.95f), transform.localPosition.z);
-                } else {
+                }
+                else
+                {
                     transform.localPosition = new Vector3(transform.localPosition.x + num * X,
                         transform.localPosition.y + num * (Y - 1.95f), transform.localPosition.z);
                 }
-            } else {
-                if (Parent == UserInteractMenuTransform) {
+            }
+            else
+            {
+                if (Parent == UserInteractMenuTransform)
+                {
                     transform.localPosition = new Vector3(transform.localPosition.x + num * X,
                         transform.localPosition.y + num * (Y - 2.45f), transform.localPosition.z);
-                } else {
+                }
+                else
+                {
                     transform.localPosition = new Vector3(transform.localPosition.x + num * X,
                         transform.localPosition.y + num * (Y - 1.45f), transform.localPosition.z);
                 }
@@ -676,19 +716,24 @@ namespace PlagueButtonAPI {
             transform.GetComponentInChildren<UiTooltip>().field_Public_String_0 = ToolTip;
             transform.GetComponentInChildren<UiTooltip>().field_Public_String_1 = ToolTip;
 
-            if (CurrentToggleState && ButtonType != ButtonAPI.ButtonType.Default) {
+            if (CurrentToggleState && ButtonType != ButtonAPI.ButtonType.Default)
+            {
                 transform.GetComponentInChildren<Text>().color = ToggledOnTextColour;
-            } else {
+            }
+            else
+            {
                 transform.GetComponentInChildren<Text>().color = ToggledOffTextColour;
             }
 
             //Set The Button's Border Colour
-            if (BorderColour != null) {
+            if (BorderColour != null)
+            {
                 transform.GetComponentInChildren<Image>().color = (Color)BorderColour;
             }
 
             //Size Scaling & Repositioning
-            if (!FullSizeButton) {
+            if (!FullSizeButton)
+            {
                 transform.localPosition +=
                     new Vector3(0f, transform.GetComponent<RectTransform>().sizeDelta.y / 5f, 0f);
                 transform.localPosition -=
@@ -696,11 +741,14 @@ namespace PlagueButtonAPI {
                 transform.GetComponent<RectTransform>().sizeDelta = new Vector2(
                     transform.GetComponent<RectTransform>().sizeDelta.x,
                     transform.GetComponent<RectTransform>().sizeDelta.y / 2f);
-            } else {
+            }
+            else
+            {
                 transform.localPosition -= new Vector3(0f, 20f, 0f);
             }
 
-            if (HalfHorizontally) {
+            if (HalfHorizontally)
+            {
                 transform.GetComponent<RectTransform>().sizeDelta = new Vector2(
                     transform.GetComponent<RectTransform>().sizeDelta.x / 2f,
                     transform.GetComponent<RectTransform>().sizeDelta.y);
@@ -708,7 +756,8 @@ namespace PlagueButtonAPI {
                 transform.localPosition -= new Vector3(transform.GetComponent<RectTransform>().sizeDelta.x / 2f, 0f, 0f);
             }
 
-            if (SpriteForButton != null) {
+            if (SpriteForButton != null)
+            {
                 transform.GetComponentInChildren<Image>().sprite = SpriteForButton;
             }
 
@@ -716,24 +765,36 @@ namespace PlagueButtonAPI {
             transform.GetComponent<Button>().onClick = new Button.ButtonClickedEvent();
 
             //Listener Redirection - To Get Around AddListener Not Passing A State Bool Due To Being A onClick Event
-            transform.GetComponent<Button>().onClick.AddListener(new Action(() => {
-                try {
-                    if (ButtonType == ButtonType.Toggle) {
+            transform.GetComponent<Button>().onClick.AddListener(new Action(() =>
+            {
+                try
+                {
+                    if (ButtonType == ButtonType.Toggle)
+                    {
                         ButtonListener?.Invoke(transform.GetComponentInChildren<Text>().color != ToggledOnTextColour);
-                    } else {
+                    }
+                    else
+                    {
                         ButtonListener?.Invoke(true);
                     }
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     MelonLogger.LogError("An Exception Occured In The OnClick Of The " + Text + (ButtonType == ButtonType.Toggle ? " Toggle" : " Button") + " -->\n" + ex);
                 }
             }));
 
-            if (ButtonType == ButtonType.Toggle) {
+            if (ButtonType == ButtonType.Toggle)
+            {
                 //Set The Text Colour To The Toggle State, ToggledOnTextColour Being Toggled On
-                transform.GetComponent<Button>().onClick.AddListener(new Action(() => {
-                    if (transform.GetComponentInChildren<Text>().color == ToggledOnTextColour) {
+                transform.GetComponent<Button>().onClick.AddListener(new Action(() =>
+                {
+                    if (transform.GetComponentInChildren<Text>().color == ToggledOnTextColour)
+                    {
                         transform.GetComponentInChildren<Text>().color = ToggledOffTextColour;
-                    } else {
+                    }
+                    else
+                    {
                         transform.GetComponentInChildren<Text>().color = ToggledOnTextColour;
                     }
                 }));
@@ -752,7 +813,8 @@ namespace PlagueButtonAPI {
             //Define Where To Put This Button
             transform.SetParent(Parent, worldPositionStays: true);
 
-            if (ConditionalOrSinglePressKeyBind != null) {
+            if (ConditionalOrSinglePressKeyBind != null)
+            {
                 RegisteredKeyBinds.Add(plagueButton.button, Tuple.Create((KeyCode)ConditionalOrSinglePressKeyBind, OptionalKeyBind));
             }
 
@@ -770,8 +832,10 @@ namespace PlagueButtonAPI {
         /// <param name="name">
         /// The Name You Want To Give The Page/Find Internally.
         /// </param>
-        internal static GameObject MakeEmptyPage(string name, string OptionalTitleText = "", string OptionalTitleTextTooltip = "", Color? OptionalTitleTextOnColour = null, Color? OptionalTitleTextOffColour = null, Action<bool> OptionalTitleTextOnClick = null) {
-            if (string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name)) {
+        internal static GameObject MakeEmptyPage(string name, string OptionalTitleText = "", string OptionalTitleTextTooltip = "", Color? OptionalTitleTextOnColour = null, Color? OptionalTitleTextOffColour = null, Action<bool> OptionalTitleTextOnClick = null)
+        {
+            if (string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name))
+            {
                 MelonLogger.Log("Your Empty Page Name Cannot Be Empty!");
                 return null;
             }
@@ -779,10 +843,12 @@ namespace PlagueButtonAPI {
             var info = Assembly.GetExecutingAssembly().GetCustomAttribute<MelonInfoAttribute>();
 
             //If This Page Already Exists, Return It
-            for (int i = 0; i < SubMenus.Count; i++) {
+            for (int i = 0; i < SubMenus.Count; i++)
+            {
                 GameObject menu = SubMenus[i];
 
-                if (menu.name == "PlagueButtonAPI_SubMenu_" + info.Name.Replace(" ", "_") + " By " + info.Author.Replace(" ", "_") + "_" + name) {
+                if (menu.name == "PlagueButtonAPI_SubMenu_" + info.Name.Replace(" ", "_") + " By " + info.Author.Replace(" ", "_") + "_" + name)
+                {
                     return menu;
                 }
             }
@@ -795,12 +861,14 @@ namespace PlagueButtonAPI {
             transform.name = "PlagueButtonAPI_SubMenu_" + info.Name.Replace(" ", "_") + " By " + info.Author.Replace(" ", "_") + "_" + name;
 
             //Remove All Buttons
-            for (int i = 0; i < transform.childCount; i++) {
+            for (int i = 0; i < transform.childCount; i++)
+            {
                 UnityEngine.Object.Destroy(transform.GetChild(i).gameObject);
             }
 
             //Organise Hierarchy Ree
-            if (NewElementsMenuTransform.Find("PlagueButtonAPI") == null) {
+            if (NewElementsMenuTransform.Find("PlagueButtonAPI") == null)
+            {
                 var obj = new GameObject("PlagueButtonAPI");
 
                 obj.transform.SetParent(NewElementsMenuTransform);
@@ -816,7 +884,8 @@ namespace PlagueButtonAPI {
             SubMenus.Add(transform.gameObject);
 
             //Title Text
-            if (!string.IsNullOrEmpty(OptionalTitleText)) {
+            if (!string.IsNullOrEmpty(OptionalTitleText))
+            {
                 CreateText(ButtonType.Toggle, ButtonAPI.SizeType.QuickMenuSize, OptionalTitleText, OptionalTitleTextTooltip, (float)ButtonAPI.HorizontalPosition.SecondButtonPos + 0.5f, (float)ButtonAPI.VerticalPosition.AboveMenu - 0.5f, transform, (OptionalTitleTextOnClick != null), false, OptionalTitleTextOnClick, false, OptionalTitleTextOnColour ?? (OptionalTitleTextOffColour ?? Color.white), OptionalTitleTextOffColour ?? (OptionalTitleTextOnColour ?? Color.white));
             }
 
@@ -833,8 +902,10 @@ namespace PlagueButtonAPI {
         /// <param name="WhereTheSubMenuIsInside">
         /// Where You Placed The SubMenu, Such As The ShortcutMenu Or UserInteractMenu.
         /// </param>
-        internal static GameObject FindSubMenu(string name, Transform WhereTheSubMenuIsInside) {
-            if (string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name)) {
+        internal static GameObject FindSubMenu(string name, Transform WhereTheSubMenuIsInside)
+        {
+            if (string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name))
+            {
                 MelonLogger.Log("Your SubMenu Name Cannot Be Empty!");
                 return null;
             }
@@ -851,25 +922,31 @@ namespace PlagueButtonAPI {
         /// <param name="name">
         /// The GameObject Of The SubMenu You Want To Enter.
         /// </param>
-        internal static void EnterSubMenu(GameObject menu) {
-            if (ShortcutMenuTransform.gameObject.active) {
+        internal static void EnterSubMenu(GameObject menu)
+        {
+            if (ShortcutMenuTransform.gameObject.active)
+            {
                 ShortcutMenuTransform.gameObject.SetActive(false);
             }
 
-            if (UserInteractMenuTransform.gameObject.active) {
+            if (UserInteractMenuTransform.gameObject.active)
+            {
                 UserInteractMenuTransform.gameObject.SetActive(false);
             }
 
-            if (CustomTransform.gameObject.active) {
+            if (CustomTransform.gameObject.active)
+            {
                 CustomTransform.gameObject.SetActive(false);
             }
 
-            for (int i = 0; i < SubMenus.Count; i++) {
+            for (int i = 0; i < SubMenus.Count; i++)
+            {
                 GameObject Menu = SubMenus[i];
                 Menu.SetActive(false);
             }
 
-            if (menu != null) {
+            if (menu != null)
+            {
                 menu.SetActive(true);
             }
         }
@@ -877,12 +954,14 @@ namespace PlagueButtonAPI {
         /// <summary>
         /// Closes All SubMenus Created
         /// </summary>
-        internal static void CloseAllSubMenus() {
+        internal static void CloseAllSubMenus()
+        {
             ShortcutMenuTransform.gameObject.SetActive(false);
             UserInteractMenuTransform.gameObject.SetActive(false);
             CustomTransform.gameObject.SetActive(false);
 
-            for (int i = 0; i < SubMenus.Count; i++) {
+            for (int i = 0; i < SubMenus.Count; i++)
+            {
                 GameObject Menu = SubMenus[i];
                 Menu.SetActive(false);
             }
@@ -897,7 +976,8 @@ namespace PlagueButtonAPI {
         /// <summary>
         /// The Horizontal Position Of The Button You Are Creating.
         /// </summary>
-        internal enum HorizontalPosition {
+        internal enum HorizontalPosition
+        {
             ThreeLeftOfMenu = -6,
 
             TwoLeftOfMenu = -5,
@@ -922,7 +1002,8 @@ namespace PlagueButtonAPI {
         /// <summary>
         /// The Vertical Position Of The Button You Are Creating.
         /// </summary>
-        internal enum VerticalPosition {
+        internal enum VerticalPosition
+        {
             TwoAboveMenu = 6,
 
             AboveMenu = 5,
@@ -943,7 +1024,8 @@ namespace PlagueButtonAPI {
         /// <summary>
         /// The Type Of Button You Are Creating.
         /// </summary>
-        internal enum ButtonType {
+        internal enum ButtonType
+        {
             Default,
             Toggle
         }
@@ -951,7 +1033,8 @@ namespace PlagueButtonAPI {
         /// <summary>
         /// The Type Of Text Label You Want To Make
         /// </summary>
-        internal enum SizeType {
+        internal enum SizeType
+        {
             ButtonSize,
             QuickMenuSize
         }
@@ -967,25 +1050,31 @@ namespace PlagueButtonAPI {
 
         private static float HandlerRoutineDelay = 0f;
 
-        internal static void SubMenuHandler() {
-            if (SubMenus != null && SubMenus.Count > 0 && QuickMenuObj != null && Time.time > HandlerRoutineDelay) {
+        internal static void SubMenuHandler()
+        {
+            if (SubMenus != null && SubMenus.Count > 0 && QuickMenuObj != null && Time.time > HandlerRoutineDelay)
+            {
                 HandlerRoutineDelay = Time.time + 0.2f;
 
                 //If User Has Loaded A World
-                if (RoomManager.prop_Boolean_3) {
-                    for (int i = 0; i < SubMenus.Count; i++) {
+                if (RoomManager.prop_Boolean_3)
+                {
+                    for (int i = 0; i < SubMenus.Count; i++)
+                    {
                         GameObject Menu = SubMenus[i];
 
                         if (Menu.activeSelf) // Is In This SubMenu
                         {
                             //If QuickMenu Was Closed
-                            if (!QuickMenuObj.prop_Boolean_0) {
+                            if (!QuickMenuObj.prop_Boolean_0)
+                            {
                                 //Hide SubMenu
                                 Menu.SetActive(false);
                             }
 
                             //If QuickMenu Is Open Normally When In A SubMenu (Aka When It Shouldn't Be) - This Fixes The Menu Breaking When A Player Joins
-                            else if (ShortcutMenuTransform.gameObject.active || UserInteractMenuTransform.gameObject.active || CustomTransform.gameObject.active) {
+                            else if (ShortcutMenuTransform.gameObject.active || UserInteractMenuTransform.gameObject.active || CustomTransform.gameObject.active)
+                            {
                                 ShortcutMenuTransform.gameObject.SetActive(false);
                                 UserInteractMenuTransform.gameObject.SetActive(false);
                                 CustomTransform.gameObject.SetActive(false);
@@ -997,14 +1086,21 @@ namespace PlagueButtonAPI {
                 }
             }
 
-            if (RegisteredKeyBinds.Count > 0) {
-                foreach (KeyValuePair<Button, Tuple<KeyCode, KeyCode?>> ButtonAndBinds in RegisteredKeyBinds) {
-                    if (ButtonAndBinds.Value.Item2 != null) {
-                        if (Input.GetKey(ButtonAndBinds.Value.Item1) && Input.GetKeyDown((KeyCode)ButtonAndBinds.Value.Item2)) {
+            if (RegisteredKeyBinds.Count > 0)
+            {
+                foreach (KeyValuePair<Button, Tuple<KeyCode, KeyCode?>> ButtonAndBinds in RegisteredKeyBinds)
+                {
+                    if (ButtonAndBinds.Value.Item2 != null)
+                    {
+                        if (Input.GetKey(ButtonAndBinds.Value.Item1) && Input.GetKeyDown((KeyCode)ButtonAndBinds.Value.Item2))
+                        {
                             ButtonAndBinds.Key?.onClick?.Invoke();
                         }
-                    } else {
-                        if (Input.GetKeyDown(ButtonAndBinds.Value.Item1)) {
+                    }
+                    else
+                    {
+                        if (Input.GetKeyDown(ButtonAndBinds.Value.Item1))
+                        {
                             ButtonAndBinds.Key?.onClick?.Invoke();
                         }
                     }
@@ -1016,7 +1112,8 @@ namespace PlagueButtonAPI {
     }
 
     #region Extension Methods
-    internal static class ButtonAPIExtensions {
+    internal static class ButtonAPIExtensions
+    {
         /// <summary>
         /// Sets The Buttons Toggle State. | Created By Plague | Discord Server: http://Krewella.co.uk/Discord
         /// </summary>
@@ -1026,8 +1123,10 @@ namespace PlagueButtonAPI {
         /// <param name="StateToSetTo">
         /// The Toggle State You Wish To Set This Button To.
         /// </param>
-        internal static void SetToggleState(this ButtonAPI.PlagueButton button, bool StateToSetTo) {
-            if (button.text != null) {
+        internal static void SetToggleState(this ButtonAPI.PlagueButton button, bool StateToSetTo)
+        {
+            if (button.text != null)
+            {
                 button.text.color = button.text.color == button.OnColour ? button.OffColour : button.OnColour;
             }
         }
@@ -1038,7 +1137,8 @@ namespace PlagueButtonAPI {
         /// <param name="button">
         /// The PlagueButton Of The Button You Wish To Set The Toggle State Of.
         /// </param>
-        internal static bool GetToggleState(this ButtonAPI.PlagueButton button) {
+        internal static bool GetToggleState(this ButtonAPI.PlagueButton button)
+        {
             return button.ToggleState;
         }
 
@@ -1051,8 +1151,10 @@ namespace PlagueButtonAPI {
         /// <param name="text">
         /// The Text You Want To Place On The Button.
         /// </param>
-        internal static void SetText(this ButtonAPI.PlagueButton button, string text) {
-            if (button.text != null) {
+        internal static void SetText(this ButtonAPI.PlagueButton button, string text)
+        {
+            if (button.text != null)
+            {
                 button.text.text = text;
             }
         }
@@ -1063,8 +1165,10 @@ namespace PlagueButtonAPI {
         /// <param name="button">
         /// The PlagueButton Of The Button You Wish To Set The Toggle State Of.
         /// </param>
-        internal static string GetText(this ButtonAPI.PlagueButton button) {
-            if (button.text != null) {
+        internal static string GetText(this ButtonAPI.PlagueButton button)
+        {
+            if (button.text != null)
+            {
                 return button.text.text;
             }
 
@@ -1080,8 +1184,10 @@ namespace PlagueButtonAPI {
         /// <param name="text">
         /// The Text You Want To Place On The Button.
         /// </param>
-        internal static void SetTooltip(this ButtonAPI.PlagueButton button, string text) {
-            if (button.tooltip != null) {
+        internal static void SetTooltip(this ButtonAPI.PlagueButton button, string text)
+        {
+            if (button.tooltip != null)
+            {
                 button.tooltip.field_Public_String_0 = text;
                 button.tooltip.field_Public_String_1 = text;
             }
@@ -1093,8 +1199,10 @@ namespace PlagueButtonAPI {
         /// <param name="button">
         /// The GameObject Of The Button You Wish To Set The Toggle State Of.
         /// </param>
-        internal static string GetTooltip(this ButtonAPI.PlagueButton button) {
-            if (button.tooltip != null) {
+        internal static string GetTooltip(this ButtonAPI.PlagueButton button)
+        {
+            if (button.tooltip != null)
+            {
                 return button.tooltip.field_Public_String_0;
             }
 
@@ -1110,8 +1218,10 @@ namespace PlagueButtonAPI {
         /// <param name="state">
         /// If You Want The Button To Be Interactable.
         /// </param>
-        internal static void SetInteractivity(this ButtonAPI.PlagueButton button, bool state) {
-            if (button.button != null) {
+        internal static void SetInteractivity(this ButtonAPI.PlagueButton button, bool state)
+        {
+            if (button.button != null)
+            {
                 button.button.interactable = state;
             }
         }
@@ -1122,8 +1232,10 @@ namespace PlagueButtonAPI {
         /// <param name="button">
         /// The PlagueButton Of The Button To Set The Interactivity Of.
         /// </param>
-        internal static bool GetInteractivity(this ButtonAPI.PlagueButton button) {
-            if (button.button != null) {
+        internal static bool GetInteractivity(this ButtonAPI.PlagueButton button)
+        {
+            if (button.button != null)
+            {
                 return button.button.interactable;
             }
 
@@ -1136,8 +1248,10 @@ namespace PlagueButtonAPI {
         /// <param name="button">
         /// The PlagueButton Of The Button To Pull The Sprite From.
         /// </param>
-        internal static void SetSprite(this ButtonAPI.PlagueButton button, Sprite sprite) {
-            if (button.image != null) {
+        internal static void SetSprite(this ButtonAPI.PlagueButton button, Sprite sprite)
+        {
+            if (button.image != null)
+            {
                 button.image.sprite = sprite;
             }
         }
@@ -1148,8 +1262,10 @@ namespace PlagueButtonAPI {
         /// <param name="button">
         /// The PlagueButton Of The Button To Pull The Sprite From.
         /// </param>
-        internal static Sprite GetSprite(this ButtonAPI.PlagueButton button) {
-            if (button.image != null) {
+        internal static Sprite GetSprite(this ButtonAPI.PlagueButton button)
+        {
+            if (button.image != null)
+            {
                 return button.image.sprite;
             }
 
@@ -1165,12 +1281,15 @@ namespace PlagueButtonAPI {
         /// <returns>
         /// A Bool Indicating If Destroying Was Successful, Or The Button Didn't Exist
         /// </returns>
-        internal static bool Destroy(this ButtonAPI.PlagueButton button) {
-            if (ButtonAPI.ButtonsFromThisMod.Contains(button)) {
+        internal static bool Destroy(this ButtonAPI.PlagueButton button)
+        {
+            if (ButtonAPI.ButtonsFromThisMod.Contains(button))
+            {
                 ButtonAPI.ButtonsFromThisMod.Remove(button);
             }
 
-            if (button.gameObject != null) {
+            if (button.gameObject != null)
+            {
                 UnityEngine.Object.Destroy(button.gameObject);
                 return true;
             }
@@ -1190,14 +1309,18 @@ namespace PlagueButtonAPI {
         /// <returns>
         /// Tuple - The Bool Being If It Was Found In Root, False Otherwise
         /// </returns>
-        internal static Tuple<bool, T> GetComponent<T>(this ButtonAPI.PlagueButton button) {
+        internal static Tuple<bool, T> GetComponent<T>(this ButtonAPI.PlagueButton button)
+        {
             bool InRoot = false;
 
             T ReturnableType = button.gameObject.GetComponent<T>();
 
-            if (ReturnableType == null) {
+            if (ReturnableType == null)
+            {
                 ReturnableType = button.gameObject.GetComponentInChildren<T>();
-            } else {
+            }
+            else
+            {
                 InRoot = true;
             }
 
@@ -1216,10 +1339,14 @@ namespace PlagueButtonAPI {
         /// <returns>
         /// The Component Added, Or Null If It Failed
         /// </returns>
-        internal static Component AddComponent<T>(this ButtonAPI.PlagueButton button) where T : Component {
-            try {
+        internal static Component AddComponent<T>(this ButtonAPI.PlagueButton button) where T : Component
+        {
+            try
+            {
                 return button.gameObject?.AddComponent<T>();
-            } catch {
+            }
+            catch
+            {
                 return null;
             }
         }
@@ -1233,8 +1360,10 @@ namespace PlagueButtonAPI {
         /// <returns>
         /// A Boolean Indicating Active State
         /// </returns>
-        internal static bool IsActive(this ButtonAPI.PlagueButton button) {
-            if (button.gameObject == null) {
+        internal static bool IsActive(this ButtonAPI.PlagueButton button)
+        {
+            if (button.gameObject == null)
+            {
                 return false;
             }
 
@@ -1250,7 +1379,8 @@ namespace PlagueButtonAPI {
         /// <param name="state">
         /// The State You Want To Set It To
         /// </param>
-        internal static void SetActive(this ButtonAPI.PlagueButton button, bool state) {
+        internal static void SetActive(this ButtonAPI.PlagueButton button, bool state)
+        {
             button.gameObject?.SetActive(state);
         }
 
@@ -1263,14 +1393,16 @@ namespace PlagueButtonAPI {
         /// <param name="state">
         /// The State You Want To Set It To
         /// </param>
-        internal static void SetActiveRecursively(this ButtonAPI.PlagueButton button, bool state) {
+        internal static void SetActiveRecursively(this ButtonAPI.PlagueButton button, bool state)
+        {
             button.gameObject?.SetActiveRecursively(state);
         }
 
         /// <summary>
         /// VRChat's Layers
         /// </summary>
-        internal enum VRCLayer {
+        internal enum VRCLayer
+        {
             Default,
             TransparentFX,
             IgnoreRaycast,
@@ -1314,25 +1446,33 @@ namespace PlagueButtonAPI {
         /// <param name="layers">
         /// The Array Of VRCLayer(s) You Decide, Made With new VRCLayer[] { VRCLayer.LayerHere }
         /// </param>
-        internal static void SetLayers(this ButtonAPI.PlagueButton button, VRCLayer[] layers) {
-            if (button.gameObject == null) {
+        internal static void SetLayers(this ButtonAPI.PlagueButton button, VRCLayer[] layers)
+        {
+            if (button.gameObject == null)
+            {
                 return;
             }
 
             int FinalLayer = 0;
 
-            for (int i = 0; i < layers.Length; i++) {
-                if (FinalLayer == 0) {
+            for (int i = 0; i < layers.Length; i++)
+            {
+                if (FinalLayer == 0)
+                {
                     FinalLayer = (1 << (int)layers[i]);
-                } else {
+                }
+                else
+                {
                     FinalLayer = (FinalLayer | (1 << (int)layers[i]));
                 }
             }
 
             button.gameObject.layer = FinalLayer;
 
-            foreach (Transform trans in button.gameObject.GetComponentsInChildren<Transform>(true)) {
-                if (trans != null && trans.gameObject != null) {
+            foreach (Transform trans in button.gameObject.GetComponentsInChildren<Transform>(true))
+            {
+                if (trans != null && trans.gameObject != null)
+                {
                     trans.gameObject.layer = FinalLayer;
                 }
             }
@@ -1347,11 +1487,14 @@ namespace PlagueButtonAPI {
         /// <returns>
         /// Integer[] Representing The Layer's Original Layer Numbers.
         /// </returns>
-        internal static int[] GetLayers(this ButtonAPI.PlagueButton button) {
+        internal static int[] GetLayers(this ButtonAPI.PlagueButton button)
+        {
             List<int> LayersFound = new List<int>();
 
-            for (int i = 0; i < Enum.GetValues(typeof(VRCLayer)).Length; i++) {
-                if ((button.gameObject.layer | 1 << i) > 0) {
+            for (int i = 0; i < Enum.GetValues(typeof(VRCLayer)).Length; i++)
+            {
+                if ((button.gameObject.layer | 1 << i) > 0)
+                {
                     LayersFound.Add(i);
                 }
             }
@@ -1368,8 +1511,10 @@ namespace PlagueButtonAPI {
         /// <param name="tag">
         /// The String Of The Tag You Want To Set.
         /// </param>
-        internal static void SetTag(this ButtonAPI.PlagueButton button, string tag) {
-            if (button.gameObject != null) {
+        internal static void SetTag(this ButtonAPI.PlagueButton button, string tag)
+        {
+            if (button.gameObject != null)
+            {
                 button.gameObject.tag = tag;
             }
         }
@@ -1380,8 +1525,10 @@ namespace PlagueButtonAPI {
         /// <param name="button">
         /// The PlagueButton Of The Button
         /// </param>
-        internal static string GetTag(this ButtonAPI.PlagueButton button) {
-            if (button.gameObject != null) {
+        internal static string GetTag(this ButtonAPI.PlagueButton button)
+        {
+            if (button.gameObject != null)
+            {
                 return button.gameObject.tag;
             }
 
@@ -1392,27 +1539,34 @@ namespace PlagueButtonAPI {
 
     #region Custom Components
 
-    internal class FreezeControls : MonoBehaviour {
+    internal class FreezeControls : MonoBehaviour
+    {
         public FreezeControls(IntPtr instance) : base(instance) { }
 
         internal Action OnExit;
         internal Action OnEnterKeyPressed;
 
-        void OnEnable() {
+        void OnEnable()
+        {
             VRCInputManager.Method_Public_Static_Void_Boolean_0(true);
         }
 
-        void OnDisable() {
+        void OnDisable()
+        {
             VRCInputManager.Method_Public_Static_Void_Boolean_0(false);
 
             OnExit?.Invoke();
         }
 
-        void Update() {
-            if (Input.GetKeyDown(KeyCode.Escape)) {
+        void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
                 VRCInputManager.Method_Public_Static_Void_Boolean_0(false);
                 VRCUiManager.prop_VRCUiManager_0.Method_Public_Virtual_New_Void_Boolean_0();
-            } else if (Input.GetKeyDown(KeyCode.Return)) {
+            }
+            else if (Input.GetKeyDown(KeyCode.Return))
+            {
                 OnEnterKeyPressed?.Invoke();
             }
         }
