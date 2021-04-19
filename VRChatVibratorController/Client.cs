@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MelonLoader;
+using System;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -22,7 +23,7 @@ namespace Vibrator_Controller
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Exception: {0}", ex);
+                MelonLogger.Error($"Error occured on setupClient method:\n{ex}");
             }
         }
 
