@@ -18,7 +18,7 @@ namespace PlagueButtonAPI
 
         private static readonly string Creditation =
         "Plague Button API" +
-        "http://Krewella.co.uk/Discord" +
+        "https://VRCAntiCrash.com/Discord" +
         "Copyright Reserved" +
         "Use-Only Licensed" +
         "https://github.com/OFWModz/PlagueButtonAPI" +
