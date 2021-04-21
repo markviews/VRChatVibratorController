@@ -2,9 +2,7 @@
 
 Lets you control your friends lovense using your vr controllers.
 
-I do my best to keep this mod updated but I am busy with school and other projects.
-<br>I encourage you to check out simmilar mods at the bottom of this page.
-<br>If ur interested in takeing over this mod message me on discord: `MarkViews#0001`
+I do my best to keep this mod updated but I am busy with school and other projects...
 
 ### How to install
 1. Download and install [MelonLoader](https://melonwiki.xyz/#/README)
@@ -23,14 +21,12 @@ I do my best to keep this mod updated but I am busy with school and other projec
 
 ### Mod menu location
 You can change the menu location by changing `buttonX` and `buttonY` to desired [coordinates](https://i.ibb.co/bFWzzq8/Coordinates-1.png) and `subMenu` in `modprefs.ini` to:
-`UIExpansionKit`, `ShortcutMenu` (Main menu), `UserInteractMenu` (Menu when you select someone), `UserIconCameraMenu` (VRC+ menu to take pictures), `EmoteMenu`, `EmojiMenu`, `CameraMenu`, `UIElementsMenu`, or `AvatarStatsMenu`
-<br><br>If you have UIExpansionKit when you first run this mod the mod button will be in the UIExpansionKit menu by default.
+`UIExpansionKit`, `ShortcutMenu`, `UserInteractMenu`, `UserIconCameraMenu`, `EmoteMenu`, `EmojiMenu`, `CameraMenu`, `UIElementsMenu`, or `AvatarStatsMenu`
 
 ### Credits
-Plague for [PlagueButtonAPI](https://github.com/OFWModz/PlagueButtonAPI) and helping me with the project a bunch
+Plague for [PlagueButtonAPI](https://github.com/OFWModz/PlagueButtonAPI)
 <br>abbeybabbey for UI improvments
 <br>Knah for [UIExpansionKit](https://github.com/knah/VRCMods)
 
 ### Notes
 This mod is not developed by or associated with Lovense or Hytto.
-<br>Simmaler tool/mod (Person with toy runs these programs): [RealFeel](https://krewella.co.uk/RealFeel)
