@@ -14,6 +14,7 @@ namespace Vibrator_Controller
         internal ButtonAPI.PlagueButton button;
         internal string name;
         internal string id;
+        internal bool isActive = true;
         internal UnityEngine.UI.Slider speedSlider;//slider for vibrator speed
         internal UnityEngine.UI.Text speedSliderText;
         internal UnityEngine.UI.Slider maxSlider;//slider for max's contractions
@@ -88,6 +89,7 @@ namespace Vibrator_Controller
 
         internal void disable()
         {
+            isActive = false;
             MelonLogger.Msg("Disabled toy: " + id);
             hand = "none";
             button.SetText(name + "\nClick to\nSet");
@@ -97,6 +99,7 @@ namespace Vibrator_Controller
 
         internal void enable()
         {
+            isActive = true;
             MelonLogger.Msg("Enabled toy: " + id);
             button.gameObject.SetActive(true);
         }

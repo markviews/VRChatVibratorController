@@ -78,7 +78,7 @@ namespace Vibrator_Controller
 
                     foreach (Toy toy in Toy.toys)
                     {
-                        ToysMenu(toy);
+                        if (toy.isActive) ToysMenu(toy);
                     }
                 });
             }, "Lovense", lovenseLogo);
