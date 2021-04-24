@@ -1,4 +1,5 @@
-﻿using Il2CppSystem.Collections.Generic;
+﻿using Harmony;
+using Il2CppSystem.Collections.Generic;
 using MelonLoader;
 using PlagueButtonAPI;
 using System;
@@ -35,8 +36,17 @@ namespace Vibrator_Controller
         private static GameObject menuContent;
         private bool pauseControl = false;//pause controls untill trigger is pressed
         private static MelonPreferences_Category vibratorController;
+
+        private static MelonMod Instance;
+        public static HarmonyInstance HarmonyInstance => Instance.Harmony;
+
+        private static ToyActionMenu toyActionMenu;
+
         public override void OnApplicationStart()
         {
+            Instance = this;
+            toyActionMenu = new ToyActionMenu();
+
             XrefScanning.Main.Initialize();
             string defaultSubMenu = "ShortcutMenu";
             if (MelonHandler.Mods.Any(mod => mod.Info.Name == "UI Expansion Kit"))

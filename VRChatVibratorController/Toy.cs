@@ -12,7 +12,7 @@ namespace Vibrator_Controller
         internal string hand = "none";
         private static int x = -3;
         internal ButtonAPI.PlagueButton button;
-        private string name;
+        internal string name;
         internal string id;
         internal UnityEngine.UI.Slider speedSlider;//slider for vibrator speed
         internal UnityEngine.UI.Text speedSliderText;
@@ -107,7 +107,7 @@ namespace Vibrator_Controller
             if (maxSlider != null) maxSlider.gameObject.SetActive(toggle);
         }
 
-        private int lastSpeed = 0;
+        internal int lastSpeed = 0;
 
         internal void setSpeed(int speed)
         {
