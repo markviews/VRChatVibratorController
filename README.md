@@ -24,7 +24,7 @@ You can change the menu location by changing `buttonX` and `buttonY` to desired 
 `UIExpansionKit`, `ShortcutMenu`, `UserInteractMenu`, `UserIconCameraMenu`, `EmoteMenu`, `EmojiMenu`, `CameraMenu`, `UIElementsMenu`, or `AvatarStatsMenu`
 
 ### Credits
-Plague for [PlagueButtonAPI](https://github.com/OFWModz/PlagueButtonAPI)
+Plague for [PlagueButtonAPI](https://github.com/OFWModz/PlagueButtonAPI) and helping with the project a bunch
 <br>abbeybabbey for UI improvments
 <br>Knah for [UIExpansionKit](https://github.com/knah/VRCMods)
 
