@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using ActionMenuApi;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 
@@ -18,7 +19,7 @@ namespace Vibrator_Controller
         private static int[] available_purcent = { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
         private static Dictionary<int, Texture2D> purcent_icons = new Dictionary<int, Texture2D>();
 
-        private static string[] available_toys = { "Ambi", "Osci", "Edge", "Domi", "Hush", "Nora", "Lush" };
+        private static string[] available_toys = { "Ambi", "Osci", "Edge", "Domi", "Hush", "Nora", "Lush", "Max" };
         private static Dictionary<string, Texture2D> toy_icons = new Dictionary<string, Texture2D>();
 
         private static ActionMenuAPI actionMenuApi;
@@ -60,13 +61,33 @@ namespace Vibrator_Controller
                 MelonLogger.Warning("Consider checking for newer version as mod possibly no longer working, Exception occured OnAppStart(): " + e.Message);
             }
 
-            actionMenuApi = new ActionMenuAPI();
+            // actionMenuApi = new ActionMenuAPI();
 
             SetupButtons();
         }
 
         private static void SetupButtons()
         {
+            AMAPI.AddSubMenuToMenu(ActionMenuPageType.Main, 
+                delegate {
+                    foreach (Toy toy in Toy.toys)
+                    {
+                        try
+                        {
+                            if (toy.isActive) ToysMenu(toy);
+                        }
+                        catch (Exception e)
+                        {
+                            MelonLogger.Warning($"Error with toy {toy.name}: " + e.Message);
+                            throw;
+                        }
+                    }
+                },
+                "Lovense",
+                lovenseLogo
+            );
+
+            return;
             actionMenuApi.AddPedalToExistingMenu(ActionMenuAPI.ActionMenuPageType.Main, delegate
             {
                 actionMenuApi.CreateSubMenu(delegate {
@@ -88,21 +109,91 @@ namespace Vibrator_Controller
 
         private static void ToysMenu(Toy toy)
         {
+            switch (toy.name)
+            {
+                case "Edge":
+                    EdgeRadials(toy);
+                    break;
+                case "Max":
+                    MaxRadials(toy);
+                    break;
+                case "Nora":
+                    NoraRadials(toy);
+                    break;
+                default:
+                    VibrateRadial(toy, toy.name);
+                    break;
+            }
+            
+            return;
             actionMenuApi.AddPedalToCustomMenu(() =>
             {
                 actionMenuApi.CreateSubMenu(delegate {
                     foreach (int purcent in Enumerable.Reverse(available_purcent).ToArray())
                     {
-                        PucentageMenu(toy, purcent, purcent_icons[purcent]);
+                        PercentageMenu(toy, purcent, purcent_icons[purcent]);
                     }
                 });
             }, $"{toy.name}: {toy.lastSpeed * 10}%", toy_icons[toy.name]);
         }
 
+        private static void VibrateRadial(Toy toy, string text = "")
+        {
+            AMAPI.AddRadialPedalToSubMenu(f =>
+            {
+                int roundedPercent = (int) Math.Round(f / 10) * 10;
+
+                if (toy.lastSpeed != roundedPercent / 10)
+                {
+                    toy.setSpeed(roundedPercent / 10);
+                }
+            }, text, toy.lastSpeed * 10, toy_icons[toy.name]);
+        }
+        
+        private static void EdgeRadials(Toy toy)
+        {
+            VibrateRadial(toy, $"{toy.name} 2");
+                
+            AMAPI.AddRadialPedalToSubMenu(f =>
+            {
+                int roundedPercent = (int) Math.Round(f / 10) * 10;
+
+                if (toy.lastEdgeSpeed != roundedPercent / 10)
+                {
+                    toy.setEdgeSpeed(roundedPercent / 10);
+                }
+            }, $"{toy.name} 1", toy.lastEdgeSpeed * 10, toy_icons[toy.name]);
+        }
+        
+        private static void MaxRadials(Toy toy)
+        {
+            VibrateRadial(toy, $"{toy.name} Vibration");
+            
+            AMAPI.AddRadialPedalToSubMenu(f =>
+            {
+                int contractionLevel = (int) Math.Round(f / 33);
+
+                if (toy.contraction != contractionLevel)
+                {
+                    toy.setContraction(contractionLevel);
+                }
+            }, $"{toy.name} Contraction", toy.lastSpeed * 10, toy_icons[toy.name]);
+        }
+        
+        private static void NoraRadials(Toy toy)
+        {
+            VibrateRadial(toy, $"{toy.name} Vibration");
+            
+            AMAPI.AddButtonPedalToSubMenu(() =>
+            {
+                toy.rotate();
+            }, $"{toy.name} Rotate", toy_icons[toy.name]);
+        }
+
         // TODO find a way to use radial button
         // See with gompo#6956 if he found anything interesting for that
 
-        private static void PucentageMenu(Toy toy, int purcent, Texture2D logo = null)
+        private static void PercentageMenu(Toy toy, int purcent, Texture2D logo = null)
         {
             actionMenuApi.AddPedalToCustomMenu(() =>
             {

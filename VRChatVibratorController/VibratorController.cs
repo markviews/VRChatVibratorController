@@ -169,6 +169,8 @@ namespace Vibrator_Controller
             {
                 InputPopup("", delegate (string text)
                 {
+                    text = text.Trim();
+                    
                     if (text.Length != 4)
                     {
                         addButtonUI.SetText("Add\nToys\n<color=#FF0000>Invalid Code</color>");
@@ -188,6 +190,14 @@ namespace Vibrator_Controller
 
             quickMenu = GameObject.Find("UserInterface/QuickMenu/QuickMenu_NewElements");
             menuContent = GameObject.Find("UserInterface/MenuContent/Backdrop/Backdrop");
+            
+            // #region DEV STUFF
+            // new Toy("Edge", "xxxxxx");
+            // new Toy("Nora", "xxxxxx");
+            // new Toy("Max", "xxxxxx");
+            // new Toy("Lush", "xxxxxx");
+            // new Toy("Hush", "xxxxxx");
+            // #endregion
         }
 
         //thanks to Plague#2850 for helping with the popup and abbeybabbey for helping with the ImmobilizePlayer code

@@ -136,13 +136,28 @@ namespace Vibrator_Controller
 
         internal int contraction = 0;
 
-        internal void setContraction()
+        internal void setContraction(int speed = -1)
         {
-            if (contraction != maxSlider.value)
+            if (speed == -1)
             {
-                contraction = (int)maxSlider.value;
-                Client.send("air " + id + " " + contraction);
-                maxSliderText.text = "Max Contraction: " + contraction;
+                if (contraction != maxSlider.value)
+                {
+                    contraction = (int)maxSlider.value;
+                    Client.send("air " + id + " " + contraction);
+                    maxSliderText.text = "Max Contraction: " + contraction;
+                }
+            }
+            else
+            {
+                if (speed != maxSlider.value)
+                {
+                    maxSlider.value = speed;
+                    contraction = speed;
+                    Client.send("air " + id + " " + maxSlider.value);
+                    maxSliderText.text = "Max Contraction: " + maxSlider.value;
+                    
+                    MelonLogger.Warning("Max Contraction: " + maxSlider.value);
+                }
             }
         }
 

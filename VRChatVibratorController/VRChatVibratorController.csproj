@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ActionMenuApi, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>G:\SteamLibrary\steamapps\common\VRChat\Mods\ActionMenuApi.dll</HintPath>
+    </Reference>
     <Reference Include="Assembly-CSharp, Version=3.7.1.6, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>G:\SteamLibrary\steamapps\common\VRChat\MelonLoader\Managed\Assembly-CSharp.dll</HintPath>
