@@ -14,7 +14,7 @@ namespace Vibrator_Controller
     class ToyActionMenu
     {
         private static AssetBundle iconsAssetBundle = null;
-        private static Texture2D lovenseLogo;
+        private static Texture2D logo;
 
         private static int[] available_purcent = { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
         private static Dictionary<int, Texture2D> purcent_icons = new Dictionary<int, Texture2D>();
@@ -39,8 +39,8 @@ namespace Vibrator_Controller
                     iconsAssetBundle.hideFlags |= HideFlags.DontUnloadUnusedAsset;
                 }
 
-                lovenseLogo = iconsAssetBundle.LoadAsset_Internal("Assets/lovense-logo.png", Il2CppType.Of<Texture2D>()).Cast<Texture2D>();
-                lovenseLogo.hideFlags |= HideFlags.DontUnloadUnusedAsset;
+                logo = iconsAssetBundle.LoadAsset_Internal("Assets/logo.png", Il2CppType.Of<Texture2D>()).Cast<Texture2D>();
+                logo.hideFlags |= HideFlags.DontUnloadUnusedAsset;
 
                 foreach (string toy_name in available_toys)
                 {
@@ -83,8 +83,8 @@ namespace Vibrator_Controller
                         }
                     }
                 },
-                "Lovense",
-                lovenseLogo
+                "Vibrator Controller",
+                logo
             );
 
             return;
@@ -102,7 +102,7 @@ namespace Vibrator_Controller
                         if (toy.isActive) ToysMenu(toy);
                     }
                 });
-            }, "Lovense", lovenseLogo);
+            }, "Vibrator Controller", logo);
 
             MelonLogger.Msg("ActionMenu Generated");
         }

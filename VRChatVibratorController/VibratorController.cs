@@ -45,7 +45,14 @@ namespace Vibrator_Controller
         public override void OnApplicationStart()
         {
             Instance = this;
-            toyActionMenu = new ToyActionMenu();
+            try
+            {
+                toyActionMenu = new ToyActionMenu();
+            }
+            catch (Exception e)
+            {
+                MelonLogger.Warning("You may be missing the ActionMenuAPI mod. See: https://github.com/gompocp/ActionMenuApi");
+            }
 
             XrefScanning.Main.Initialize();
             string defaultSubMenu = "ShortcutMenu";
