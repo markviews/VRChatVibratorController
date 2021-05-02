@@ -1,4 +1,5 @@
-﻿using Il2CppSystem.Collections.Generic;
+﻿using Harmony;
+using Il2CppSystem.Collections.Generic;
 using MelonLoader;
 using PlagueButtonAPI;
 using System;
@@ -35,8 +36,24 @@ namespace Vibrator_Controller
         private static GameObject menuContent;
         private bool pauseControl = false;//pause controls untill trigger is pressed
         private static MelonPreferences_Category vibratorController;
+
+        private static MelonMod Instance;
+        public static HarmonyInstance HarmonyInstance => Instance.Harmony;
+
+        private static ToyActionMenu toyActionMenu;
+
         public override void OnApplicationStart()
         {
+            Instance = this;
+            try
+            {
+                toyActionMenu = new ToyActionMenu();
+            }
+            catch (Exception e)
+            {
+                MelonLogger.Warning("You may be missing the ActionMenuAPI mod. See: https://github.com/gompocp/ActionMenuApi");
+            }
+
             XrefScanning.Main.Initialize();
             string defaultSubMenu = "ShortcutMenu";
             if (MelonHandler.Mods.Any(mod => mod.Info.Name == "UI Expansion Kit"))
@@ -159,6 +176,8 @@ namespace Vibrator_Controller
             {
                 InputPopup("", delegate (string text)
                 {
+                    text = text.Trim();
+                    
                     if (text.Length != 4)
                     {
                         addButtonUI.SetText("Add\nToys\n<color=#FF0000>Invalid Code</color>");
@@ -178,6 +197,14 @@ namespace Vibrator_Controller
 
             quickMenu = GameObject.Find("UserInterface/QuickMenu/QuickMenu_NewElements");
             menuContent = GameObject.Find("UserInterface/MenuContent/Backdrop/Backdrop");
+            
+            // #region DEV STUFF
+            // new Toy("Edge", "xxxxxx");
+            // new Toy("Nora", "xxxxxx");
+            // new Toy("Max", "xxxxxx");
+            // new Toy("Lush", "xxxxxx");
+            // new Toy("Hush", "xxxxxx");
+            // #endregion
         }
 
         //thanks to Plague#2850 for helping with the popup and abbeybabbey for helping with the ImmobilizePlayer code

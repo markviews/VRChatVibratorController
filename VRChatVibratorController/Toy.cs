@@ -12,8 +12,9 @@ namespace Vibrator_Controller
         internal string hand = "none";
         private static int x = -3;
         internal ButtonAPI.PlagueButton button;
-        private string name;
+        internal string name;
         internal string id;
+        internal bool isActive = true;
         internal UnityEngine.UI.Slider speedSlider;//slider for vibrator speed
         internal UnityEngine.UI.Text speedSliderText;
         internal UnityEngine.UI.Slider maxSlider;//slider for max's contractions
@@ -88,6 +89,7 @@ namespace Vibrator_Controller
 
         internal void disable()
         {
+            isActive = false;
             MelonLogger.Msg("Disabled toy: " + id);
             hand = "none";
             button.SetText(name + "\nClick to\nSet");
@@ -97,6 +99,7 @@ namespace Vibrator_Controller
 
         internal void enable()
         {
+            isActive = true;
             MelonLogger.Msg("Enabled toy: " + id);
             button.gameObject.SetActive(true);
         }
@@ -107,7 +110,7 @@ namespace Vibrator_Controller
             if (maxSlider != null) maxSlider.gameObject.SetActive(toggle);
         }
 
-        private int lastSpeed = 0;
+        internal int lastSpeed = 0;
 
         internal void setSpeed(int speed)
         {
@@ -133,13 +136,28 @@ namespace Vibrator_Controller
 
         internal int contraction = 0;
 
-        internal void setContraction()
+        internal void setContraction(int speed = -1)
         {
-            if (contraction != maxSlider.value)
+            if (speed == -1)
             {
-                contraction = (int)maxSlider.value;
-                Client.send("air " + id + " " + contraction);
-                maxSliderText.text = "Max Contraction: " + contraction;
+                if (contraction != maxSlider.value)
+                {
+                    contraction = (int)maxSlider.value;
+                    Client.send("air " + id + " " + contraction);
+                    maxSliderText.text = "Max Contraction: " + contraction;
+                }
+            }
+            else
+            {
+                if (speed != maxSlider.value)
+                {
+                    maxSlider.value = speed;
+                    contraction = speed;
+                    Client.send("air " + id + " " + maxSlider.value);
+                    maxSliderText.text = "Max Contraction: " + maxSlider.value;
+                    
+                    MelonLogger.Warning("Max Contraction: " + maxSlider.value);
+                }
             }
         }
 
