@@ -26,7 +26,9 @@ You can change the menu location by changing `buttonX` and `buttonY` to desired 
 ### Credits
 Plague for [PlagueButtonAPI](https://github.com/OFWModz/PlagueButtonAPI) and helping with the project a bunch
 <br>abbeybabbey for UI improvments
-<br>Knah for [UIExpansionKit](https://github.com/knah/VRCMods)
+<br>Knah for [UIExpansionKit](https://github.com/knah/VRCMods) and AssetBundle code
+<br>gompocp for [ActionMenuApi](https://github.com/gompocp/ActionMenuApi)
+<br>miiss-neko for action menu integration
 
 ### Notes
 This mod is not developed by or associated with Lovense or Hytto.
