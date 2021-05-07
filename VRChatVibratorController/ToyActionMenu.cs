@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using ActionMenuApi;
+using ActionMenuApi.Types;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 
@@ -16,22 +17,22 @@ namespace Vibrator_Controller
         private static AssetBundle iconsAssetBundle = null;
         private static Texture2D logo;
 
-        private static int[] available_purcent = { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
+        private static int[] available_purcent = {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
         private static Dictionary<int, Texture2D> purcent_icons = new Dictionary<int, Texture2D>();
 
-        private static string[] available_toys = { "Ambi", "Osci", "Edge", "Domi", "Hush", "Nora", "Lush", "Max" };
+        private static string[] available_toys = {"Ambi", "Osci", "Edge", "Domi", "Hush", "Nora", "Lush", "Max"};
         private static Dictionary<string, Texture2D> toy_icons = new Dictionary<string, Texture2D>();
 
         private static ActionMenuAPI actionMenuApi;
 
         internal ToyActionMenu()
         {
-
             try
             {
                 //Adapted from knah's JoinNotifier mod found here: https://github.com/knah/VRCMods/blob/master/JoinNotifier/JoinNotifierMod.cs 
-                using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Vibrator_Controller.icons"))
-                using (var tempStream = new MemoryStream((int)stream.Length))
+                using (var stream = Assembly.GetExecutingAssembly()
+                    .GetManifestResourceStream("Vibrator_Controller.icons"))
+                using (var tempStream = new MemoryStream((int) stream.Length))
                 {
                     stream.CopyTo(tempStream);
 
@@ -39,26 +40,32 @@ namespace Vibrator_Controller
                     iconsAssetBundle.hideFlags |= HideFlags.DontUnloadUnusedAsset;
                 }
 
-                logo = iconsAssetBundle.LoadAsset_Internal("Assets/logo.png", Il2CppType.Of<Texture2D>()).Cast<Texture2D>();
+                logo = iconsAssetBundle.LoadAsset_Internal("Assets/logo.png", Il2CppType.Of<Texture2D>())
+                    .Cast<Texture2D>();
                 logo.hideFlags |= HideFlags.DontUnloadUnusedAsset;
 
                 foreach (string toy_name in available_toys)
                 {
-                    var logo = iconsAssetBundle.LoadAsset_Internal($"Assets/{toy_name.ToLower()}-x64.png", Il2CppType.Of<Texture2D>()).Cast<Texture2D>();
+                    var logo = iconsAssetBundle
+                        .LoadAsset_Internal($"Assets/{toy_name.ToLower()}-x64.png", Il2CppType.Of<Texture2D>())
+                        .Cast<Texture2D>();
                     logo.hideFlags |= HideFlags.DontUnloadUnusedAsset;
                     toy_icons.Add(toy_name, logo);
                 }
 
                 foreach (int purcent in available_purcent)
                 {
-                    var logo = iconsAssetBundle.LoadAsset_Internal($"Assets/{purcent}.png", Il2CppType.Of<Texture2D>()).Cast<Texture2D>();
+                    var logo = iconsAssetBundle.LoadAsset_Internal($"Assets/{purcent}.png", Il2CppType.Of<Texture2D>())
+                        .Cast<Texture2D>();
                     logo.hideFlags |= HideFlags.DontUnloadUnusedAsset;
                     purcent_icons.Add(purcent, logo);
                 }
             }
             catch (Exception e)
             {
-                MelonLogger.Warning("Consider checking for newer version as mod possibly no longer working, Exception occured OnAppStart(): " + e.Message);
+                MelonLogger.Warning(
+                    "Consider checking for newer version as mod possibly no longer working, Exception occured OnAppStart(): " +
+                    e.Message);
             }
 
             // actionMenuApi = new ActionMenuAPI();
@@ -68,8 +75,10 @@ namespace Vibrator_Controller
 
         private static void SetupButtons()
         {
-            AMAPI.AddSubMenuToMenu(ActionMenuPageType.Main, 
-                delegate {
+            AMAPI.AddSubMenuToMenu(ActionMenuPageType.Main,
+                "Vibrator Controller",
+                delegate
+                {
                     foreach (Toy toy in Toy.toys)
                     {
                         try
@@ -83,14 +92,14 @@ namespace Vibrator_Controller
                         }
                     }
                 },
-                "Vibrator Controller",
                 logo
             );
 
             return;
             actionMenuApi.AddPedalToExistingMenu(ActionMenuAPI.ActionMenuPageType.Main, delegate
             {
-                actionMenuApi.CreateSubMenu(delegate {
+                actionMenuApi.CreateSubMenu(delegate
+                {
                     //// Test displaying all existing toys icons
                     // foreach (string toy_name in available_toys)
                     // {
@@ -124,11 +133,12 @@ namespace Vibrator_Controller
                     VibrateRadial(toy, toy.name);
                     break;
             }
-            
+
             return;
             actionMenuApi.AddPedalToCustomMenu(() =>
             {
-                actionMenuApi.CreateSubMenu(delegate {
+                actionMenuApi.CreateSubMenu(delegate
+                {
                     foreach (int purcent in Enumerable.Reverse(available_purcent).ToArray())
                     {
                         PercentageMenu(toy, purcent, purcent_icons[purcent]);
@@ -139,55 +149,55 @@ namespace Vibrator_Controller
 
         private static void VibrateRadial(Toy toy, string text = "")
         {
-            AMAPI.AddRadialPedalToSubMenu(f =>
-            {
-                int roundedPercent = (int) Math.Round(f / 10) * 10;
-
-                if (toy.lastSpeed != roundedPercent / 10)
+            AMAPI.AddRadialPedalToSubMenu(text,
+                f =>
                 {
-                    toy.setSpeed(roundedPercent / 10);
-                }
-            }, text, toy.lastSpeed * 10, toy_icons[toy.name]);
+                    int roundedPercent = (int) Math.Round(f / 10) * 10;
+
+                    if (toy.lastSpeed != roundedPercent / 10)
+                    {
+                        toy.setSpeed(roundedPercent / 10);
+                    }
+                }, toy.lastSpeed * 10, toy_icons[toy.name]);
         }
-        
+
         private static void EdgeRadials(Toy toy)
         {
             VibrateRadial(toy, $"{toy.name} 2");
-                
-            AMAPI.AddRadialPedalToSubMenu(f =>
-            {
-                int roundedPercent = (int) Math.Round(f / 10) * 10;
 
-                if (toy.lastEdgeSpeed != roundedPercent / 10)
+            AMAPI.AddRadialPedalToSubMenu($"{toy.name} 1",
+                f =>
                 {
-                    toy.setEdgeSpeed(roundedPercent / 10);
-                }
-            }, $"{toy.name} 1", toy.lastEdgeSpeed * 10, toy_icons[toy.name]);
+                    int roundedPercent = (int) Math.Round(f / 10) * 10;
+
+                    if (toy.lastEdgeSpeed != roundedPercent / 10)
+                    {
+                        toy.setEdgeSpeed(roundedPercent / 10);
+                    }
+                }, toy.lastEdgeSpeed * 10, toy_icons[toy.name]);
         }
-        
+
         private static void MaxRadials(Toy toy)
         {
             VibrateRadial(toy, $"{toy.name} Vibration");
-            
-            AMAPI.AddRadialPedalToSubMenu(f =>
-            {
-                int contractionLevel = (int) Math.Round(f / 33);
 
-                if (toy.contraction != contractionLevel)
+            AMAPI.AddRadialPedalToSubMenu($"{toy.name} Contraction",
+                f =>
                 {
-                    toy.setContraction(contractionLevel);
-                }
-            }, $"{toy.name} Contraction", toy.lastSpeed * 10, toy_icons[toy.name]);
+                    int contractionLevel = (int) Math.Round(f / 33);
+
+                    if (toy.contraction != contractionLevel)
+                    {
+                        toy.setContraction(contractionLevel);
+                    }
+                }, toy.lastSpeed * 10, toy_icons[toy.name]);
         }
-        
+
         private static void NoraRadials(Toy toy)
         {
             VibrateRadial(toy, $"{toy.name} Vibration");
-            
-            AMAPI.AddButtonPedalToSubMenu(() =>
-            {
-                toy.rotate();
-            }, $"{toy.name} Rotate", toy_icons[toy.name]);
+
+            AMAPI.AddButtonPedalToSubMenu($"{toy.name} Rotate", () => { toy.rotate(); }, toy_icons[toy.name]);
         }
 
         // TODO find a way to use radial button
@@ -195,10 +205,7 @@ namespace Vibrator_Controller
 
         private static void PercentageMenu(Toy toy, int purcent, Texture2D logo = null)
         {
-            actionMenuApi.AddPedalToCustomMenu(() =>
-            {
-                toy.setSpeed(purcent / 10);
-            }, "", logo);
+            actionMenuApi.AddPedalToCustomMenu(() => { toy.setSpeed(purcent / 10); }, "", logo);
         }
     }
 }
