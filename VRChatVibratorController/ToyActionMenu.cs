@@ -127,7 +127,7 @@ namespace Vibrator_Controller {
         private static void VibrateRadial(Toy toy, string text = "") {
             AMAPI.AddRadialPedalToSubMenu(text,
                 f => {
-                    int roundedPercent = (int)Math.Round(f / 10) * 10;
+                    int roundedPercent = (int)Math.Round(f * 100);
 
                     if (toy.lastSpeed != roundedPercent / 10) {
                         toy.setSpeed(roundedPercent / 10);
@@ -139,8 +139,9 @@ namespace Vibrator_Controller {
             VibrateRadial(toy, $"{toy.name} 2");
 
             AMAPI.AddRadialPedalToSubMenu($"{toy.name} 1",
-                f => {
-                    int roundedPercent = (int)Math.Round(f / 10) * 10;
+                f =>
+                {
+                    int roundedPercent = (int) Math.Round(f * 100);
 
                     if (toy.lastEdgeSpeed != roundedPercent / 10) {
                         toy.setEdgeSpeed(roundedPercent / 10);
@@ -153,7 +154,7 @@ namespace Vibrator_Controller {
 
             AMAPI.AddRadialPedalToSubMenu($"{toy.name} Contraction",
                 f => {
-                    int contractionLevel = (int)Math.Round(f / 33);
+                    int contractionLevel = (int)Math.Round(f * 100) / 33;
 
                     if (toy.contraction != contractionLevel) {
                         toy.setContraction(contractionLevel);
