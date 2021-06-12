@@ -261,7 +261,6 @@ namespace Vibrator_Controller
                 }
                 else
                 {
-                    int speed = 0;
                     if (lockSpeed) return;
                     if (holdButton != KeyCode.None && !pauseControl)
                         if (!Input.GetKey(holdButton))
@@ -285,26 +284,23 @@ namespace Vibrator_Controller
                     switch (toy.hand)
                     {
                         case "left":
-                            speed = left;
-                            right = speed;
+                            right = left;
                             break;
                         case "right":
-                            speed = right;
+                            left = right;
                             break;
                         case "either":
-                            if (left > right) speed = left;
-                            else speed = right;
-                            right = speed;
+                            if (left > right) right = left;
+                            else left = right;
                             break;
                         case "both":
-                            speed = left;
                             break;
                     }
                     if (toy.name == "Edge")
                     {
                         toy.setEdgeSpeed(right);
                     }
-                    toy.setSpeed(speed);
+                    toy.setSpeed(left);
                 }
             }
         }
