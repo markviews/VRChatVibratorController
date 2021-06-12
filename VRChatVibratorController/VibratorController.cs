@@ -11,7 +11,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Vibrator_Controller;
 
-[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.3.1", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
+[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.3.3", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
 [assembly: MelonGame("VRChat", "VRChat")]
 [assembly: MelonOptionalDependencies("UIExpansionKit")]
 
@@ -269,8 +269,8 @@ namespace Vibrator_Controller
                             toy.setSpeed(0);
                             return;
                         }
-                    int left = (int)(10 * Input.GetAxis("Oculus_CrossPlatform_PrimaryIndexTrigger"));
-                    int right = (int)(10 * Input.GetAxis("Oculus_CrossPlatform_SecondaryIndexTrigger"));
+                    int left = (int)(20 * Input.GetAxis("Oculus_CrossPlatform_PrimaryIndexTrigger"));
+                    int right = (int)(20 * Input.GetAxis("Oculus_CrossPlatform_SecondaryIndexTrigger"));
 
                     if (pauseControl)
                     {

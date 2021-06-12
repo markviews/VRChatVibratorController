@@ -40,7 +40,7 @@ namespace Vibrator_Controller
 
             GameObject speedSliderObject = GameObject.Instantiate(slider, quickmenu.transform, true);
             speedSlider = speedSliderObject.GetComponent<UnityEngine.UI.Slider>();
-            speedSlider.maxValue = 10;
+            speedSlider.maxValue = 20;
             speedSlider.wholeNumbers = true;
             speedSlider.value = 0;
             speedSliderText = speedSlider.transform.Find("Fill Area/VolumeNumberText").GetComponent<UnityEngine.UI.Text>();
@@ -76,7 +76,7 @@ namespace Vibrator_Controller
                 GameObject edgeSliderObject = GameObject.Instantiate(slider, quickmenu.transform, true);
                 edgeSliderObject.GetComponent<RectTransform>().sizeDelta = new Vector2(850, 160);
                 edgeSlider = edgeSliderObject.GetComponent<UnityEngine.UI.Slider>();
-                edgeSlider.maxValue = 10;
+                edgeSlider.maxValue = 20;
                 edgeSlider.wholeNumbers = true;
                 edgeSlider.value = 0;
                 Transform textTransform = edgeSlider.transform.Find("Fill Area/VolumeNumberText");

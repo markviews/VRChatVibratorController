@@ -129,8 +129,8 @@ namespace Vibrator_Controller {
                 f => {
                     int roundedPercent = (int)Math.Round(f * 100);
 
-                    if (toy.lastSpeed != roundedPercent / 10) {
-                        toy.setSpeed(roundedPercent / 10);
+                    if (toy.lastSpeed != roundedPercent / 20) {
+                        toy.setSpeed(roundedPercent / 20);
                     }
                 }, toy.lastSpeed * 10, toy_icons[toy.name]);
         }
@@ -172,7 +172,7 @@ namespace Vibrator_Controller {
         // See with gompo#6956 if he found anything interesting for that
 
         private static void PercentageMenu(Toy toy, int purcent, Texture2D logo = null) {
-            actionMenuApi.AddPedalToCustomMenu(() => { toy.setSpeed(purcent / 10); }, "", logo);
+            actionMenuApi.AddPedalToCustomMenu(() => { toy.setSpeed(purcent / 20); }, "", logo);
         }
     }
 }
