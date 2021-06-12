@@ -286,6 +286,7 @@ namespace Vibrator_Controller
                     {
                         case "left":
                             speed = left;
+                            right = speed;
                             break;
                         case "right":
                             speed = right;
@@ -293,11 +294,15 @@ namespace Vibrator_Controller
                         case "either":
                             if (left > right) speed = left;
                             else speed = right;
+                            right = speed;
                             break;
                         case "both":
                             speed = left;
-                            toy.setEdgeSpeed(right);
                             break;
+                    }
+                    if (toy.name == "Edge")
+                    {
+                        toy.setEdgeSpeed(right);
                     }
                     toy.setSpeed(speed);
                 }
