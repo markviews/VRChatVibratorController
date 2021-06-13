@@ -129,7 +129,7 @@ namespace Vibrator_Controller {
                 f => {
                     int roundedPercent = (int)Math.Round(f * 100);
                     toy.setSpeed(roundedPercent / 5); //0-20
-                }, toy.lastSpeed / 100 / 20, toy_icons[toy.name]);
+                }, ((float)toy.lastSpeed)  / 20, toy_icons[toy.name]);
         }
 
         private static void EdgeRadials(Toy toy) {
@@ -140,7 +140,7 @@ namespace Vibrator_Controller {
                 {
                     int roundedPercent = (int) Math.Round(f * 100);
                     toy.setEdgeSpeed(roundedPercent / 5); //0-20
-                }, toy.lastEdgeSpeed / 100 / 20, toy_icons[toy.name]);
+                }, ((float)toy.lastEdgeSpeed) / 20, toy_icons[toy.name]);
         }
 
         private static void MaxRadials(Toy toy) {
@@ -153,7 +153,7 @@ namespace Vibrator_Controller {
                     if (toy.contraction != contractionLevel) {
                         toy.setContraction(contractionLevel);
                     }
-                }, toy.lastSpeed / 100 / 20, toy_icons[toy.name]);
+                }, ((float)toy.lastSpeed / 20), toy_icons[toy.name]);
         }
 
         private static void NoraRadials(Toy toy) {
