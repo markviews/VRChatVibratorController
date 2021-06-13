@@ -2,8 +2,6 @@
 
 Lets you control your friends lovense using your vr controllers.
 
-I do my best to keep this mod updated but I am busy with school and other projects...
-
 ### How to install
 1. Download and install [MelonLoader](https://melonwiki.xyz/#/README)
 2. Download [Vibrator.Controller.dll](https://github.com/markviews/VRChatVibratorController/releases)
@@ -19,9 +17,9 @@ I do my best to keep this mod updated but I am busy with school and other projec
 2. Connect your toy to the Lovense Connect app (the pink one)
 3. Click `Search for toys` on the [mod webpage](https://remote.markstuff.net/)
 
-### Mod menu location
+### Menu location
 You can change the menu location by changing `buttonX` and `buttonY` to desired [coordinates](https://i.ibb.co/bFWzzq8/Coordinates-1.png) and `subMenu` in `modprefs.ini` to:
-`UIExpansionKit`, `ShortcutMenu`, `UserInteractMenu`, `UserIconCameraMenu`, `EmoteMenu`, `EmojiMenu`, `CameraMenu`, `UIElementsMenu`, or `AvatarStatsMenu`
+`UIExpansionKit`, `ShortcutMenu`, `EmoteMenu`, `EmojiMenu`, or `UIElementsMenu`
 
 ### Credits
 * Plague for [PlagueButtonAPI](https://github.com/OFWModz/PlagueButtonAPI) and helping with the project a bunch
