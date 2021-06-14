@@ -18,7 +18,7 @@ namespace Vibrator_Controller {
         private static int[] available_purcent = { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
         private static Dictionary<int, Texture2D> purcent_icons = new Dictionary<int, Texture2D>();
 
-        private static string[] available_toys = { "Ambi", "Osci", "Edge", "Domi", "Hush", "Nora", "Lush", "Max" };
+        private static string[] available_toys = { "Ambi", "Osci", "Edge", "Domi", "Hush", "Nora", "Lush", "Max", "Diamo" };
         private static Dictionary<string, Texture2D> toy_icons = new Dictionary<string, Texture2D>();
 
         private static ActionMenuAPI actionMenuApi;
