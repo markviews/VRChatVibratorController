@@ -18,7 +18,7 @@ namespace Vibrator_Controller
             try
             {
                 webSocket = new ClientWebSocket();
-                await webSocket.ConnectAsync(new Uri("ws://control.markstuff.net:8080"), CancellationToken.None);
+                await webSocket.ConnectAsync(new Uri("wss://control.markstuff.net:8080"), CancellationToken.None);
                 foreach (string item in queue)
                 {
                     await send(item);
