@@ -44,6 +44,7 @@ namespace Vibrator_Controller
 
         public override void OnApplicationStart()
         {
+            MelonCoroutines.Start(UiManagerInitializer());
             Instance = this;
             try
             {
@@ -105,8 +106,9 @@ namespace Vibrator_Controller
             }));
         }
 
-        public override void VRChat_OnUiManagerInit()
-        {
+        public IEnumerator UiManagerInitializer() {
+            while (VRCUiManager.prop_VRCUiManager_0 == null) yield return null;
+
             if (subMenu != "UIExpansionKit")
             {
                 ButtonAPI.CustomTransform = GameObject.Find("/UserInterface/QuickMenu/" + subMenu).transform;
