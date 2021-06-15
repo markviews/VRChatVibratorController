@@ -186,6 +186,7 @@ namespace Vibrator_Controller
                     }
                     else
                     {
+                        Client.currentlyConnectedCode = text;
                         Client.send("join " + text);
                     }
                 });
