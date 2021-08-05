@@ -1497,18 +1497,18 @@ namespace PlagueButtonAPI {
         internal Action OnEnterKeyPressed;
 
         void OnEnable() {
-            VRCInputManager.Method_Public_Static_Void_Boolean_0(true);
+            VRCInputManager.Method_Public_Static_Void_Boolean_PDM_0(true);
         }
 
         void OnDisable() {
-            VRCInputManager.Method_Public_Static_Void_Boolean_0(false);
+            VRCInputManager.Method_Public_Static_Void_Boolean_PDM_0(false);
 
             OnExit?.Invoke();
         }
 
         void Update() {
             if (Input.GetKeyDown(KeyCode.Escape)) {
-                VRCInputManager.Method_Public_Static_Void_Boolean_0(false);
+                VRCInputManager.Method_Public_Static_Void_Boolean_PDM_0(false);
                 VRCUiManager.prop_VRCUiManager_0.Method_Public_Virtual_New_Void_Boolean_0();
             } else if (Input.GetKeyDown(KeyCode.Return)) {
                 OnEnterKeyPressed?.Invoke();
