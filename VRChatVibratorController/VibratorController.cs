@@ -31,9 +31,14 @@ namespace Vibrator_Controller {
         private static GameObject menuContent;
         private bool pauseControl = false;//pause controls untill trigger is pressed
         private static MelonPreferences_Category vibratorController;
+        private static ToyActionMenu toyActionMenu;
 
         public override void OnApplicationStart() {
             MelonCoroutines.Start(UiManagerInitializer());
+
+            try {
+                toyActionMenu = new ToyActionMenu();
+            } catch (Exception) {}
 
             string defaultSubMenu = "ShortcutMenu";
             if (MelonHandler.Mods.Any(mod => mod.Info.Name == "UI Expansion Kit"))
