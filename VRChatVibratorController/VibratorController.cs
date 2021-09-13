@@ -1,24 +1,19 @@
-﻿using Harmony;
-using Il2CppSystem.Collections.Generic;
-using MelonLoader;
+﻿using MelonLoader;
 using PlagueButtonAPI;
 using System;
 using System.Collections;
 using System.Linq;
 using UIExpansionKit.API;
-using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.UI;
 using Vibrator_Controller;
 
 [assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.3.8", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
 [assembly: MelonGame("VRChat", "VRChat")]
-[assembly: MelonOptionalDependencies("UIExpansionKit")]
+[assembly: MelonAdditionalDependencies("UIExpansionKit")]
 
-namespace Vibrator_Controller
-{
-    internal class VibratorController : MelonMod
-    {
+namespace Vibrator_Controller {
+    internal class VibratorController : MelonMod {
 
         private static string findButton = null;
         private static bool lockSpeed = false;
@@ -37,25 +32,9 @@ namespace Vibrator_Controller
         private bool pauseControl = false;//pause controls untill trigger is pressed
         private static MelonPreferences_Category vibratorController;
 
-        private static MelonMod Instance;
-        public static HarmonyInstance HarmonyInstance => Instance.Harmony;
-
-        private static ToyActionMenu toyActionMenu;
-
-        public override void OnApplicationStart()
-        {
+        public override void OnApplicationStart() {
             MelonCoroutines.Start(UiManagerInitializer());
-            Instance = this;
-            try
-            {
-                toyActionMenu = new ToyActionMenu();
-            }
-            catch (Exception e)
-            {
-                MelonLogger.Warning("You may be missing the ActionMenuAPI mod. See: https://github.com/gompocp/ActionMenuApi");
-            }
 
-            XrefScanning.Main.Initialize();
             string defaultSubMenu = "ShortcutMenu";
             if (MelonHandler.Mods.Any(mod => mod.Info.Name == "UI Expansion Kit"))
                 defaultSubMenu = "UIExpansionKit";
@@ -75,25 +54,15 @@ namespace Vibrator_Controller
             buttonX = MelonPreferences.GetEntryValue<int>(vibratorController.Identifier, "buttonX");
             buttonY = MelonPreferences.GetEntryValue<int>(vibratorController.Identifier, "buttonY");
 
-            if (subMenu == "UIExpansionKit")
-            {
-                if (defaultSubMenu == "UIExpansionKit")
-                {
-                    setupUIExpansion();
-                }
-                else
-                {
+            if (subMenu == "UIExpansionKit") {
+                if (defaultSubMenu == "UIExpansionKit") {
+                    ExpansionKitApi.RegisterWaitConditionBeforeDecorating(createButton());
+                } else {
                     subMenu = "ShortcutMenu";
                     MelonPreferences.SetEntryValue(vibratorController.Identifier, "subMenu", subMenu);
                     MelonLogger.Msg("UIExpansionKit not found.. Moving menu button to 'ShortcutMenu'");
                 }
             }
-
-        }
-
-        private static void setupUIExpansion()
-        {
-            ExpansionKitApi.RegisterWaitConditionBeforeDecorating(createButton());
         }
 
         private static IEnumerator createButton()
@@ -174,22 +143,19 @@ namespace Vibrator_Controller
                 HoldKeyBind.SetText(holdButton.ToString());
 
             //Add toy
-            addButtonUI = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Add\nToy", "Click to pair with a friend's toy", ButtonAPI.HorizontalPosition.ThirdButtonPos, ButtonAPI.VerticalPosition.TopButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a)
-            {
-                InputPopup("", delegate (string text)
-                {
+            addButtonUI = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Add\nToy", "Click to pair with a friend's toy", ButtonAPI.HorizontalPosition.ThirdButtonPos, ButtonAPI.VerticalPosition.TopButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a) {
+
+                BuiltinUiUtils.ShowInputPopup("Enter Code", "", InputField.InputType.Standard, false, "Confirm", (text, _, __) => {
                     text = text.Trim();
-                    
-                    if (text.Length != 4)
-                    {
+                    if (text.Length != 4) {
                         addButtonUI.SetText("Add\nToys\n<color=#FF0000>Invalid Code</color>");
-                    }
-                    else
-                    {
+                    } else {
                         Client.currentlyConnectedCode = text;
+                        Client.autoReconnectTries = 0;
                         Client.send("join " + text);
                     }
                 });
+
             }, Color.white, Color.magenta, null, true, false, false, false, null, true);
 
             //How to use
@@ -200,36 +166,6 @@ namespace Vibrator_Controller
 
             quickMenu = GameObject.Find("UserInterface/QuickMenu/QuickMenu_NewElements");
             menuContent = GameObject.Find("UserInterface/MenuContent/Backdrop/Backdrop");
-            
-            // #region DEV STUFF
-            // new Toy("Edge", "xxxxxx");
-            // new Toy("Nora", "xxxxxx");
-            // new Toy("Max", "xxxxxx");
-            // new Toy("Lush", "xxxxxx");
-            // new Toy("Hush", "xxxxxx");
-            // #endregion
-        }
-
-        //thanks to Plague#2850 for helping with the popup and abbeybabbey for helping with the ImmobilizePlayer code
-        internal static void InputPopup(string title, Action<string> okaction)
-        {
-            ImmobilizePlayer(true);
-            VRCUiPopupManager.field_Private_Static_VRCUiPopupManager_0
-                .Method_Public_Void_String_String_InputType_Boolean_String_Action_3_String_List_1_KeyCode_Text_Action_String_Boolean_Action_1_VRCUiPopup_Boolean_Int32_0(
-                    title, "", InputField.InputType.Standard, false, "Confirm",
-                    DelegateSupport.ConvertDelegate<Il2CppSystem.Action<string, List<KeyCode>, Text>>(
-                        (Action<string, List<KeyCode>, Text>)delegate (string s, List<KeyCode> k, Text t)
-                        {
-                            ImmobilizePlayer(false);
-                            okaction(s);
-                        }), new Action(() => { ImmobilizePlayer(false); }), "...");
-        }
-
-        // immobilize player when typing into input
-        private static void ImmobilizePlayer(bool isTyping)
-        {
-            VRCPlayer.field_Internal_Static_VRCPlayer_0.field_Private_VRCPlayerApi_0.Immobilize(isTyping); // used for wasd movements
-            XrefScanning.Main.ImmobilizePlayer(isTyping); // used for vertical movement freezing
         }
 
         public override void OnUpdate()

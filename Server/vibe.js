@@ -3,8 +3,8 @@ const fs = require('fs')
 const https = require('https')
 const WebSocket = require('ws')
 const server = https.createServer({
-  cert: fs.readFileSync('cert.pem'),
-  key: fs.readFileSync('key.pem')
+  cert: fs.readFileSync('/etc/letsencrypt/live/control.markstuff.net/fullchain.pem'),
+  key: fs.readFileSync('/etc/letsencrypt/live/control.markstuff.net/privkey.pem')
 })
 const wss = new WebSocket.Server({ server })
 let rateLimit = new Map()
@@ -130,10 +130,14 @@ wss.on('connection', function connection(ws) {
 			var myid = ""
 			for (const [id, toyClient] of session.entries()) {
 				if (ws === toyClient) {
-					if (id.length == 4) {
-						myid = id
-					}
-          session.delete(id)
+
+          if (id != undefined) {
+            if (id.length == 4) {
+  						myid = id
+  					}
+            session.delete(id)
+          }
+
 				}
 			}
 			if (session.size == 0 && myid != "") {

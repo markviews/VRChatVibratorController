@@ -32,19 +32,18 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Client.cs" />
-    <Compile Include="ActionMenuAPI.cs" />
     <Compile Include="PlagueButtonAPI\PlagueButtonAPI.cs" />
     <Compile Include="Toy.cs" />
     <Compile Include="ToyActionMenu.cs" />
     <Compile Include="VibratorController.cs" />
-    <Compile Include="XrefScanning\Main.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PlagueButtonAPI\LICENSE" />
     <EmbeddedResource Include="icons" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="ActionMenuApi">
+    <Reference Include="ActionMenuApi, Version=0.3.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Downloads\ActionMenuApi.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp, Version=3.7.1.6, Culture=neutral, processorArchitecture=MSIL">
@@ -350,9 +349,6 @@
     <Reference Include="VRCSDKBase">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\VRChat\MelonLoader\Managed\VRCSDKBase.dll</HintPath>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="ActionMenuApi.dll" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
