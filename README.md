@@ -29,7 +29,7 @@ You can change the menu location by changing `buttonX` and `buttonY` to desired 
 * Knah for [UIExpansionKit](https://github.com/knah/VRCMods) and AssetBundle code
 * gompocp for [ActionMenuApi](https://github.com/gompocp/ActionMenuApi)
 * miiss-neko for action menu integration
-* Er1807 for fixing edge vibrator controlls
+* Er1807 for fixing edge vibrator controls
 
 ### Notes
 This mod is not developed by or associated with Lovense or Hytto.
