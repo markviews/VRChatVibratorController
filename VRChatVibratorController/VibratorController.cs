@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Vibrator_Controller;
 
-[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.3.8", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
+[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.3.9", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
 [assembly: MelonGame("VRChat", "VRChat")]
 [assembly: MelonAdditionalDependencies("UIExpansionKit")]
 
@@ -156,7 +156,6 @@ namespace Vibrator_Controller {
                         addButtonUI.SetText("Add\nToys\n<color=#FF0000>Invalid Code</color>");
                     } else {
                         Client.currentlyConnectedCode = text;
-                        Client.autoReconnectTries = 0;
                         Client.send("join " + text);
                     }
                 });

@@ -10,29 +10,23 @@ namespace Vibrator_Controller {
 
         internal static string currentlyConnectedCode;
         private static ClientWebSocket webSocket;
-        internal static int autoReconnectTries = 0;
 
         //Source https://codereview.stackexchange.com/questions/41591/websockets-client-code-and-making-it-production-ready
         internal static async void setupClient(string msg) {
-            if (autoReconnectTries >= 5) {
-                currentlyConnectedCode = null;
-                MelonLogger.Warning("Failed to connect to server 5 times... Press AddToy and type code to try again.");
-                return;
-            }
-            autoReconnectTries++;
-
             try {
                 webSocket = new ClientWebSocket();
                 await webSocket.ConnectAsync(new Uri("wss://control.markstuff.net:8080"), CancellationToken.None);
                 await send(msg);
+                MelonLogger.Msg("Connected to server");
                 await Receive(webSocket);
             } catch (Exception) {
                 MelonLogger.Warning("Disconnected from server");
+                webSocket = null;
             }
         }
 
         internal static async Task send(string msg) {
-            if (webSocket == null || webSocket.State != WebSocketState.Open) {
+            if (webSocket == null) {
                 if (currentlyConnectedCode != null) setupClient("join " + currentlyConnectedCode);
                 return;
             }
