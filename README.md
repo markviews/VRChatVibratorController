@@ -24,7 +24,7 @@ You can change the menu location by changing `buttonX` and `buttonY` to desired 
 `UIExpansionKit`, `ShortcutMenu`, `EmoteMenu`, `EmojiMenu`, or `UIElementsMenu`
 
 ### Credits
-* Plague for [PlagueButtonAPI](https://github.com/OFWModz/PlagueButtonAPI) and helping with the project a bunch
+* Plague for [PlagueButtonAPI](https://github.com/PlagueVRC/PlagueButtonAPI) and helping with the project a bunch
 * abbeybabbey for UI improvments
 * Knah for [UIExpansionKit](https://github.com/knah/VRCMods) and AssetBundle code
 * gompocp for [ActionMenuApi](https://github.com/gompocp/ActionMenuApi)
