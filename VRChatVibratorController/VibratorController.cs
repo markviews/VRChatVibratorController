@@ -32,15 +32,10 @@ namespace Vibrator_Controller {
         private bool pauseControl = false;//pause controls untill trigger is pressed
         private static MelonPreferences_Category vibratorController;
         private static ToyActionMenu toyActionMenu;
+        private bool useActionMenu;
 
         public override void OnApplicationStart() {
             MelonCoroutines.Start(UiManagerInitializer());
-
-            if (MelonHandler.Mods.Any(mod => mod.Info.Name == "ActionMenuApi")) {
-                try {
-                    toyActionMenu = new ToyActionMenu();
-                } catch (Exception) { }
-            }
 
             string defaultSubMenu = "ShortcutMenu";
             if (MelonHandler.Mods.Any(mod => mod.Info.Name == "UI Expansion Kit"))
@@ -54,12 +49,14 @@ namespace Vibrator_Controller {
             MelonPreferences.CreateEntry(vibratorController.Identifier, "subMenu", defaultSubMenu, "Menu to put the mod button on");
             MelonPreferences.CreateEntry(vibratorController.Identifier, "buttonX", 0, "x position to put the mod button");
             MelonPreferences.CreateEntry(vibratorController.Identifier, "buttonY", 1, "y position to put the mod button");
+            MelonPreferences.CreateEntry(vibratorController.Identifier, "ActionMenu", true, "action menu integration");
 
             lockButton = (KeyCode)MelonPreferences.GetEntryValue<int>(vibratorController.Identifier, "lockButton");
             holdButton = (KeyCode)MelonPreferences.GetEntryValue<int>(vibratorController.Identifier, "holdButton");
             subMenu = MelonPreferences.GetEntryValue<string>(vibratorController.Identifier, "subMenu");
             buttonX = MelonPreferences.GetEntryValue<int>(vibratorController.Identifier, "buttonX");
             buttonY = MelonPreferences.GetEntryValue<int>(vibratorController.Identifier, "buttonY");
+            useActionMenu = MelonPreferences.GetEntryValue<bool>(vibratorController.Identifier, "ActionMenu");
 
             if (subMenu == "UIExpansionKit") {
                 if (defaultSubMenu == "UIExpansionKit") {
@@ -70,6 +67,15 @@ namespace Vibrator_Controller {
                     MelonLogger.Msg("UIExpansionKit not found.. Moving menu button to 'ShortcutMenu'");
                 }
             }
+
+            if (useActionMenu && MelonHandler.Mods.Any(mod => mod.Info.Name == "ActionMenuApi")) {
+                try {
+                    toyActionMenu = new ToyActionMenu();
+                } catch (Exception) {
+                    MelonLogger.Warning("Failed to add action menu button");
+                }
+            }
+
         }
 
         private static IEnumerator createButton()
