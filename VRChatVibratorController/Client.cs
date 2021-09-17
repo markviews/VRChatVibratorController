@@ -31,7 +31,8 @@ namespace Vibrator_Controller {
                 return;
             }
 
-            await webSocket.SendAsync(new ArraySegment<byte>(Encoding.Unicode.GetBytes(msg)), WebSocketMessageType.Text, true, CancellationToken.None);
+            if (webSocket.State == WebSocketState.Open)
+                await webSocket.SendAsync(new ArraySegment<byte>(Encoding.Unicode.GetBytes(msg)), WebSocketMessageType.Text, true, CancellationToken.None);
         }
 
         private static async Task Receive(ClientWebSocket webSocket) {
