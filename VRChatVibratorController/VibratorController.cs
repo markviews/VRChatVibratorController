@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Vibrator_Controller;
 
-[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.4.0", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
+[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.4.1", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
 [assembly: MelonGame("VRChat", "VRChat")]
 [assembly: MelonAdditionalDependencies("UIExpansionKit")]
 
@@ -36,9 +36,11 @@ namespace Vibrator_Controller {
         public override void OnApplicationStart() {
             MelonCoroutines.Start(UiManagerInitializer());
 
-            try {
-                toyActionMenu = new ToyActionMenu();
-            } catch (Exception) {}
+            if (MelonHandler.Mods.Any(mod => mod.Info.Name == "ActionMenuApi")) {
+                try {
+                    toyActionMenu = new ToyActionMenu();
+                } catch (Exception) { }
+            }
 
             string defaultSubMenu = "ShortcutMenu";
             if (MelonHandler.Mods.Any(mod => mod.Info.Name == "UI Expansion Kit"))
