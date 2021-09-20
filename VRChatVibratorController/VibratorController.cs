@@ -8,30 +8,30 @@ using UnityEngine;
 using UnityEngine.UI;
 using Vibrator_Controller;
 
-[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.4.1", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
+[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.4.2", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
 [assembly: MelonGame("VRChat", "VRChat")]
 [assembly: MelonAdditionalDependencies("UIExpansionKit")]
 
 namespace Vibrator_Controller {
     internal class VibratorController : MelonMod {
 
-        private static string findButton = null;
-        private static bool lockSpeed = false;
-        private static int buttonX;
-        private static int buttonY;
-        private static string subMenu;
-        private static ButtonAPI.PlagueButton LockButtonUI;
-        private static ButtonAPI.PlagueButton LockKeyBind;
-        private static ButtonAPI.PlagueButton HoldButtonUI;
-        private static ButtonAPI.PlagueButton HoldKeyBind;
+        private string findButton = null;
+        private bool lockSpeed = false;
+        private int buttonX;
+        private int buttonY;
+        private string subMenu;
+        private ButtonAPI.PlagueButton LockButtonUI;
+        private ButtonAPI.PlagueButton LockKeyBind;
+        private ButtonAPI.PlagueButton HoldButtonUI;
+        private ButtonAPI.PlagueButton HoldKeyBind;
         private static ButtonAPI.PlagueButton addButtonUI;
-        private static KeyCode lockButton;//button to lock speed
-        private static KeyCode holdButton;//button to hold with other controll to use toy (if enabled)
+        private KeyCode lockButton;//button to lock speed
+        private KeyCode holdButton;//button to hold with other controll to use toy (if enabled)
         private static GameObject quickMenu;
         private static GameObject menuContent;
         private bool pauseControl = false;//pause controls untill trigger is pressed
-        private static MelonPreferences_Category vibratorController;
-        private static ToyActionMenu toyActionMenu;
+        private MelonPreferences_Category vibratorController;
+        private ToyActionMenu toyActionMenu;
         private bool useActionMenu;
 
         public override void OnApplicationStart() {
@@ -45,7 +45,6 @@ namespace Vibrator_Controller {
 
             MelonPreferences.CreateEntry(vibratorController.Identifier, "lockButton", 0, "Button to lock speed");
             MelonPreferences.CreateEntry(vibratorController.Identifier, "holdButton", 0, "Button to hold to use toy");
-            MelonPreferences.CreateEntry(vibratorController.Identifier, "Requirehold", false, "If enabled you will need to hold set button to use toy");
             MelonPreferences.CreateEntry(vibratorController.Identifier, "subMenu", defaultSubMenu, "Menu to put the mod button on");
             MelonPreferences.CreateEntry(vibratorController.Identifier, "buttonX", 0, "x position to put the mod button");
             MelonPreferences.CreateEntry(vibratorController.Identifier, "buttonY", 1, "y position to put the mod button");
