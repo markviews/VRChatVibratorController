@@ -1,0 +1,46 @@
+<html>
+
+<head>
+<title>VRC Vibrator Remote</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div id="box">
+	<h2>VRC Vibrator Remote</h2>
+	<div id="serverStatus">Server Status: Connecting...</div>
+	<div id="codeDisplay" style="display: none;">Code: <b id="id"></b> (send this to your friend with the mod)</div>
+	<br>
+	<button onclick="searchForToys()" id="searchButton">Search for toys</button>
+	
+	<table id="table"></table>
+	
+	<div id="error" style="display: none;">
+	<br>
+	Failed to find toys, be sure you followed these steps:
+	<br>1. Connect your phone to the same wifi you open this webpage on
+	<br>2. Connect your toy to the Lovense Connect app (the pink one)
+	<br>3. Try clicking refresh
+	
+	<div>
+	<br>
+	You can also type your local URL and click refresh again<br>
+	(Click the green shield at the top right of the app)<br>
+	<input type="text" placeholder="https://" style="width: 55px" disabled>
+	<input type="text" placeholder="192-168-1-100" style="width: 100px" id="ip">
+	<input type="text" placeholder=".lovense.club:34568/GetToys" style="width: 185px" disabled>
+	
+	</div>
+	
+	</div>
+	
+		<!--	Use HTTP <input type="checkbox" id="http"> -->
+			
+	<br>
+	<h4>Leave this webpage open. It sends controls from the mod server(from your friend with the mod) to the Lovense Connect app on your phone.</h4>
+</div>
+<script src="https://api.lovense.com/api/lan/v1/lan.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
