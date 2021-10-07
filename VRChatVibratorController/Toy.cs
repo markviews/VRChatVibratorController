@@ -156,7 +156,7 @@ namespace Vibrator_Controller
                     Client.send("air " + id + " " + maxSlider.value);
                     maxSliderText.text = "Max Contraction: " + maxSlider.value;
                     
-                    MelonLogger.Warning("Max Contraction: " + maxSlider.value);
+                    MelonLogger.Msg("Max Contraction: " + maxSlider.value);
                 }
             }
         }
