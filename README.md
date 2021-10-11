@@ -19,10 +19,6 @@ Lets you control your friends lovense using your vr controllers.
 2. Connect your toy to the Lovense Connect app (the pink one)
 3. Type your phone's local ip in the box and click `Connect` on the [mod webpage](https://control.markstuff.net/)
 
-### Menu location
-You can change the menu location by changing `buttonX` and `buttonY` to desired [coordinates](https://i.ibb.co/bFWzzq8/Coordinates-1.png) and `subMenu` in `modprefs.ini` to:
-`UIExpansionKit`, `ShortcutMenu`, `EmoteMenu`, `EmojiMenu`, or `UIElementsMenu`
-
 ### Credits
 * Plague for [PlagueButtonAPI](https://github.com/PlagueVRC/PlagueButtonAPI) and helping with the project a bunch
 * abbeybabbey for UI improvments
@@ -30,6 +26,7 @@ You can change the menu location by changing `buttonX` and `buttonY` to desired 
 * gompocp for [ActionMenuApi](https://github.com/gompocp/ActionMenuApi)
 * miiss-neko for action menu integration
 * Er1807 for fixing edge vibrator controls
+* [websocket-sharp](https://github.com/sta/websocket-sharp)
 
 ### Notes
 This mod is not developed by or associated with Lovense or Hytto.
