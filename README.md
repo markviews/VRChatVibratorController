@@ -26,6 +26,7 @@ Lets you control your friends lovense using your vr controllers.
 * gompocp for [ActionMenuApi](https://github.com/gompocp/ActionMenuApi)
 * miiss-neko for action menu integration
 * Er1807 for fixing edge vibrator controls
+* [websocket-sharp](https://github.com/sta/websocket-sharp)
 
 ### Notes
 This mod is not developed by or associated with Lovense or Hytto.
