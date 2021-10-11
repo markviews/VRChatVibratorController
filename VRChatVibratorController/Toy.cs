@@ -10,8 +10,6 @@ namespace Vibrator_Controller
         internal static ArrayList toys = new ArrayList();
 
         internal string hand = "none";
-        private static int x = -3;
-        internal ButtonAPI.PlagueButton button;
         internal string name;
         internal string id;
         internal bool isActive = true;
@@ -27,12 +25,7 @@ namespace Vibrator_Controller
         {
             this.id = id;
             this.name = name;
-
-            button = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, name + "\nClick to\nSet", "Click to set controll mode", (ButtonAPI.HorizontalPosition)x++, ButtonAPI.VerticalPosition.BottomButton, ButtonAPI.MakeEmptyPage("SubMenu_1").transform, delegate (bool a)
-            {
-                changeHand();
-            }, Color.white, Color.magenta, null, true, false, false, false, null, true);
-
+            
             toys.Add(this);
 
             GameObject slider = GameObject.Find("UserInterface/QuickMenu/UserInteractMenu/User Volume/VolumeSlider");
@@ -92,8 +85,6 @@ namespace Vibrator_Controller
             isActive = false;
             MelonLogger.Msg("Disabled toy: " + id);
             hand = "none";
-            button.SetText(name + "\nClick to\nSet");
-            button.gameObject.SetActive(false);
             fixSliders();
         }
 
@@ -101,7 +92,6 @@ namespace Vibrator_Controller
         {
             isActive = true;
             MelonLogger.Msg("Enabled toy: " + id);
-            button.gameObject.SetActive(true);
         }
 
         internal void showSlider(bool toggle)
@@ -117,7 +107,7 @@ namespace Vibrator_Controller
             if (speed != lastSpeed)
             {
                 lastSpeed = speed;
-                Client.send("speed " + id + " " + speed + (name is "Edge" ? " 1" : ""));
+                Client.Send("speed " + id + " " + speed + (name is "Edge" ? " 1" : ""));
                 speedSliderText.text = name + " Speed: " + (speed * 10) + "%";
             }
         }
@@ -129,7 +119,7 @@ namespace Vibrator_Controller
             if (speed != lastEdgeSpeed)
             {
                 lastEdgeSpeed = (int)speed;
-                Client.send("speed " + id + " " + speed + " 2");
+                Client.Send("speed " + id + " " + speed + " 2");
                 edgeSliderText.text = name + " Speed: " + (speed * 10) + "%";
             }
         }
@@ -143,7 +133,7 @@ namespace Vibrator_Controller
                 if (contraction != maxSlider.value)
                 {
                     contraction = (int)maxSlider.value;
-                    Client.send("air " + id + " " + contraction);
+                    Client.Send("air " + id + " " + contraction);
                     maxSliderText.text = "Max Contraction: " + contraction;
                 }
             }
@@ -153,7 +143,7 @@ namespace Vibrator_Controller
                 {
                     maxSlider.value = speed;
                     contraction = speed;
-                    Client.send("air " + id + " " + maxSlider.value);
+                    Client.Send("air " + id + " " + maxSlider.value);
                     maxSliderText.text = "Max Contraction: " + maxSlider.value;
                     
                     MelonLogger.Msg("Max Contraction: " + maxSlider.value);
@@ -163,7 +153,7 @@ namespace Vibrator_Controller
 
         internal void rotate()
         {
-            Client.send("rotate " + id);
+            Client.Send("rotate " + id);
         }
 
         internal void fixSliders()
@@ -215,32 +205,25 @@ namespace Vibrator_Controller
             {
                 case "none":
                     hand = "left";
-                    button.SetText(name + "\nLeft Trigger");
                     break;
                 case "left":
                     hand = "right";
-                    button.SetText(name + "\nRight Trigger");
                     break;
                 case "right":
                     hand = "either";
-                    button.SetText(name + "\nEither Trigger");
                     break;
                 case "either":
                     hand = "both";
-                    if (!name.Equals("Edge"))
-                    {
+                    if (!name.Equals("Edge")) {
                         changeHand();
                         break;
                     }
-                    button.SetText(name + "\nLeft/Right\n(for edge)");
                     break;
                 case "both":
                     hand = "slider";
-                    button.SetText(name + "\nSlider only");
                     break;
                 case "slider":
                     hand = "none";
-                    button.SetText(name + "\nClick to\nSet");
                     break;
             }
             fixSliders();
