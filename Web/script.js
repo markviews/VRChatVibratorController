@@ -50,7 +50,7 @@ var ws = new WebSocket("wss://control.markstuff.net:8080")
 					str += toy.name + ":" + id + " "
 			}
 			str = str.slice(0, -1)//remove space at end
-			ws.send("toys " + str)
+			ws.send("add " + str)
 			document.getElementById("serverStatus").innerText = "Server Status: Control Client joined"
 		break
 		case "left":
