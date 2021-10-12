@@ -99,7 +99,7 @@ function searchForToys() {
 	var ip = document.getElementById("ip").value
 	if (ip != "") {
 		localStorage.setItem("ip", ip)
-		lovense.setConnectCallbackData({domain: ip, httpsPort: "34568"})
+		lovense.setConnectCallbackData({domain: ip, httpsPort: "34567"})
 	}
 
 	toys = lovense.getToys()

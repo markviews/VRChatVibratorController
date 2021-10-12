@@ -13,7 +13,7 @@ https://api.lovense.com/api/lan/v1/lan.js
   setInterval(function() {
     if (mobileData && mobileData.domain && mobileData.httpsPort) {
       ajax({
-        url: 'https://' + mobileData.domain + ':' +mobileData.httpsPort + '/GetToys',
+        url: 'http://' + mobileData.domain + ':' +mobileData.httpsPort + '/GetToys',
         success: function(response) {
           var data = response
           if (typeof response === 'string')
@@ -114,7 +114,7 @@ https://api.lovense.com/api/lan/v1/lan.js
 
   lovense.sendCommand = function(command, data) {
     if (lovense.isToyOnline())
-      ajax({ url: 'https://' + mobileData.domain + ':' + mobileData.httpsPort + '/' + command, data: data, })
+      ajax({ url: 'http://' + mobileData.domain + ':' + mobileData.httpsPort + '/' + command, data: data, })
   }
 
 })()
