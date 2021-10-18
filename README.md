@@ -15,9 +15,10 @@ Lets you control your friends lovense using your vr controllers.
 
 ### How to get a code
 * Friend that has toy should follow these instructions
+* If you have issues connecting to toys from the webpage try downloading the webpage and opening it locally
 1. Connect your phone to the same wifi as your computer
 2. Connect your toy to the Lovense Connect app (the pink one)
-3. Type your phone's local ip in the box and click `Connect` on the [mod webpage](https://control.markstuff.net/)
+3. Type your phone's local ip in the box and click `Connect` on the [mod webpage](https://remote.markstuff.net/)
 
 ### Credits
 * Plague for [PlagueButtonAPI](https://github.com/PlagueVRC/PlagueButtonAPI) and helping with the project a bunch
