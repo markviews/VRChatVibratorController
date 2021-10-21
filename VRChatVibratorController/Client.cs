@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using WebSocketSharp;
+using Buttplug;
 
 namespace Vibrator_Controller {
     class Client {

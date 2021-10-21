@@ -1,11 +1,15 @@
-﻿using MelonLoader;
+﻿using Buttplug;
+using MelonLoader;
 using System;
 using System.Collections;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using UIExpansionKit.API;
 using UnityEngine;
 using UnityEngine.UI;
 using Vibrator_Controller;
+using System.Reflection;
 
 [assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.4.3", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
 [assembly: MelonGame("VRChat", "VRChat")]
@@ -20,6 +24,9 @@ namespace Vibrator_Controller {
         private GameObject quickMenu, menuContent;
         private MelonPreferences_Category vibratorController;
         private ToyActionMenu toyActionMenu;
+
+        private bool scanning = false;
+        private ButtplugClient bpClient;
 
         public override void OnApplicationStart() {
             vibratorController = MelonPreferences.CreateCategory("VibratorController");
@@ -40,8 +47,22 @@ namespace Vibrator_Controller {
                 }
             }
 
+            extractDLL();
+
             Client.Setup();
             ExpansionKitApi.RegisterWaitConditionBeforeDecorating(CreateButton());
+        }
+
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr LoadLibrary(string dllToLoad);
+
+        private void extractDLL() {
+            using (Stream s = Assembly.GetCallingAssembly().GetManifestResourceStream("Vibrator_Controller.buttplug_rs_ffi.dll"))
+            using (BinaryReader r = new BinaryReader(s))
+            using (FileStream fs = new FileStream(Environment.CurrentDirectory + @"\buttplug_rs_ffi.dll", FileMode.OpenOrCreate))
+            using (BinaryWriter w = new BinaryWriter(fs)) {
+                w.Write(r.ReadBytes((int)s.Length));
+            }
         }
 
         public IEnumerator CreateButton() {
@@ -56,7 +77,7 @@ namespace Vibrator_Controller {
         }
 
         public void ShowMenu() {
-            var menu = ExpansionKitApi.CreateCustomQuickMenuPage(LayoutDescription.QuickMenu3Columns);
+            var menu = ExpansionKitApi.CreateCustomQuickMenuPage(LayoutDescription.QuickMenu4Columns);
 
             menu.AddSimpleButton(findButton == "lockButton" ? "Press Now" : "Lock Speed\nButton\n" + lockButton.ToString(), () => {
                 if (findButton == "lockButton") {
@@ -82,7 +103,7 @@ namespace Vibrator_Controller {
                 ShowMenu();
             });
 
-            menu.AddSimpleButton("Add\nToy", () => {
+            menu.AddSimpleButton("Add Remote\nToy\n(Code)", () => {
                 menu.Hide();
                 BuiltinUiUtils.ShowInputPopup("Enter Code", "", InputField.InputType.Standard, false, "Confirm", (text, _, __) => {
                     text = text.Trim();
@@ -94,12 +115,61 @@ namespace Vibrator_Controller {
                 });
             });
 
+            if (bpClient == null) {
+                bpClient = new ButtplugClient("VRCVibratorController");
+                bpClient.ConnectAsync(new ButtplugEmbeddedConnectorOptions()).ContinueWith((t) => {
+                    menu.Hide();
+                    ShowMenu();
+                });
+                bpClient.DeviceAdded += (object aObj, DeviceAddedEventArgs args) => { new Toy(args.Device); bpClient.StopScanningAsync(); scanning = false; };
+                bpClient.DeviceRemoved += (object aObj, DeviceRemovedEventArgs args) => { if (Toy.sharedToys.Contains(args.Device)) Toy.sharedToys.Remove(args.Device); };
+                return;
+            }
+
+            if (scanning) {
+                menu.AddSimpleButton("Scanning..\nPress To\nStop", () => {
+                    MelonLogger.Msg("Done Scanning.");
+                    scanning = false;
+                    bpClient.StopScanningAsync();
+                    menu.Hide();
+                    ShowMenu();
+                });
+            } else {
+                menu.AddSimpleButton("Scan for\nLocal Toys\n(Bluetooth)", () => {
+                    MelonLogger.Msg("Scanning for toys..");
+                    scanning = true;
+                    bpClient.StartScanningAsync();
+                    menu.Hide();
+                    ShowMenu();
+                });
+            }
+
+            //if (bpClient != null && bpClient.Devices != null && bpClient.Devices.Length > 0)
+            //    Console.WriteLine("Devices: " + bpClient.Devices.Length);
+
             foreach (Toy toy in Toy.toys) {
                 menu.AddSimpleButton(toy.name + "\n" + toy.hand, () => {
                     toy.changeHand();
                     menu.Hide();
                     ShowMenu();
                 });
+            }
+
+            foreach (Toy toy in Toy.sharedToys) {
+                if (toy.isActive) {
+                    menu.AddSimpleButton(toy.device.Name + "\n(Shared)", () => {
+                        toy.disable();
+                        menu.Hide();
+                        ShowMenu();
+                    });
+                } else {
+                    menu.AddSimpleButton(toy.device.Name + "\n(Not Shared)", () => {
+                        toy.enable();
+                        menu.Hide();
+                        ShowMenu();
+                    });
+                }
+                
             }
 
 

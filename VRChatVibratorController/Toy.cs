@@ -2,12 +2,14 @@
 using PlagueButtonAPI;
 using System.Collections;
 using UnityEngine;
+using Buttplug;
 
 namespace Vibrator_Controller
 {
     class Toy
     {
         internal static ArrayList toys = new ArrayList();
+        internal static ArrayList sharedToys = new ArrayList();
 
         internal string hand = "none";
         internal string name;
@@ -20,14 +22,18 @@ namespace Vibrator_Controller
         internal UnityEngine.UI.Slider edgeSlider;//slider for edge's 2nd speed
         internal UnityEngine.UI.Text edgeSliderText;
         internal ButtonAPI.PlagueButton rotateButton;
+        internal ButtplugClientDevice device;
 
-        internal Toy(string name, string id)
-        {
-            this.id = id;
-            this.name = name;
-            
+        internal Toy(ButtplugClientDevice d) {
+            MelonLogger.Msg("Device connected: " + d.Name);
+            sharedToys.Add(this);
+            device = d;
+        }
+
+        internal Toy(string name, string id) {
             toys.Add(this);
-
+            this.name = name;
+            this.id = id;
             GameObject slider = GameObject.Find("UserInterface/QuickMenu/UserInteractMenu/User Volume/VolumeSlider");
             GameObject quickmenu = GameObject.Find("UserInterface/QuickMenu/ShortcutMenu");
 
@@ -40,8 +46,7 @@ namespace Vibrator_Controller
             speedSliderText.text = name + " Speed: 0%";
             speedSliderObject.SetActive(false);
 
-            if (name.Equals("Max"))
-            {
+            if (name.Equals("Max")) {
                 GameObject maxSliderObject = GameObject.Instantiate(slider, quickmenu.transform, true);
                 maxSliderObject.transform.localScale = new Vector3(0.7f, 1, 1);
                 maxSlider = maxSliderObject.GetComponent<UnityEngine.UI.Slider>();
@@ -53,18 +58,13 @@ namespace Vibrator_Controller
                 maxSliderText = textTransform.GetComponent<UnityEngine.UI.Text>();
                 maxSliderText.text = "Max Contraction: 0";
                 maxSliderObject.SetActive(false);
-            }
-            else if (name.Equals("Nora"))
-            {
-                rotateButton = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Rotate", "Rotate Nora", ButtonAPI.HorizontalPosition.LeftOfMenu, ButtonAPI.VerticalPosition.BelowBottomButton, ButtonAPI.ShortcutMenuTransform, delegate (bool a)
-                {
+            } else if (name.Equals("Nora")) {
+                rotateButton = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Rotate", "Rotate Nora", ButtonAPI.HorizontalPosition.LeftOfMenu, ButtonAPI.VerticalPosition.BelowBottomButton, ButtonAPI.ShortcutMenuTransform, delegate (bool a) {
                     rotate();
                 }, Color.white, Color.magenta, null, true, false, false, false, null, true);
                 rotateButton.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(720, 190);
                 rotateButton.gameObject.SetActive(false);
-            }
-            else if (name.Equals("Edge"))
-            {
+            } else if (name.Equals("Edge")) {
                 speedSlider.GetComponent<RectTransform>().sizeDelta = new Vector2(850, 160);
                 GameObject edgeSliderObject = GameObject.Instantiate(slider, quickmenu.transform, true);
                 edgeSliderObject.GetComponent<RectTransform>().sizeDelta = new Vector2(850, 160);
@@ -84,8 +84,10 @@ namespace Vibrator_Controller
         {
             isActive = false;
             MelonLogger.Msg("Disabled toy: " + id);
-            hand = "none";
-            fixSliders();
+            if (device == null) {
+                hand = "none";
+                fixSliders();
+            }
         }
 
         internal void enable()
@@ -107,8 +109,19 @@ namespace Vibrator_Controller
             if (speed != lastSpeed)
             {
                 lastSpeed = speed;
-                Client.Send("speed " + id + " " + speed + (name is "Edge" ? " 1" : ""));
                 speedSliderText.text = name + " Speed: " + (speed * 10) + "%";
+                MelonLogger.Msg("Speed " + speed);
+
+                if (device == null) {
+                    Client.Send("speed " + id + " " + speed + (name is "Edge" ? " 1" : ""));
+                } else {
+                    try {
+                        device.SendVibrateCmd(speed / 20);
+                    } catch (ButtplugDeviceException) {
+                        MelonLogger.Error("Toy not connected");
+                    }
+                }
+
             }
         }
 
