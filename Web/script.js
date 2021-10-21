@@ -1,5 +1,5 @@
 /* Webpage Client */
-var ws = new WebSocket("wss://control.markstuff.net:8080")
+var ws = new WebSocket("ws://control.markstuff.net:8080")
 	ws.onopen = function() {
 		document.getElementById("serverStatus").innerText = "Server Status: Connected to server"
 	}

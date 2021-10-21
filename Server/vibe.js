@@ -1,4 +1,5 @@
 /* Node.js Server */
+/*
 const fs = require('fs')
 const https = require('https')
 const WebSocket = require('ws')
@@ -7,6 +8,9 @@ const server = https.createServer({
   key: fs.readFileSync('/etc/letsencrypt/live/control.markstuff.net/privkey.pem')
 })
 const wss = new WebSocket.Server({ server })
+*/
+const WebSocket = require('ws')
+const wss = new WebSocket.Server({ port: 8080 })
 let rateLimit = new Map()
 let openCodes = new Map()//waiting room
 let sessions = new Map()//active sessions
@@ -16,7 +20,7 @@ log("Server ready")
 wss.on('connection', function connection(ws) {
 
 	ws.on('message', function incoming(msg) {
-		msg = msg.replace(new RegExp(String.fromCharCode(0), "g"),"")
+		msg = msg.toString().replace(new RegExp(String.fromCharCode(0), "g"),"")
 		var args = msg.toString().split(" ")
 
 		switch(args[0]) {
@@ -152,7 +156,7 @@ wss.on('connection', function connection(ws) {
 
 
 })
-server.listen(8080)
+//server.listen(8080)
 
 function log(msg) {
 	console.log("[Waiting: " + openCodes.size + " Active: " + sessions.size + "] " + msg)
