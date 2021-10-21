@@ -83,17 +83,24 @@ namespace Vibrator_Controller
         internal void disable()
         {
             isActive = false;
-            MelonLogger.Msg("Disabled toy: " + id);
+            
             if (device == null) {
                 hand = "none";
                 fixSliders();
+                MelonLogger.Msg("Disabled toy: " + id);
+            } else {
+                MelonLogger.Msg("Disabled toy: " + device.Name);
             }
         }
 
         internal void enable()
         {
             isActive = true;
-            MelonLogger.Msg("Enabled toy: " + id);
+            if (device == null) {
+                MelonLogger.Msg("Enabled toy: " + id);
+            } else {
+                MelonLogger.Msg("Disabled toy: " + device.Name);
+            }
         }
 
         internal void showSlider(bool toggle)

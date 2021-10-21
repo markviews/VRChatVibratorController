@@ -53,9 +53,6 @@ namespace Vibrator_Controller {
             ExpansionKitApi.RegisterWaitConditionBeforeDecorating(CreateButton());
         }
 
-        [DllImport("kernel32.dll")]
-        public static extern IntPtr LoadLibrary(string dllToLoad);
-
         private void extractDLL() {
             using (Stream s = Assembly.GetCallingAssembly().GetManifestResourceStream("Vibrator_Controller.buttplug_rs_ffi.dll"))
             using (BinaryReader r = new BinaryReader(s))
