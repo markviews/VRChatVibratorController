@@ -10,6 +10,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Vibrator_Controller;
 using System.Reflection;
+using System.Collections.Generic;
 
 [assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.4.3", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
 [assembly: MelonGame("VRChat", "VRChat")]
@@ -119,7 +120,16 @@ namespace Vibrator_Controller {
                     ShowMenu();
                 });
                 bpClient.DeviceAdded += (object aObj, DeviceAddedEventArgs args) => { new Toy(args.Device); bpClient.StopScanningAsync(); scanning = false; };
-                bpClient.DeviceRemoved += (object aObj, DeviceRemovedEventArgs args) => { if (Toy.sharedToys.Contains(args.Device)) Toy.sharedToys.Remove(args.Device); };
+                bpClient.DeviceRemoved += (object aObj, DeviceRemovedEventArgs args) => { 
+                    foreach (KeyValuePair<string, Toy> entry in Toy.sharedToys) {
+                        Toy toy = entry.Value;
+
+                        if (toy.device == args.Device) {
+                            Toy.sharedToys.Remove(toy.id);
+                            break;
+                        }
+                    }
+                };
                 return;
             }
 
@@ -152,7 +162,9 @@ namespace Vibrator_Controller {
                 });
             }
 
-            foreach (Toy toy in Toy.sharedToys) {
+            foreach (KeyValuePair<string, Toy> entry in Toy.sharedToys) {
+                Toy toy = entry.Value;
+
                 if (toy.isActive) {
                     menu.AddSimpleButton(toy.device.Name + "\n(Shared)", () => {
                         toy.disable();
@@ -166,9 +178,7 @@ namespace Vibrator_Controller {
                         ShowMenu();
                     });
                 }
-                
             }
-
 
             menu.Show();
         }
@@ -241,46 +251,121 @@ namespace Vibrator_Controller {
         internal static void message(string msg) {
             String[] args = msg.Replace(((char)0).ToString(), "").Split(' ');
             switch (args[0]) {
-                case "toys":
-                case "add":
+                
+                //remote toy commands
+                case "toys"://toys name:id name:id name:id (depreciated)
+                case "add"://add name:id name:id name:id
                     if (args[1] == "") {
                         MelonLogger.Error("Connected but no toys found..");
                         return;
                     }
                     for (int i = 1; i < args.Length; i++) {
                         string[] toyData = args[i].Split(':');
-                        string name = toyData[0];
-                        string id = toyData[1];
 
-                        foreach (Toy toy in Toy.toys)
-                            if (toy.id.Contains(id)) {
-                                toy.enable();
-                                return;
-                            }
+                        if (toyData.Length >= 2) {
+                            string name = toyData[0];
+                            string id = toyData[1];
 
-                        MelonLogger.Msg("Adding: " + name + ":" + id);
-                        new Toy(name, id);
+                            foreach (Toy toy in Toy.toys)
+                                if (toy.id.Contains(id)) {
+                                    toy.enable();
+                                    return;
+                                }
+
+                            MelonLogger.Msg("Adding: " + name + ":" + id);
+                            new Toy(name, id);
+                        }
+
                     }
                     break;
-                case "remove": {
+                case "remove"://remove name:id name:id name:id
+                    if (args.Length >= 2) {
                         string[] toyData = args[1].Split(':');
                         string name = toyData[0];
                         string id = toyData[1];
-                        foreach (Toy toy in Toy.toys)
+                        foreach (Toy toy in Toy.toys) {
                             if (toy.id.Contains(id)) {
                                 toy.disable();//TODO display this somehow
                                 break;
                             }
+                        }
+                        
                     }
                     break;
-                case "notFound":
+                case "notFound"://*no args
                     MelonLogger.Error("Invalid code");
                     //addToyText.text = "Add\nToys\n<color=#FF0000>Invalid Code</color>";
                     break;
-                case "left":
-                    MelonLogger.Warning("User disconnected");//TODO display this somehow
-                    foreach (Toy toy in Toy.toys)
+
+
+                //other user disconnect from the server (not this user)
+                //user on webpage sharing toy to to this user disconnected or
+                //user with mod controlling this user disconnected
+                case "left"://*no args
+                    MelonLogger.Warning("Control Client disconnected");
+
+                    foreach (Toy toy in Toy.toys) {
                         toy.disable();
+                    }
+
+                    foreach (KeyValuePair<string, Toy> entry in Toy.sharedToys) {
+                        Toy toy = entry.Value;
+                        toy.disable();
+                    }
+                    break;
+
+
+                //Local toy commands
+                case "speed"://speed id speed edgeSpeed
+                    if (args.Length >= 3) {
+                        string id = args[1];
+                        int speed, edgeSpeed;
+
+                        try {
+                            speed = Int32.Parse(args[2]);
+                            if (args.Length >= 4)
+                                edgeSpeed = Int32.Parse(args[3]);
+                        } catch (FormatException) {break;}
+
+                        if (Toy.sharedToys.ContainsKey(id)) {
+                            Toy toy = Toy.sharedToys[id];
+                            toy.setSpeed(speed);
+                        }
+                    }
+                    break;
+                case "air"://air id speed
+                    if (args.Length >= 3) {
+                        string id = args[1];
+                        int speed;
+
+                        try {
+                            speed = Int32.Parse(args[2]);
+                        } catch (FormatException) { break; }
+
+                        if (Toy.sharedToys.ContainsKey(id)) {
+                            Toy toy = Toy.sharedToys[id];
+                            toy.setContraction(speed);
+                        }
+                    }
+                    break;
+                case "rotate"://rotate id
+                    if (args.Length >= 2) {
+                        string id = args[1];
+
+                        if (Toy.sharedToys.ContainsKey(id)) {
+                            Toy toy = Toy.sharedToys[id];
+                            toy.rotate();
+                        }
+                    }
+                    break;
+                case "id"://id id
+                    if (args.Length >= 2) {
+                        string id = args[1];
+
+                    }
+                    break;
+                case "joined"://*no args
+                    MelonLogger.Msg("Control Client connected");
                     break;
             }
         }

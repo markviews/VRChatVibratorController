@@ -3,13 +3,14 @@ using PlagueButtonAPI;
 using System.Collections;
 using UnityEngine;
 using Buttplug;
+using System.Collections.Generic;
 
 namespace Vibrator_Controller
 {
     class Toy
     {
         internal static ArrayList toys = new ArrayList();
-        internal static ArrayList sharedToys = new ArrayList();
+        internal static Dictionary<string, Toy> sharedToys = new Dictionary<string, Toy>();//id, Toy
 
         internal string hand = "none";
         internal string name;
@@ -26,7 +27,15 @@ namespace Vibrator_Controller
 
         internal Toy(ButtplugClientDevice d) {
             MelonLogger.Msg("Device connected: " + d.Name);
-            sharedToys.Add(this);
+
+            int count = 1;
+            id = d.Name;
+            while (sharedToys.ContainsKey(id)) {
+                id = d.Name + count++;
+            }
+
+            sharedToys.Add(id, this);
+
             device = d;
         }
 
@@ -84,22 +93,23 @@ namespace Vibrator_Controller
         {
             isActive = false;
             
-            if (device == null) {
+            if (isLocal()) {
+                MelonLogger.Msg("Disabled toy: " + device.Name);
+            } else {
                 hand = "none";
                 fixSliders();
                 MelonLogger.Msg("Disabled toy: " + id);
-            } else {
-                MelonLogger.Msg("Disabled toy: " + device.Name);
             }
         }
 
         internal void enable()
         {
             isActive = true;
-            if (device == null) {
-                MelonLogger.Msg("Enabled toy: " + id);
+
+            if (isLocal()) {
+                MelonLogger.Msg("Enabled toy: " + device.Name);
             } else {
-                MelonLogger.Msg("Disabled toy: " + device.Name);
+                MelonLogger.Msg("Enabled toy: " + id);
             }
         }
 
@@ -116,17 +126,17 @@ namespace Vibrator_Controller
             if (speed != lastSpeed)
             {
                 lastSpeed = speed;
-                speedSliderText.text = name + " Speed: " + (speed * 10) + "%";
                 MelonLogger.Msg("Speed " + speed);
 
-                if (device == null) {
-                    Client.Send("speed " + id + " " + speed + (name is "Edge" ? " 1" : ""));
-                } else {
+                if (isLocal()) {
                     try {
                         device.SendVibrateCmd(speed / 20);
                     } catch (ButtplugDeviceException) {
                         MelonLogger.Error("Toy not connected");
                     }
+                } else {
+                    Client.Send("speed " + id + " " + speed + (name is "Edge" ? " 1" : ""));
+                    speedSliderText.text = name + " Speed: " + (speed * 10) + "%";
                 }
 
             }
@@ -249,6 +259,10 @@ namespace Vibrator_Controller
             fixSliders();
         }
 
+        //returns true if this is a local bluetooth device (controlled by someone else)
+        internal bool isLocal() {
+            return device != null;
+        }
 
     }
 }
