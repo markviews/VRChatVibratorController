@@ -24,25 +24,34 @@ namespace Vibrator_Controller
         internal UnityEngine.UI.Text edgeSliderText;
         internal ButtonAPI.PlagueButton rotateButton;
         internal ButtplugClientDevice device;
+        internal int lastSpeed = 0, lastEdgeSpeed = 0, lastContraction = 0;
 
-        internal Toy(ButtplugClientDevice d) {
-            MelonLogger.Msg("Device connected: " + d.Name);
-
+        internal Toy(ButtplugClientDevice device) {
             int count = 1;
-            id = d.Name;
+            id = device.Name.Replace(" ", "");
             while (sharedToys.ContainsKey(id)) {
-                id = d.Name + count++;
+                id = device.Name.Replace(" ", "") + count++;
             }
 
             sharedToys.Add(id, this);
+            hand = "shared";
+            name = device.Name;
+            this.device = device;
 
-            device = d;
+            if (VibratorController.code == null) Client.Send("new");
+
+            MelonLogger.Msg("Device connected: " + name + " [" + id + "]");
+            CreateSlider();
         }
 
         internal Toy(string name, string id) {
             toys.Add(this);
             this.name = name;
             this.id = id;
+            CreateSlider();
+        }
+
+        private void CreateSlider() {
             GameObject slider = GameObject.Find("UserInterface/QuickMenu/UserInteractMenu/User Volume/VolumeSlider");
             GameObject quickmenu = GameObject.Find("UserInterface/QuickMenu/ShortcutMenu");
 
@@ -92,34 +101,19 @@ namespace Vibrator_Controller
         internal void disable()
         {
             isActive = false;
-            
-            if (isLocal()) {
-                MelonLogger.Msg("Disabled toy: " + device.Name);
-            } else {
+            MelonLogger.Msg("Disabled toy: " + name);
+            fixSliders();
+
+            if (!isLocal()) {
                 hand = "none";
-                fixSliders();
-                MelonLogger.Msg("Disabled toy: " + id);
             }
         }
 
         internal void enable()
         {
             isActive = true;
-
-            if (isLocal()) {
-                MelonLogger.Msg("Enabled toy: " + device.Name);
-            } else {
-                MelonLogger.Msg("Enabled toy: " + id);
-            }
+            MelonLogger.Msg("Enabled toy: " + name);
         }
-
-        internal void showSlider(bool toggle)
-        {
-            speedSlider.gameObject.SetActive(toggle);
-            if (maxSlider != null) maxSlider.gameObject.SetActive(toggle);
-        }
-
-        internal int lastSpeed = 0;
 
         internal void setSpeed(int speed)
         {
@@ -130,7 +124,8 @@ namespace Vibrator_Controller
 
                 if (isLocal()) {
                     try {
-                        device.SendVibrateCmd(speed / 20);
+                        device.SendVibrateCmd((double)speed / 10);
+                        MelonLogger.Msg("set device speed to " + ((double)speed / 10));
                     } catch (ButtplugDeviceException) {
                         MelonLogger.Error("Toy not connected");
                     }
@@ -142,8 +137,6 @@ namespace Vibrator_Controller
             }
         }
 
-        internal int lastEdgeSpeed = 0;
-
         internal void setEdgeSpeed(float speed)
         {
             if (speed != lastEdgeSpeed)
@@ -154,17 +147,15 @@ namespace Vibrator_Controller
             }
         }
 
-        internal int contraction = 0;
-
         internal void setContraction(int speed = -1)
         {
             if (speed == -1)
             {
-                if (contraction != maxSlider.value)
+                if (lastContraction != maxSlider.value)
                 {
-                    contraction = (int)maxSlider.value;
-                    Client.Send("air " + id + " " + contraction);
-                    maxSliderText.text = "Max Contraction: " + contraction;
+                    lastContraction = (int)maxSlider.value;
+                    Client.Send("air " + id + " " + lastContraction);
+                    maxSliderText.text = "Max Contraction: " + lastContraction;
                 }
             }
             else
@@ -172,7 +163,7 @@ namespace Vibrator_Controller
                 if (speed != maxSlider.value)
                 {
                     maxSlider.value = speed;
-                    contraction = speed;
+                    lastContraction = speed;
                     Client.Send("air " + id + " " + maxSlider.value);
                     maxSliderText.text = "Max Contraction: " + maxSlider.value;
                     
@@ -186,7 +177,7 @@ namespace Vibrator_Controller
             Client.Send("rotate " + id);
         }
 
-        internal void fixSliders()
+        private void fixSliders()
         {
             float sliderY = 0;
             foreach (Toy toy in toys)
@@ -237,6 +228,13 @@ namespace Vibrator_Controller
                     hand = "left";
                     break;
                 case "left":
+                    if (isLocal()) {
+                        hand = "shared";
+                        return;
+                    }
+                    hand = "right";
+                    break;
+                case "shared":
                     hand = "right";
                     break;
                 case "right":

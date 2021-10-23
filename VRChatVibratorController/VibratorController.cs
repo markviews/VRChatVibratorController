@@ -28,6 +28,7 @@ namespace Vibrator_Controller {
 
         private bool scanning = false;
         private ButtplugClient bpClient;
+        internal static string code;
 
         public override void OnApplicationStart() {
             vibratorController = MelonPreferences.CreateCategory("VibratorController");
@@ -164,20 +165,17 @@ namespace Vibrator_Controller {
 
             foreach (KeyValuePair<string, Toy> entry in Toy.sharedToys) {
                 Toy toy = entry.Value;
+                string text = toy.name + "\n" + toy.hand;
 
-                if (toy.isActive) {
-                    menu.AddSimpleButton(toy.device.Name + "\n(Shared)", () => {
-                        toy.disable();
-                        menu.Hide();
-                        ShowMenu();
-                    });
-                } else {
-                    menu.AddSimpleButton(toy.device.Name + "\n(Not Shared)", () => {
-                        toy.enable();
-                        menu.Hide();
-                        ShowMenu();
-                    });
+                if (toy.hand == "shared") {
+                    text = toy.name + "\nShared\n(" + code + ")";
                 }
+
+                menu.AddSimpleButton(text, () => {
+                    toy.changeHand();
+                    menu.Hide();
+                    ShowMenu();
+                });
             }
 
             menu.Show();
@@ -249,6 +247,8 @@ namespace Vibrator_Controller {
 
         //message from server
         internal static void message(string msg) {
+            MelonLogger.Msg(msg);
+
             String[] args = msg.Replace(((char)0).ToString(), "").Split(' ');
             switch (args[0]) {
                 
@@ -361,11 +361,18 @@ namespace Vibrator_Controller {
                 case "id"://id id
                     if (args.Length >= 2) {
                         string id = args[1];
-
+                        code = id;
+                        MelonLogger.Msg("Received code: " + code);
                     }
                     break;
                 case "joined"://*no args
                     MelonLogger.Msg("Control Client connected");
+
+                    foreach (KeyValuePair<string, Toy> entry in Toy.sharedToys) {
+                        Toy toy = entry.Value;
+                        Client.Send("add " + toy.name + ":" + toy.id);
+                    }
+                    
                     break;
             }
         }
