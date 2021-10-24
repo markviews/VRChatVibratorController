@@ -186,7 +186,7 @@ namespace Vibrator_Controller
 
             float sliderY = 0;
 
-            if (!hand.Equals("none"))
+            if (!hand.Equals("none") && !hand.Equals("shared"))
             {
                 speedSlider.transform.localPosition = new Vector3(-348.077f, 343.046f - sliderY, 0);
                 speedSlider.gameObject.SetActive(true);
