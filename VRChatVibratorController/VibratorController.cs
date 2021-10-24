@@ -10,10 +10,14 @@ using UnityEngine.UI;
 using Vibrator_Controller;
 using System.Reflection;
 using System.Collections.Generic;
+using VRChatUtilityKit.Utilities;
+using UnhollowerRuntimeLib;
+using UnityEngine.Events;
+using VRC;
 
 [assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.4.4", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
 [assembly: MelonGame("VRChat", "VRChat")]
-[assembly: MelonAdditionalDependencies("UIExpansionKit")]
+[assembly: MelonAdditionalDependencies("UIExpansionKit", "VRCWSLibary", "VRChatUtilityKit")]
 
 namespace Vibrator_Controller {
     internal class VibratorController : MelonMod {
@@ -27,7 +31,6 @@ namespace Vibrator_Controller {
 
         private static bool scanning = false;
         private static ButtplugClient bpClient;
-        internal static string code;
         private static ICustomShowableLayoutedMenu menu;
 
         public override void OnApplicationStart() {
@@ -51,16 +54,61 @@ namespace Vibrator_Controller {
 
             extractDLL();
 
-            Client.Setup();
+            VRCWSIntegration.Init();
             ExpansionKitApi.RegisterWaitConditionBeforeDecorating(CreateButton());
+            VRCUtils.OnUiManagerInit += init;
+            NetworkEvents.OnPlayerLeft += onPlayerLeft;
         }
 
-        private void extractDLL() {
-            using (Stream s = Assembly.GetCallingAssembly().GetManifestResourceStream("Vibrator_Controller.buttplug_rs_ffi.dll"))
-            using (BinaryReader r = new BinaryReader(s))
-            using (FileStream fs = new FileStream(Environment.CurrentDirectory + @"\buttplug_rs_ffi.dll", FileMode.OpenOrCreate))
-            using (BinaryWriter w = new BinaryWriter(fs)) {
-                w.Write(r.ReadBytes((int)s.Length));
+        private void onPlayerLeft(Player obj)
+        {
+            if(obj.prop_String_0 == VRCWSIntegration.connectedTo)
+            foreach (KeyValuePair<string, Toy> entry in Toy.sharedToys)
+            {
+                Toy toy = entry.Value;
+                toy.disable();
+            }
+        }
+
+        private void init()
+        {
+            var baseUIElement = GameObject.Find("UserInterface/MenuContent/Screens/UserInfo/Buttons/RightSideButtons/RightUpperButtonColumn/PlaylistsButton").gameObject;
+
+            var gameObject = GameObject.Instantiate(baseUIElement, baseUIElement.transform.parent, true);
+            gameObject.name = "Get Toys";
+
+            var uitext = gameObject.GetComponentInChildren<Text>();
+            uitext.text = "Get Toys";
+
+            var button = gameObject.GetComponent<Button>();
+            button.onClick = new Button.ButtonClickedEvent();
+            var action = new Action(delegate ()
+            {
+                MelonLogger.Msg($"Connecting to user");
+                VRCWSIntegration.connectedTo = VRCUtils.ActiveUserInUserInfoMenu.id;
+                foreach (KeyValuePair<string, Toy> entry in Toy.sharedToys)
+                {
+                    Toy toy = entry.Value;
+                    toy.disable();
+                }
+                VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.GetToys));
+            });
+            button.onClick.AddListener(DelegateSupport.ConvertDelegate<UnityAction>(action));
+        }
+
+        private void extractDLL()
+        {
+            try
+            {
+                using (Stream s = Assembly.GetCallingAssembly().GetManifestResourceStream("Vibrator_Controller.buttplug_rs_ffi.dll"))
+                using (BinaryReader r = new BinaryReader(s))
+                using (FileStream fs = new FileStream(Environment.CurrentDirectory + @"\buttplug_rs_ffi.dll", FileMode.OpenOrCreate))
+                using (BinaryWriter w = new BinaryWriter(fs))
+                    w.Write(r.ReadBytes((int)s.Length));
+            }
+            catch (Exception)
+            {
+                MelonLogger.Msg("Couldnt extract buttplug_rs_ffi. Maybe a second process is already using that file");
             }
         }
 
@@ -70,6 +118,12 @@ namespace Vibrator_Controller {
             quickMenu = GameObject.Find("UserInterface/QuickMenu/QuickMenu_NewElements");
             menuContent = GameObject.Find("UserInterface/MenuContent/Backdrop/Backdrop");
 
+
+            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.UserQuickMenu).AddSimpleButton("Get\nToys", () => {
+                VRCWSIntegration.connectedTo = VRCUtils.ActivePlayerInQuickMenu.prop_String_0;
+                VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.GetToys));
+            });
+
             ExpansionKitApi.GetExpandedMenu(ExpandedMenu.QuickMenu).AddSimpleButton("Vibrator\nController", () => {
                 ShowMenu();
             });
@@ -77,7 +131,6 @@ namespace Vibrator_Controller {
 
         private static void ShowMenu() {
             menu = ExpansionKitApi.CreateCustomQuickMenuPage(LayoutDescription.QuickMenu4Columns);
-
             menu.AddSimpleButton(findButton == "lockButton" ? "Press Now" : "Lock Speed\nButton\n" + lockButton.ToString(), () => {
                 if (findButton == "lockButton") {
                     lockButton = KeyCode.None;
@@ -102,18 +155,6 @@ namespace Vibrator_Controller {
                 ShowMenu();
             });
 
-            menu.AddSimpleButton("Add Remote\nToy\n(Code)", () => {
-                menu.Hide();
-                BuiltinUiUtils.ShowInputPopup("Enter Code", "", InputField.InputType.Standard, false, "Confirm", (text, _, __) => {
-                    text = text.Trim();
-                    if (text.Length == 4) {
-                        Client.currentlyConnectedCode = text;
-                        Client.reconnectTries = 0;
-                        Client.Send("join " + text);
-                    }
-                });
-            });
-
             if (bpClient == null) {
                 bpClient = new ButtplugClient("VRCVibratorController");
                 bpClient.ConnectAsync(new ButtplugEmbeddedConnectorOptions()).ContinueWith((t) => {
@@ -134,6 +175,7 @@ namespace Vibrator_Controller {
                             break;
                         }
                     }
+                    ShowMenu();
                 };
                 return;
             }
@@ -164,8 +206,8 @@ namespace Vibrator_Controller {
                 if (toy.isLocal()) {
                     string text = toy.name + "\n" + toy.hand;
 
-                    if (toy.hand == "shared") {
-                        text = toy.name + "\nShared\n(" + code + ")";
+                    if (toy.hand == Hand.shared) {
+                        text = toy.name + "\nShared";
                     }
 
                     menu.AddSimpleButton(text, () => {
@@ -195,7 +237,7 @@ namespace Vibrator_Controller {
             }
 
             foreach (Toy toy in Toy.toys) {
-                if (toy.hand == "shared") return;
+                if (toy.hand == Hand.shared) return;
                 if (menuOpen()) {
                     toy.setSpeed((int)toy.speedSlider.value);
 
@@ -203,7 +245,7 @@ namespace Vibrator_Controller {
                         toy.setContraction();
                     if (toy.edgeSlider != null) {
                         if (toy.lastEdgeSpeed != toy.edgeSlider.value)
-                            toy.setEdgeSpeed(toy.edgeSlider.value);
+                            toy.setEdgeSpeed((int)toy.edgeSlider.value);
                     }
                     pauseControl = true;
                 } else {
@@ -224,17 +266,17 @@ namespace Vibrator_Controller {
                     }
 
                     switch (toy.hand) {
-                        case "left":
+                        case Hand.left:
                             right = left;
                             break;
-                        case "right":
+                        case Hand.right:
                             left = right;
                             break;
-                        case "either":
+                        case Hand.either:
                             if (left > right) right = left;
                             else left = right;
                             break;
-                        case "both":
+                        case Hand.both:
                             break;
                     }
                     if (toy.name == "Edge") {
@@ -252,136 +294,73 @@ namespace Vibrator_Controller {
         }
 
         //message from server
-        internal static void message(string msg) {
-            //MelonLogger.Msg(msg);
+        internal static void message(VibratorControllerMessage msg, string userID) {
 
-            String[] args = msg.Replace(((char)0).ToString(), "").Split(' ');
-            switch (args[0]) {
+
+            switch (msg.Command) {
                 
                 //remote toy commands
-                case "toys"://toys name:id name:id name:id (depreciated)
-                case "add"://add name:id name:id name:id
-                    if (args[1] == "") {
+                case Commands.AddToy:
+
+                    if (msg.ToyID == "") {
                         MelonLogger.Error("Connected but no toys found..");
                         return;
                     }
-                    for (int i = 1; i < args.Length; i++) {
-                        string[] toyData = args[i].Split(':');
-
-                        if (toyData.Length >= 2) {
-                            string name = toyData[0];
-                            string id = toyData[1];
-
-                            foreach (Toy toy in Toy.toys)
-                                if (toy.id.Contains(id)) {
-                                    toy.enable();
-                                    return;
-                                }
-
-                            MelonLogger.Msg("Adding: " + name + ":" + id);
-                            new Toy(name, id);
+                    
+                    foreach (Toy toy in Toy.toys)
+                        if (toy.id.Contains(msg.ToyID)) {
+                            toy.enable();
+                            return;
                         }
 
+                    MelonLogger.Msg($"Adding : {msg.ToyName} : {msg.ToyID}");
+                    new Toy(msg.ToyName, msg.ToyID);
+                       
+                    break;
+                case Commands.RemoveToy:
+                    
+                    foreach (Toy toy in Toy.toys) {
+                        if (toy.id.Contains(msg.ToyID)) {
+                            toy.disable();//TODO display this somehow
+                            break;
+                        }
                     }
                     break;
-                case "remove"://remove name:id name:id name:id
-                    if (args.Length >= 2) {
-                        string[] toyData = args[1].Split(':');
-                        string name = toyData[0];
-                        string id = toyData[1];
-                        foreach (Toy toy in Toy.toys) {
-                            if (toy.id.Contains(id)) {
-                                toy.disable();//TODO display this somehow
-                                break;
-                            }
-                        }
+
+                //Local toy commands
+                case Commands.SetSpeed:
+                    if (Toy.sharedToys.ContainsKey(msg.ToyID))
+                    {
+                        Toy toy = Toy.sharedToys[msg.ToyID];
+                        toy.setSpeed(msg.Strength);
+                    }
+                    break;
+                case Commands.SetSpeedEdge:
+                    if (Toy.sharedToys.ContainsKey(msg.ToyID))
+                    {
+                        Toy toy = Toy.sharedToys[msg.ToyID];
+                        toy.setEdgeSpeed(msg.Strength);
+                    }
+                    break;
+                case Commands.SetAir:
+                    if (Toy.sharedToys.ContainsKey(msg.ToyID)) {
+                        Toy toy = Toy.sharedToys[msg.ToyID];
+                        toy.setContraction(msg.Strength);
                         
                     }
                     break;
-                case "notFound"://*no args
-                    MelonLogger.Error("Invalid code");
-                    //addToyText.text = "Add\nToys\n<color=#FF0000>Invalid Code</color>";
-                    break;
-
-
-                //other user disconnect from the server (not this user)
-                //user on webpage sharing toy to to this user disconnected or
-                //user with mod controlling this user disconnected
-                case "left"://*no args
-                    MelonLogger.Warning("Control Client disconnected");
-
-                    foreach (Toy toy in Toy.toys) {
-                        toy.disable();
-                    }
-
-                    foreach (KeyValuePair<string, Toy> entry in Toy.sharedToys) {
-                        Toy toy = entry.Value;
-                        toy.disable();
+                case Commands.SetRotate:
+                    if (Toy.sharedToys.ContainsKey(msg.ToyID)) {
+                        Toy toy = Toy.sharedToys[msg.ToyID];
+                        toy.rotate();
                     }
                     break;
-
-
-                //Local toy commands
-                case "speed"://speed id speed edgeSpeed
-                    if (args.Length >= 3) {
-                        string id = args[1];
-                        int speed, edgeSpeed;
-
-                        try {
-                            speed = Int32.Parse(args[2]);
-                            if (args.Length >= 4)
-                                edgeSpeed = Int32.Parse(args[3]);
-                        } catch (FormatException) {break;}
-
-                        if (Toy.sharedToys.ContainsKey(id)) {
-                            Toy toy = Toy.sharedToys[id];
-                            toy.setSpeed(speed);
-                        }
-                    }
-                    break;
-                case "air"://air id speed
-                    if (args.Length >= 3) {
-                        string id = args[1];
-                        int speed;
-
-                        try {
-                            speed = Int32.Parse(args[2]);
-                        } catch (FormatException) { break; }
-
-                        if (Toy.sharedToys.ContainsKey(id)) {
-                            Toy toy = Toy.sharedToys[id];
-                            toy.setContraction(speed);
-                        }
-                    }
-                    break;
-                case "rotate"://rotate id
-                    if (args.Length >= 2) {
-                        string id = args[1];
-
-                        if (Toy.sharedToys.ContainsKey(id)) {
-                            Toy toy = Toy.sharedToys[id];
-                            toy.rotate();
-                        }
-                    }
-                    break;
-                case "id"://id id
-                    if (args.Length >= 2) {
-                        string id = args[1];
-                        code = id;
-                        MelonLogger.Msg("Received code: " + code);
-
-                        if (menuOpen()) {
-                            menu.Hide();
-                            ShowMenu();
-                        }
-                    }
-                    break;
-                case "joined"://*no args
+                case Commands.GetToys:
                     MelonLogger.Msg("Control Client connected");
-
+                    //maybe check
                     foreach (KeyValuePair<string, Toy> entry in Toy.sharedToys) {
-                        Toy toy = entry.Value;
-                        Client.Send("add " + toy.name + ":" + toy.id);
+                        VRCWSIntegration.connectedTo = userID;
+                        VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.AddToy, entry.Value));
                     }
                     
                     break;
