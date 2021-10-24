@@ -98,7 +98,7 @@ namespace Vibrator_Controller {
 
             CustomSubMenu.AddRadialPuppet($"{toy.name} Contraction", f => {
                 int contractionLevel = (int)Math.Round(f * 100) / 33;
-                if (toy.contraction != contractionLevel) {
+                if (toy.lastContraction != contractionLevel) {
                     toy.setContraction(contractionLevel);
                 }
             }, ((float)toy.lastSpeed / 20), toy_icons[toy.name]);

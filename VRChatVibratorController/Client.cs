@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using WebSocketSharp;
+using Buttplug;
 
 namespace Vibrator_Controller {
     class Client {
@@ -13,18 +14,26 @@ namespace Vibrator_Controller {
         private static bool connected = false;
 
         internal static void Setup() {
-            ws = new WebSocket("wss://control.markstuff.net:8080");
+            ws = new WebSocket("ws://control.markstuff.net:8080");
             ws.OnMessage += (sender, e) => VibratorController.message(e.Data);
-            ws.OnOpen += (sender, e) => { Send("join " + currentlyConnectedCode); connected = true; };
+            ws.OnOpen += (sender, e) => { 
+                connected = true;
+                MelonLogger.Msg("Connected to server");
+                if (currentlyConnectedCode != null) {
+                    Send("join " + currentlyConnectedCode);
+                } else {
+                    Send("new");
+                }
+            };
             ws.OnError += Reconnect;
             ws.OnClose += Reconnect;
-            ws.SslConfiguration.EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12;
         }
 
         internal static void Send(string text) {
-            if (ws != null && connected) 
+            if (ws != null && connected) {
                 ws.Send(text);
-            else 
+                MelonLogger.Msg("Sent: " + text);
+            } else
                 Reconnect(null, null);
         }
 

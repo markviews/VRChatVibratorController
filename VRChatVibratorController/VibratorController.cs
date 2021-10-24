@@ -1,11 +1,16 @@
-﻿using MelonLoader;
+﻿using Buttplug;
+using MelonLoader;
 using System;
 using System.Collections;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using UIExpansionKit.API;
 using UnityEngine;
 using UnityEngine.UI;
 using Vibrator_Controller;
+using System.Reflection;
+using System.Collections.Generic;
 
 [assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.4.3", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
 [assembly: MelonGame("VRChat", "VRChat")]
@@ -14,12 +19,17 @@ using Vibrator_Controller;
 namespace Vibrator_Controller {
     internal class VibratorController : MelonMod {
 
-        private string findButton = null;
-        private bool useActionMenu, lockSpeed = false, pauseControl = false;
-        private KeyCode lockButton, holdButton;
-        private GameObject quickMenu, menuContent;
-        private MelonPreferences_Category vibratorController;
-        private ToyActionMenu toyActionMenu;
+        private static string findButton = null;
+        private static bool useActionMenu, lockSpeed = false, pauseControl = false;
+        private static KeyCode lockButton, holdButton;
+        private static GameObject quickMenu, menuContent;
+        private static MelonPreferences_Category vibratorController;
+        private static ToyActionMenu toyActionMenu;
+
+        private static bool scanning = false;
+        private static ButtplugClient bpClient;
+        internal static string code;
+        private static ICustomShowableLayoutedMenu menu;
 
         public override void OnApplicationStart() {
             vibratorController = MelonPreferences.CreateCategory("VibratorController");
@@ -40,11 +50,22 @@ namespace Vibrator_Controller {
                 }
             }
 
+            extractDLL();
+
             Client.Setup();
             ExpansionKitApi.RegisterWaitConditionBeforeDecorating(CreateButton());
         }
 
-        public IEnumerator CreateButton() {
+        private void extractDLL() {
+            using (Stream s = Assembly.GetCallingAssembly().GetManifestResourceStream("Vibrator_Controller.buttplug_rs_ffi.dll"))
+            using (BinaryReader r = new BinaryReader(s))
+            using (FileStream fs = new FileStream(Environment.CurrentDirectory + @"\buttplug_rs_ffi.dll", FileMode.OpenOrCreate))
+            using (BinaryWriter w = new BinaryWriter(fs)) {
+                w.Write(r.ReadBytes((int)s.Length));
+            }
+        }
+
+        private IEnumerator CreateButton() {
             while (QuickMenu.prop_QuickMenu_0 == null) yield return null;
 
             quickMenu = GameObject.Find("UserInterface/QuickMenu/QuickMenu_NewElements");
@@ -55,8 +76,8 @@ namespace Vibrator_Controller {
             });
         }
 
-        public void ShowMenu() {
-            var menu = ExpansionKitApi.CreateCustomQuickMenuPage(LayoutDescription.QuickMenu3Columns);
+        private static void ShowMenu() {
+            menu = ExpansionKitApi.CreateCustomQuickMenuPage(LayoutDescription.QuickMenu4Columns);
 
             menu.AddSimpleButton(findButton == "lockButton" ? "Press Now" : "Lock Speed\nButton\n" + lockButton.ToString(), () => {
                 if (findButton == "lockButton") {
@@ -82,7 +103,7 @@ namespace Vibrator_Controller {
                 ShowMenu();
             });
 
-            menu.AddSimpleButton("Add\nToy", () => {
+            menu.AddSimpleButton("Add Remote\nToy\n(Code)", () => {
                 menu.Hide();
                 BuiltinUiUtils.ShowInputPopup("Enter Code", "", InputField.InputType.Standard, false, "Confirm", (text, _, __) => {
                     text = text.Trim();
@@ -94,14 +115,74 @@ namespace Vibrator_Controller {
                 });
             });
 
-            foreach (Toy toy in Toy.toys) {
-                menu.AddSimpleButton(toy.name + "\n" + toy.hand, () => {
-                    toy.changeHand();
+            if (bpClient == null) {
+                bpClient = new ButtplugClient("VRCVibratorController");
+                bpClient.ConnectAsync(new ButtplugEmbeddedConnectorOptions()).ContinueWith((t) => {
+                    menu.Hide();
+                    ShowMenu();
+                });
+                bpClient.DeviceAdded += (object aObj, DeviceAddedEventArgs args) => { new Toy(args.Device); bpClient.StopScanningAsync(); scanning = false; };
+                bpClient.DeviceRemoved += (object aObj, DeviceRemovedEventArgs args) => { 
+                    foreach (KeyValuePair<string, Toy> entry in Toy.sharedToys) {
+                        Toy toy = entry.Value;
+
+                        if (toy.device == args.Device) {
+                            Toy.sharedToys.Remove(toy.id);
+
+                            if (Toy.toys.Contains(toy)) 
+                                Toy.toys.Remove(toy);
+
+                            break;
+                        }
+                    }
+                };
+                return;
+            }
+
+            if (scanning) {
+                menu.AddSimpleButton("Scanning..\nPress To\nStop", () => {
+                    MelonLogger.Msg("Done Scanning.");
+                    scanning = false;
+                    bpClient.StopScanningAsync();
+                    menu.Hide();
+                    ShowMenu();
+                });
+            } else {
+                menu.AddSimpleButton("Scan for\nLocal Toys\n(Bluetooth)", () => {
+                    MelonLogger.Msg("Scanning for toys..");
+                    scanning = true;
+                    bpClient.StartScanningAsync();
                     menu.Hide();
                     ShowMenu();
                 });
             }
 
+            //if (bpClient != null && bpClient.Devices != null && bpClient.Devices.Length > 0)
+            //    Console.WriteLine("Devices: " + bpClient.Devices.Length);
+
+            foreach (Toy toy in Toy.toys) {
+
+                if (toy.isLocal()) {
+                    string text = toy.name + "\n" + toy.hand;
+
+                    if (toy.hand == "shared") {
+                        text = toy.name + "\nShared\n(" + code + ")";
+                    }
+
+                    menu.AddSimpleButton(text, () => {
+                        toy.changeHand();
+                        menu.Hide();
+                        ShowMenu();
+                    });
+                } else {
+                    menu.AddSimpleButton(toy.name + "\n" + toy.hand, () => {
+                        toy.changeHand();
+                        menu.Hide();
+                        ShowMenu();
+                    });
+                }
+
+            }
 
             menu.Show();
         }
@@ -115,6 +196,7 @@ namespace Vibrator_Controller {
             }
 
             foreach (Toy toy in Toy.toys) {
+                if (toy.hand == "shared") return;
                 if (menuOpen()) {
                     toy.setSpeed((int)toy.speedSlider.value);
 
@@ -164,7 +246,7 @@ namespace Vibrator_Controller {
             }
         }
 
-        internal bool menuOpen() {
+        private static bool menuOpen() {
             if (quickMenu.active || menuContent.active)
                 return true;
             return false;
@@ -172,53 +254,142 @@ namespace Vibrator_Controller {
 
         //message from server
         internal static void message(string msg) {
+            MelonLogger.Msg(msg);
+
             String[] args = msg.Replace(((char)0).ToString(), "").Split(' ');
             switch (args[0]) {
-                case "toys":
-                case "add":
+                
+                //remote toy commands
+                case "toys"://toys name:id name:id name:id (depreciated)
+                case "add"://add name:id name:id name:id
                     if (args[1] == "") {
                         MelonLogger.Error("Connected but no toys found..");
                         return;
                     }
                     for (int i = 1; i < args.Length; i++) {
                         string[] toyData = args[i].Split(':');
-                        string name = toyData[0];
-                        string id = toyData[1];
 
-                        foreach (Toy toy in Toy.toys)
-                            if (toy.id.Contains(id)) {
-                                toy.enable();
-                                return;
-                            }
+                        if (toyData.Length >= 2) {
+                            string name = toyData[0];
+                            string id = toyData[1];
 
-                        MelonLogger.Msg("Adding: " + name + ":" + id);
-                        new Toy(name, id);
+                            foreach (Toy toy in Toy.toys)
+                                if (toy.id.Contains(id)) {
+                                    toy.enable();
+                                    return;
+                                }
+
+                            MelonLogger.Msg("Adding: " + name + ":" + id);
+                            new Toy(name, id);
+                        }
+
                     }
                     break;
-                case "remove": {
+                case "remove"://remove name:id name:id name:id
+                    if (args.Length >= 2) {
                         string[] toyData = args[1].Split(':');
                         string name = toyData[0];
                         string id = toyData[1];
-                        foreach (Toy toy in Toy.toys)
+                        foreach (Toy toy in Toy.toys) {
                             if (toy.id.Contains(id)) {
                                 toy.disable();//TODO display this somehow
                                 break;
                             }
+                        }
+                        
                     }
                     break;
-                case "notFound":
+                case "notFound"://*no args
                     MelonLogger.Error("Invalid code");
                     //addToyText.text = "Add\nToys\n<color=#FF0000>Invalid Code</color>";
                     break;
-                case "left":
-                    MelonLogger.Warning("User disconnected");//TODO display this somehow
-                    foreach (Toy toy in Toy.toys)
+
+
+                //other user disconnect from the server (not this user)
+                //user on webpage sharing toy to to this user disconnected or
+                //user with mod controlling this user disconnected
+                case "left"://*no args
+                    MelonLogger.Warning("Control Client disconnected");
+
+                    foreach (Toy toy in Toy.toys) {
                         toy.disable();
+                    }
+
+                    foreach (KeyValuePair<string, Toy> entry in Toy.sharedToys) {
+                        Toy toy = entry.Value;
+                        toy.disable();
+                    }
+                    break;
+
+
+                //Local toy commands
+                case "speed"://speed id speed edgeSpeed
+                    if (args.Length >= 3) {
+                        string id = args[1];
+                        int speed, edgeSpeed;
+
+                        try {
+                            speed = Int32.Parse(args[2]);
+                            if (args.Length >= 4)
+                                edgeSpeed = Int32.Parse(args[3]);
+                        } catch (FormatException) {break;}
+
+                        if (Toy.sharedToys.ContainsKey(id)) {
+                            Toy toy = Toy.sharedToys[id];
+                            toy.setSpeed(speed);
+                        }
+                    }
+                    break;
+                case "air"://air id speed
+                    if (args.Length >= 3) {
+                        string id = args[1];
+                        int speed;
+
+                        try {
+                            speed = Int32.Parse(args[2]);
+                        } catch (FormatException) { break; }
+
+                        if (Toy.sharedToys.ContainsKey(id)) {
+                            Toy toy = Toy.sharedToys[id];
+                            toy.setContraction(speed);
+                        }
+                    }
+                    break;
+                case "rotate"://rotate id
+                    if (args.Length >= 2) {
+                        string id = args[1];
+
+                        if (Toy.sharedToys.ContainsKey(id)) {
+                            Toy toy = Toy.sharedToys[id];
+                            toy.rotate();
+                        }
+                    }
+                    break;
+                case "id"://id id
+                    if (args.Length >= 2) {
+                        string id = args[1];
+                        code = id;
+                        MelonLogger.Msg("Received code: " + code);
+
+                        if (menuOpen()) {
+                            menu.Hide();
+                            ShowMenu();
+                        }
+                    }
+                    break;
+                case "joined"://*no args
+                    MelonLogger.Msg("Control Client connected");
+
+                    foreach (KeyValuePair<string, Toy> entry in Toy.sharedToys) {
+                        Toy toy = entry.Value;
+                        Client.Send("add " + toy.name + ":" + toy.id);
+                    }
+                    
                     break;
             }
         }
 
-        internal void getButton() {
+        private void getButton() {
             //A-Z
             for (int i = 97; i <= 122; i++)
                 if (Input.GetKey((KeyCode)i)) {
@@ -243,7 +414,7 @@ namespace Vibrator_Controller {
             else if (Input.GetKey(KeyCode.Joystick1Button9)) setButton(KeyCode.Joystick1Button9);
         }
 
-        internal void setButton(KeyCode button) {
+        private void setButton(KeyCode button) {
             if (findButton.Equals("lockButton")) {
                 lockButton = button;
                 MelonPreferences.SetEntryValue(vibratorController.Identifier, "lockButton", button.GetHashCode());
