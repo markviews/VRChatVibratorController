@@ -28,6 +28,7 @@ Lets you control your friends lovense using your vr controllers.
 * miiss-neko for action menu integration
 * Er1807 for fixing edge vibrator controls
 * [websocket-sharp](https://github.com/sta/websocket-sharp)
+* [Buttplug C# FFI](https://github.com/buttplugio/buttplug-rs-ffi/tree/master/csharp)
 
 ### Notes
 This mod is not developed by or associated with Lovense or Hytto.

@@ -4,7 +4,6 @@ using System;
 using System.Collections;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using UIExpansionKit.API;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,7 +11,7 @@ using Vibrator_Controller;
 using System.Reflection;
 using System.Collections.Generic;
 
-[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.4.3", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
+[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.4.4", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
 [assembly: MelonGame("VRChat", "VRChat")]
 [assembly: MelonAdditionalDependencies("UIExpansionKit")]
 
