@@ -56,7 +56,6 @@ namespace Vibrator_Controller {
 
             VRCWSIntegration.Init();
             ExpansionKitApi.RegisterWaitConditionBeforeDecorating(CreateButton());
-            VRCUtils.OnUiManagerInit += init;
             NetworkEvents.OnPlayerLeft += onPlayerLeft;
         }
 
@@ -68,32 +67,6 @@ namespace Vibrator_Controller {
                 Toy toy = entry.Value;
                 toy.disable();
             }
-        }
-
-        private void init()
-        {
-            var baseUIElement = GameObject.Find("UserInterface/MenuContent/Screens/UserInfo/Buttons/RightSideButtons/RightUpperButtonColumn/PlaylistsButton").gameObject;
-
-            var gameObject = GameObject.Instantiate(baseUIElement, baseUIElement.transform.parent, true);
-            gameObject.name = "Get Toys";
-
-            var uitext = gameObject.GetComponentInChildren<Text>();
-            uitext.text = "Get Toys";
-
-            var button = gameObject.GetComponent<Button>();
-            button.onClick = new Button.ButtonClickedEvent();
-            var action = new Action(delegate ()
-            {
-                MelonLogger.Msg($"Connecting to user");
-                VRCWSIntegration.connectedTo = VRCUtils.ActiveUserInUserInfoMenu.id;
-                foreach (KeyValuePair<string, Toy> entry in Toy.sharedToys)
-                {
-                    Toy toy = entry.Value;
-                    toy.disable();
-                }
-                VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.GetToys));
-            });
-            button.onClick.AddListener(DelegateSupport.ConvertDelegate<UnityAction>(action));
         }
 
         private void extractDLL()
