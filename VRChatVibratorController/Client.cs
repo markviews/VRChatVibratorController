@@ -16,7 +16,15 @@ namespace Vibrator_Controller {
         internal static void Setup() {
             ws = new WebSocket("ws://control.markstuff.net:8080");
             ws.OnMessage += (sender, e) => VibratorController.message(e.Data);
-            ws.OnOpen += (sender, e) => { connected = true; MelonLogger.Msg("Connected to server"); };
+            ws.OnOpen += (sender, e) => { 
+                connected = true;
+                MelonLogger.Msg("Connected to server");
+                if (currentlyConnectedCode != null) {
+                    Send("join " + currentlyConnectedCode);
+                } else {
+                    Send("new");
+                }
+            };
             ws.OnError += Reconnect;
             ws.OnClose += Reconnect;
         }

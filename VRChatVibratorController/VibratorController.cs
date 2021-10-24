@@ -19,16 +19,17 @@ using System.Collections.Generic;
 namespace Vibrator_Controller {
     internal class VibratorController : MelonMod {
 
-        private string findButton = null;
-        private bool useActionMenu, lockSpeed = false, pauseControl = false;
-        private KeyCode lockButton, holdButton;
-        private GameObject quickMenu, menuContent;
-        private MelonPreferences_Category vibratorController;
-        private ToyActionMenu toyActionMenu;
+        private static string findButton = null;
+        private static bool useActionMenu, lockSpeed = false, pauseControl = false;
+        private static KeyCode lockButton, holdButton;
+        private static GameObject quickMenu, menuContent;
+        private static MelonPreferences_Category vibratorController;
+        private static ToyActionMenu toyActionMenu;
 
-        private bool scanning = false;
-        private ButtplugClient bpClient;
+        private static bool scanning = false;
+        private static ButtplugClient bpClient;
         internal static string code;
+        private static ICustomShowableLayoutedMenu menu;
 
         public override void OnApplicationStart() {
             vibratorController = MelonPreferences.CreateCategory("VibratorController");
@@ -64,7 +65,7 @@ namespace Vibrator_Controller {
             }
         }
 
-        public IEnumerator CreateButton() {
+        private IEnumerator CreateButton() {
             while (QuickMenu.prop_QuickMenu_0 == null) yield return null;
 
             quickMenu = GameObject.Find("UserInterface/QuickMenu/QuickMenu_NewElements");
@@ -75,8 +76,8 @@ namespace Vibrator_Controller {
             });
         }
 
-        public void ShowMenu() {
-            var menu = ExpansionKitApi.CreateCustomQuickMenuPage(LayoutDescription.QuickMenu4Columns);
+        private static void ShowMenu() {
+            menu = ExpansionKitApi.CreateCustomQuickMenuPage(LayoutDescription.QuickMenu4Columns);
 
             menu.AddSimpleButton(findButton == "lockButton" ? "Press Now" : "Lock Speed\nButton\n" + lockButton.ToString(), () => {
                 if (findButton == "lockButton") {
@@ -127,6 +128,10 @@ namespace Vibrator_Controller {
 
                         if (toy.device == args.Device) {
                             Toy.sharedToys.Remove(toy.id);
+
+                            if (Toy.toys.Contains(toy)) 
+                                Toy.toys.Remove(toy);
+
                             break;
                         }
                     }
@@ -156,26 +161,27 @@ namespace Vibrator_Controller {
             //    Console.WriteLine("Devices: " + bpClient.Devices.Length);
 
             foreach (Toy toy in Toy.toys) {
-                menu.AddSimpleButton(toy.name + "\n" + toy.hand, () => {
-                    toy.changeHand();
-                    menu.Hide();
-                    ShowMenu();
-                });
-            }
 
-            foreach (KeyValuePair<string, Toy> entry in Toy.sharedToys) {
-                Toy toy = entry.Value;
-                string text = toy.name + "\n" + toy.hand;
+                if (toy.isLocal()) {
+                    string text = toy.name + "\n" + toy.hand;
 
-                if (toy.hand == "shared") {
-                    text = toy.name + "\nShared\n(" + code + ")";
+                    if (toy.hand == "shared") {
+                        text = toy.name + "\nShared\n(" + code + ")";
+                    }
+
+                    menu.AddSimpleButton(text, () => {
+                        toy.changeHand();
+                        menu.Hide();
+                        ShowMenu();
+                    });
+                } else {
+                    menu.AddSimpleButton(toy.name + "\n" + toy.hand, () => {
+                        toy.changeHand();
+                        menu.Hide();
+                        ShowMenu();
+                    });
                 }
 
-                menu.AddSimpleButton(text, () => {
-                    toy.changeHand();
-                    menu.Hide();
-                    ShowMenu();
-                });
             }
 
             menu.Show();
@@ -190,6 +196,7 @@ namespace Vibrator_Controller {
             }
 
             foreach (Toy toy in Toy.toys) {
+                if (toy.hand == "shared") return;
                 if (menuOpen()) {
                     toy.setSpeed((int)toy.speedSlider.value);
 
@@ -239,7 +246,7 @@ namespace Vibrator_Controller {
             }
         }
 
-        internal bool menuOpen() {
+        private static bool menuOpen() {
             if (quickMenu.active || menuContent.active)
                 return true;
             return false;
@@ -363,6 +370,11 @@ namespace Vibrator_Controller {
                         string id = args[1];
                         code = id;
                         MelonLogger.Msg("Received code: " + code);
+
+                        if (menuOpen()) {
+                            menu.Hide();
+                            ShowMenu();
+                        }
                     }
                     break;
                 case "joined"://*no args
@@ -377,7 +389,7 @@ namespace Vibrator_Controller {
             }
         }
 
-        internal void getButton() {
+        private void getButton() {
             //A-Z
             for (int i = 97; i <= 122; i++)
                 if (Input.GetKey((KeyCode)i)) {
@@ -402,7 +414,7 @@ namespace Vibrator_Controller {
             else if (Input.GetKey(KeyCode.Joystick1Button9)) setButton(KeyCode.Joystick1Button9);
         }
 
-        internal void setButton(KeyCode button) {
+        private void setButton(KeyCode button) {
             if (findButton.Equals("lockButton")) {
                 lockButton = button;
                 MelonPreferences.SetEntryValue(vibratorController.Identifier, "lockButton", button.GetHashCode());

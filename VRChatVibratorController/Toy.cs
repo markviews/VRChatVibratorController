@@ -33,7 +33,6 @@ namespace Vibrator_Controller
                 id = device.Name.Replace(" ", "") + count++;
             }
 
-            sharedToys.Add(id, this);
             hand = "shared";
             name = device.Name;
             this.device = device;
@@ -42,6 +41,9 @@ namespace Vibrator_Controller
 
             MelonLogger.Msg("Device connected: " + name + " [" + id + "]");
             CreateSlider();
+
+            toys.Add(this);
+            sharedToys.Add(id, this);
         }
 
         internal Toy(string name, string id) {
@@ -102,11 +104,12 @@ namespace Vibrator_Controller
         {
             isActive = false;
             MelonLogger.Msg("Disabled toy: " + name);
-            fixSliders();
 
             if (!isLocal()) {
                 hand = "none";
             }
+
+            fixSlider();
         }
 
         internal void enable()
@@ -120,6 +123,7 @@ namespace Vibrator_Controller
             if (speed != lastSpeed)
             {
                 lastSpeed = speed;
+                speedSliderText.text = name + " Speed: " + (speed * 10) + "%";
                 MelonLogger.Msg("Speed " + speed);
 
                 if (isLocal()) {
@@ -131,7 +135,6 @@ namespace Vibrator_Controller
                     }
                 } else {
                     Client.Send("speed " + id + " " + speed + (name is "Edge" ? " 1" : ""));
-                    speedSliderText.text = name + " Speed: " + (speed * 10) + "%";
                 }
 
             }
@@ -177,45 +180,46 @@ namespace Vibrator_Controller
             Client.Send("rotate " + id);
         }
 
-        private void fixSliders()
+        private void fixSlider()
         {
+            MelonLogger.Msg("fixSlider " + name + " " + hand);
+
             float sliderY = 0;
-            foreach (Toy toy in toys)
+
+            if (!hand.Equals("none"))
             {
+                speedSlider.transform.localPosition = new Vector3(-348.077f, 343.046f - sliderY, 0);
+                speedSlider.gameObject.SetActive(true);
 
-                if (!toy.hand.Equals("none"))
+                MelonLogger.Msg("fixSlider " + name + " enabled slider");
+
+                switch (name)
                 {
-                    toy.speedSlider.transform.localPosition = new Vector3(-348.077f, 343.046f - sliderY, 0);
-                    toy.speedSlider.gameObject.SetActive(true);
-
-                    switch (toy.name)
-                    {
-                        case "Edge":
-                            toy.speedSlider.GetComponent<RectTransform>().anchoredPosition = new Vector2(-1260, -1340 - sliderY);
-                            toy.edgeSlider.GetComponent<RectTransform>().anchoredPosition = new Vector2(-410, -1340 - sliderY);
-                            toy.edgeSlider.gameObject.SetActive(true);
-                            break;
-                        case "Max":
-                            toy.maxSlider.transform.localPosition = new Vector3(492.955f, 343.046f - sliderY, 0);
-                            toy.maxSlider.gameObject.SetActive(true);
-                            break;
-                        case "Nora":
-                            toy.rotateButton.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(1330, -1340 - sliderY);
-                            toy.rotateButton.gameObject.SetActive(true);
-                            break;
-                    }
-
-                    sliderY += 160;
-                }
-                else
-                {
-                    toy.speedSlider.gameObject.SetActive(false);
-                    if (toy.speedSlider != null) toy.speedSlider.gameObject.SetActive(false);
-                    if (toy.maxSlider != null) toy.maxSlider.gameObject.SetActive(false);
-                    if (toy.rotateButton != null) toy.rotateButton.gameObject.SetActive(false);
+                    case "Edge":
+                        speedSlider.GetComponent<RectTransform>().anchoredPosition = new Vector2(-1260, -1340 - sliderY);
+                        edgeSlider.GetComponent<RectTransform>().anchoredPosition = new Vector2(-410, -1340 - sliderY);
+                        edgeSlider.gameObject.SetActive(true);
+                        break;
+                    case "Max":
+                        maxSlider.transform.localPosition = new Vector3(492.955f, 343.046f - sliderY, 0);
+                        maxSlider.gameObject.SetActive(true);
+                        break;
+                    case "Nora":
+                        rotateButton.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(1330, -1340 - sliderY);
+                        rotateButton.gameObject.SetActive(true);
+                        break;
                 }
 
+                sliderY += 160;
             }
+            else
+            {
+                speedSlider.gameObject.SetActive(false);
+                if (speedSlider != null) speedSlider.gameObject.SetActive(false);
+                if (maxSlider != null) maxSlider.gameObject.SetActive(false);
+                if (rotateButton != null) rotateButton.gameObject.SetActive(false);
+            }
+
             BoxCollider collider = GameObject.Find("UserInterface/QuickMenu").GetComponent<BoxCollider>();
             collider.size = new Vector3(collider.size.x, collider.size.y + sliderY, collider.size.z);
         }
@@ -230,7 +234,7 @@ namespace Vibrator_Controller
                 case "left":
                     if (isLocal()) {
                         hand = "shared";
-                        return;
+                        break;
                     }
                     hand = "right";
                     break;
@@ -254,7 +258,7 @@ namespace Vibrator_Controller
                     hand = "none";
                     break;
             }
-            fixSliders();
+            fixSlider();
         }
 
         //returns true if this is a local bluetooth device (controlled by someone else)

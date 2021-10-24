@@ -6,7 +6,7 @@ var ws = new WebSocket("ws://control.markstuff.net:8080")
 
 	ws.onmessage = function (evt) {
 			var msg = evt.data
-			//console.log(msg)
+			console.log(msg)
 	var args = msg.split(" ")
 
 	switch(args[0]) {
