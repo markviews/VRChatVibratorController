@@ -32,7 +32,7 @@ namespace Vibrator_Controller {
         internal static void Send(string text) {
             if (ws != null && connected) {
                 ws.Send(text);
-                MelonLogger.Msg("Sent: " + text);
+                //MelonLogger.Msg("Sent: " + text);
             } else
                 Reconnect(null, null);
         }

@@ -254,7 +254,7 @@ namespace Vibrator_Controller {
 
         //message from server
         internal static void message(string msg) {
-            MelonLogger.Msg(msg);
+            //MelonLogger.Msg(msg);
 
             String[] args = msg.Replace(((char)0).ToString(), "").Split(' ');
             switch (args[0]) {

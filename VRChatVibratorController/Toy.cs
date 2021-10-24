@@ -124,12 +124,12 @@ namespace Vibrator_Controller
             {
                 lastSpeed = speed;
                 speedSliderText.text = name + " Speed: " + (speed * 10) + "%";
-                MelonLogger.Msg("Speed " + speed);
+                //MelonLogger.Msg("Speed " + speed);
 
                 if (isLocal()) {
                     try {
                         device.SendVibrateCmd((double)speed / 10);
-                        MelonLogger.Msg("set device speed to " + ((double)speed / 10));
+                        //MelonLogger.Msg("set device speed to " + ((double)speed / 10));
                     } catch (ButtplugDeviceException) {
                         MelonLogger.Error("Toy not connected");
                     }
@@ -170,7 +170,7 @@ namespace Vibrator_Controller
                     Client.Send("air " + id + " " + maxSlider.value);
                     maxSliderText.text = "Max Contraction: " + maxSlider.value;
                     
-                    MelonLogger.Msg("Max Contraction: " + maxSlider.value);
+                    //MelonLogger.Msg("Max Contraction: " + maxSlider.value);
                 }
             }
         }
@@ -182,7 +182,7 @@ namespace Vibrator_Controller
 
         private void fixSlider()
         {
-            MelonLogger.Msg("fixSlider " + name + " " + hand);
+            //MelonLogger.Msg("fixSlider " + name + " " + hand);
 
             float sliderY = 0;
 
@@ -191,7 +191,7 @@ namespace Vibrator_Controller
                 speedSlider.transform.localPosition = new Vector3(-348.077f, 343.046f - sliderY, 0);
                 speedSlider.gameObject.SetActive(true);
 
-                MelonLogger.Msg("fixSlider " + name + " enabled slider");
+                //MelonLogger.Msg("fixSlider " + name + " enabled slider");
 
                 switch (name)
                 {
