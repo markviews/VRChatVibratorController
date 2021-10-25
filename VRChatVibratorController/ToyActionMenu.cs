@@ -52,7 +52,7 @@ namespace Vibrator_Controller {
             VRCActionMenuPage.AddSubMenu(ActionMenuPage.Main, "Vibrator Controller", delegate {
                 foreach (Toy toy in Toy.toys) {
                     try {
-                        if (toy.isActive) ToysMenu(toy);
+                        if (toy.isActive && toy.hand != Hand.shared) ToysMenu(toy);
                     } catch (Exception e) {
                         MelonLogger.Warning($"Error with toy {toy.name}: " + e.Message);
                     }
@@ -77,11 +77,24 @@ namespace Vibrator_Controller {
             }
         }
 
-        private static void VibrateRadial(Toy toy, string text = "") {
-            CustomSubMenu.AddRadialPuppet(text, f => {
+        private static void VibrateRadial(Toy toy, string text = "")
+        {
+            CustomSubMenu.AddRadialPuppet(text, f =>
+            {
                 int roundedPercent = (int)Math.Round(f * 100);
                 toy.setSpeed(roundedPercent / 5); //0-20
-            }, ((float)toy.lastSpeed) / 20, toy_icons[toy.name]);
+            }, ((float)toy.lastSpeed) / 20, GetTextureForToy(toy));
+        }
+
+        private static Texture2D GetTextureForToy(Toy toy)
+        {
+            string name = toy.name;
+            name = name.Replace("Lovense ", "");//Buttlug
+
+            if(toy_icons.ContainsKey(name))
+                return toy_icons[name];
+
+            return null;
         }
 
         private static void EdgeRadials(Toy toy) {
@@ -90,7 +103,7 @@ namespace Vibrator_Controller {
             CustomSubMenu.AddRadialPuppet(toy.name + " 1", f => {
                 int roundedPercent = (int)Math.Round(f * 100);
                 toy.setEdgeSpeed(roundedPercent / 5); //0-20
-            }, ((float)toy.lastEdgeSpeed) / 20, toy_icons[toy.name]);
+            }, ((float)toy.lastEdgeSpeed) / 20, GetTextureForToy(toy));
         }
 
         private static void MaxRadials(Toy toy) {
@@ -101,13 +114,13 @@ namespace Vibrator_Controller {
                 if (toy.lastContraction != contractionLevel) {
                     toy.setContraction(contractionLevel);
                 }
-            }, ((float)toy.lastSpeed / 20), toy_icons[toy.name]);
+            }, ((float)toy.lastSpeed / 20), GetTextureForToy(toy));
         }
 
         private static void NoraRadials(Toy toy) {
             VibrateRadial(toy, toy.name + " Vibration");
 
-            CustomSubMenu.AddButton(toy.name + " Rotate", () => { toy.rotate(); }, toy_icons[toy.name]);
+            CustomSubMenu.AddButton(toy.name + " Rotate", () => { toy.rotate(); }, GetTextureForToy(toy));
         }
 
     }

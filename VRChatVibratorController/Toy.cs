@@ -4,15 +4,21 @@ using System.Collections;
 using UnityEngine;
 using Buttplug;
 using System.Collections.Generic;
+using System;
+using System.Linq;
 
 namespace Vibrator_Controller
 {
-    class Toy
+    public enum Hand
+    {
+        none, shared, left, right, both, either, slider
+    }
+    public class Toy
     {
         internal static ArrayList toys = new ArrayList();
         internal static Dictionary<string, Toy> sharedToys = new Dictionary<string, Toy>();//id, Toy
 
-        internal string hand = "none";
+        internal Hand hand = Hand.none;
         internal string name;
         internal string id;
         internal bool isActive = true;
@@ -33,11 +39,9 @@ namespace Vibrator_Controller
                 id = device.Name.Replace(" ", "") + count++;
             }
 
-            hand = "shared";
+            hand = Hand.shared;
             name = device.Name;
             this.device = device;
-
-            if (VibratorController.code == null) Client.Send("new");
 
             MelonLogger.Msg("Device connected: " + name + " [" + id + "]");
             CreateSlider();
@@ -106,7 +110,7 @@ namespace Vibrator_Controller
             MelonLogger.Msg("Disabled toy: " + name);
 
             if (!isLocal()) {
-                hand = "none";
+                hand = Hand.none;
             }
 
             fixSlider();
@@ -134,18 +138,18 @@ namespace Vibrator_Controller
                         MelonLogger.Error("Toy not connected");
                     }
                 } else {
-                    Client.Send("speed " + id + " " + speed + (name is "Edge" ? " 1" : ""));
+                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.SetSpeed, this, speed));
                 }
 
             }
         }
 
-        internal void setEdgeSpeed(float speed)
+        internal void setEdgeSpeed(int speed)
         {
             if (speed != lastEdgeSpeed)
             {
                 lastEdgeSpeed = (int)speed;
-                Client.Send("speed " + id + " " + speed + " 2");
+                VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.SetSpeedEdge, this, speed));
                 edgeSliderText.text = name + " Speed: " + (speed * 10) + "%";
             }
         }
@@ -157,7 +161,7 @@ namespace Vibrator_Controller
                 if (lastContraction != maxSlider.value)
                 {
                     lastContraction = (int)maxSlider.value;
-                    Client.Send("air " + id + " " + lastContraction);
+                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.SetAir, this, lastContraction));
                     maxSliderText.text = "Max Contraction: " + lastContraction;
                 }
             }
@@ -167,7 +171,7 @@ namespace Vibrator_Controller
                 {
                     maxSlider.value = speed;
                     lastContraction = speed;
-                    Client.Send("air " + id + " " + maxSlider.value);
+                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.SetAir, this, (int)maxSlider.value));
                     maxSliderText.text = "Max Contraction: " + maxSlider.value;
                     
                     //MelonLogger.Msg("Max Contraction: " + maxSlider.value);
@@ -177,7 +181,7 @@ namespace Vibrator_Controller
 
         internal void rotate()
         {
-            Client.Send("rotate " + id);
+            VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.SetRotate, this));
         }
 
         private void fixSlider()
@@ -186,7 +190,7 @@ namespace Vibrator_Controller
 
             float sliderY = 0;
 
-            if (!hand.Equals("none") && !hand.Equals("shared"))
+            if (hand != Hand.none && hand!=Hand.shared)
             {
                 speedSlider.transform.localPosition = new Vector3(-348.077f, 343.046f - sliderY, 0);
                 speedSlider.gameObject.SetActive(true);
@@ -226,38 +230,48 @@ namespace Vibrator_Controller
 
         internal void changeHand()
         {
+            hand++;
+            if (hand > Enum.GetValues(typeof(Hand)).Cast<Hand>().Max())
+                hand = 0;
+
+
+            if (hand == Hand.shared && !isLocal())
+                hand++; 
+            if (hand == Hand.both && !name.Equals("Edge"))
+                hand++;
+            /*
             switch (hand)
             {
-                case "none":
-                    hand = "left";
+                case Hand.none:
+                    hand = Hand.left;
                     break;
-                case "left":
+                case Hand.left:
                     if (isLocal()) {
-                        hand = "shared";
+                        hand = Hand.shared;
                         break;
                     }
-                    hand = "right";
+                    hand = Hand.right;
                     break;
-                case "shared":
-                    hand = "right";
+                case Hand.shared:
+                    hand = Hand.right;
                     break;
-                case "right":
-                    hand = "either";
+                case Hand.right:
+                    hand = Hand.either;
                     break;
-                case "either":
-                    hand = "both";
+                case Hand.either:
+                    hand = Hand.both;
                     if (!name.Equals("Edge")) {
                         changeHand();
                         break;
                     }
                     break;
-                case "both":
-                    hand = "slider";
+                case Hand.both:
+                    hand = Hand.slider;
                     break;
-                case "slider":
-                    hand = "none";
+                case Hand.slider:
+                    hand = Hand.none;
                     break;
-            }
+            }*/
             fixSlider();
         }
 
