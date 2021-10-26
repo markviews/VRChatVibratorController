@@ -1,24 +1,18 @@
 # VRChat Vibrator Controller
 
-Lets you control your friends lovense using your vr controllers.
+Lets you control your friends bluetooth vibrator using your vr controllers.
 
 ### How to install
 1. Download and install [MelonLoader](https://melonwiki.xyz/#/README)
-2. Download [VibratorController.dll](https://github.com/markviews/VRChatVibratorController/releases)
-3. Download [UIExpansionKit](https://github.com/knah/VRCMods)
-4. Download [ActionMenuAPI](https://github.com/gompocp/ActionMenuApi/releases) if you want action menu integration
-5. Drag dlls into `VRChat/Mods`
+2. Download [VibratorController](https://github.com/markviews/VRChatVibratorController/releases), [UIExpansionKit](https://github.com/knah/VRCMods), [VRCWS](https://github.com/Er1807/VRCWS) and [VRChatUtilityKit](https://github.com/loukylor/VRC-Mods)
+5. Download [ActionMenuAPI](https://github.com/gompocp/ActionMenuApi/releases) if you want action menu integration
+6. Drag dlls into `VRChat/Mods`
 
 ### How to use
-1. Ask friend to follow instructions below to get a code
-2. Click `Add Toy` and type code
-
-### How to get a code
-* Friend that has toy should follow these instructions
-* If you have issues connecting to toys from the webpage try [downloading the webpage](https://github.com/markviews/VRChatVibratorController/releases/tag/webpage) and opening it locally
-1. Connect your phone to the same wifi as your computer
-2. Connect your toy to the Lovense Connect app (the pink one)
-3. Type your phone's local ip in the box and click `Connect` on the [mod webpage](https://remote.markstuff.net/)
+1. Friend with toy: connect toy to computer's bluetooth and press "Scan for toys (Bluetooth)" in the mod menu
+2. [Connect to friend using VRCWS](https://github.com/Er1807/VRCWS#trust-another-user)
+3. Friend that wants to control: Select friend and click "Get Toys" in the quick menu
+4. Friend that wants to control: set controll option in the mod menu
 
 ### Credits
 * Plague for [PlagueButtonAPI](https://github.com/PlagueVRC/PlagueButtonAPI) and helping with the project a bunch
@@ -26,7 +20,7 @@ Lets you control your friends lovense using your vr controllers.
 * Knah for [UIExpansionKit](https://github.com/knah/VRCMods) and AssetBundle code
 * gompocp for [ActionMenuApi](https://github.com/gompocp/ActionMenuApi)
 * miiss-neko for action menu integration
-* Er1807 for fixing edge vibrator controls
+* Eric van Fandenfart for fixing edge vibrator controls and adding VRCWS support
 * [websocket-sharp](https://github.com/sta/websocket-sharp)
 * [Buttplug C# FFI](https://github.com/buttplugio/buttplug-rs-ffi/tree/master/csharp)
 
