@@ -21,7 +21,6 @@ Lets you control your friends bluetooth vibrator using your vr controllers.
 * gompocp for [ActionMenuApi](https://github.com/gompocp/ActionMenuApi)
 * miiss-neko for action menu integration
 * Eric van Fandenfart for fixing edge vibrator controls and adding VRCWS support
-* [websocket-sharp](https://github.com/sta/websocket-sharp)
 * [Buttplug C# FFI](https://github.com/buttplugio/buttplug-rs-ffi/tree/master/csharp)
 
 ### Notes
