@@ -98,8 +98,8 @@ namespace Vibrator_Controller {
 
             CustomSubMenu.AddRadialPuppet(toy.name + " 1", f => {
                 int roundedPercent = (int)Math.Round(f * 100);
-                toy.setEdgeSpeed(roundedPercent / (100 / toy.maxSpeed)); //0-10
-            }, ((float)toy.lastEdgeSpeed) / toy.maxSpeed, GetTextureForToy(toy));
+                toy.setEdgeSpeed(roundedPercent / (100 / toy.maxSpeed2)); //0-10
+            }, ((float)toy.lastEdgeSpeed) / toy.maxSpeed2, GetTextureForToy(toy));
         }
 
         private static void MaxRadials(Toy toy) {

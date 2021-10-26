@@ -6,7 +6,6 @@ using Buttplug;
 using System.Collections.Generic;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Vibrator_Controller {
     public enum Hand {
@@ -30,14 +29,7 @@ namespace Vibrator_Controller {
         internal ButtplugClientDevice device;
         internal int lastSpeed = 0, lastEdgeSpeed = 0, lastContraction = 0;
 
-        /* Done
-         * remove the word "Lovense" from name everywhere (makes it unnecessarily long)
-         * fix UIX menu not auto refreshing when toy connects
-         * show battery % if avalible
-         * set max speed based on device's actual max speed
-         * remove device from remote user when local user changes Hand from "Shared"
-         * update toy hand text in UIX menu if toy can't be controlled
-         * 
+        /* 
          * TODO
          * fix network lag spikes 
          * support for toys with rotate, 2 vibrators, linear functions. (just need to set variables below)
@@ -55,7 +47,10 @@ namespace Vibrator_Controller {
             }
 
             hand = Hand.shared;
-            name = device.Name.Replace("Lovense ", ""); ;
+
+            //remove company name
+            if (name.Split(' ').Length > 1) name = name.Split(' ')[1];
+
             this.device = device;
 
             MelonLogger.Msg("Device connected: " + name + " [" + id + "]");
