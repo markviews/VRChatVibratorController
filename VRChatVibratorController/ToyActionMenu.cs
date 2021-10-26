@@ -77,21 +77,17 @@ namespace Vibrator_Controller {
             }
         }
 
-        private static void VibrateRadial(Toy toy, string text = "")
-        {
-            CustomSubMenu.AddRadialPuppet(text, f =>
-            {
+        private static void VibrateRadial(Toy toy, string text = "") {
+            CustomSubMenu.AddRadialPuppet(text, f => {
                 int roundedPercent = (int)Math.Round(f * 100);
-                toy.setSpeed(roundedPercent / 5); //0-20
-            }, ((float)toy.lastSpeed) / 20, GetTextureForToy(toy));
+                toy.setSpeed(roundedPercent / (100/toy.maxSpeed)); //0-10
+            }, ((float)toy.lastSpeed) / toy.maxSpeed, GetTextureForToy(toy));
         }
 
-        private static Texture2D GetTextureForToy(Toy toy)
-        {
+        private static Texture2D GetTextureForToy(Toy toy) {
             string name = toy.name;
-            name = name.Replace("Lovense ", "");//Buttlug
 
-            if(toy_icons.ContainsKey(name))
+            if (toy_icons.ContainsKey(name))
                 return toy_icons[name];
 
             return null;
@@ -102,19 +98,19 @@ namespace Vibrator_Controller {
 
             CustomSubMenu.AddRadialPuppet(toy.name + " 1", f => {
                 int roundedPercent = (int)Math.Round(f * 100);
-                toy.setEdgeSpeed(roundedPercent / 5); //0-20
-            }, ((float)toy.lastEdgeSpeed) / 20, GetTextureForToy(toy));
+                toy.setEdgeSpeed(roundedPercent / (100 / toy.maxSpeed)); //0-10
+            }, ((float)toy.lastEdgeSpeed) / toy.maxSpeed, GetTextureForToy(toy));
         }
 
         private static void MaxRadials(Toy toy) {
             VibrateRadial(toy, toy.name + " Vibration");
 
             CustomSubMenu.AddRadialPuppet($"{toy.name} Contraction", f => {
-                int contractionLevel = (int)Math.Round(f * 100) / 33;
+                int contractionLevel = (int)Math.Round(f * 100) / (100 / toy.maxLinear);
                 if (toy.lastContraction != contractionLevel) {
                     toy.setContraction(contractionLevel);
                 }
-            }, ((float)toy.lastSpeed / 20), GetTextureForToy(toy));
+            }, ((float)toy.lastSpeed / toy.maxSpeed), GetTextureForToy(toy));
         }
 
         private static void NoraRadials(Toy toy) {

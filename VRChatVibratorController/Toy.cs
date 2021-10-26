@@ -6,15 +6,13 @@ using Buttplug;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
-namespace Vibrator_Controller
-{
-    public enum Hand
-    {
+namespace Vibrator_Controller {
+    public enum Hand {
         none, shared, left, right, both, either, slider
     }
-    public class Toy
-    {
+    public class Toy {
         internal static ArrayList toys = new ArrayList();
         internal static Dictionary<string, Toy> sharedToys = new Dictionary<string, Toy>();//id, Toy
 
@@ -32,6 +30,23 @@ namespace Vibrator_Controller
         internal ButtplugClientDevice device;
         internal int lastSpeed = 0, lastEdgeSpeed = 0, lastContraction = 0;
 
+        /* Done
+         * remove the word "Lovense" from name everywhere (makes it unnecessarily long)
+         * fix UIX menu not auto refreshing when toy connects
+         * show battery % if avalible
+         * set max speed based on device's actual max speed
+         * remove device from remote user when local user changes Hand from "Shared"
+         * update toy hand text in UIX menu if toy can't be controlled
+         * 
+         * TODO
+         * fix network lag spikes 
+         * support for toys with rotate, 2 vibrators, linear functions. (just need to set variables below)
+         */
+
+        internal bool supportsRotate = false, supportsLinear = false, supportsTwoVibrators = false, supportsBatteryLVL = false;
+        internal int maxSpeed = 20, maxSpeed2 = -1, maxLinear = -1;
+        internal double battery = -1;
+
         internal Toy(ButtplugClientDevice device) {
             int count = 1;
             id = device.Name.Replace(" ", "");
@@ -40,20 +55,72 @@ namespace Vibrator_Controller
             }
 
             hand = Hand.shared;
-            name = device.Name;
+            name = device.Name.Replace("Lovense ", ""); ;
             this.device = device;
 
             MelonLogger.Msg("Device connected: " + name + " [" + id + "]");
+
+            if (device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.LinearCmd))
+                supportsLinear = true;
+
+            if (device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.RotateCmd))
+                supportsRotate = true;
+
+            if (device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.BatteryLevelCmd)) {
+                supportsBatteryLVL = true;
+                device.SendBatteryLevelCmd().ContinueWith(battery => { 
+                    this.battery = battery.Result;
+                    VibratorController.menu.Hide();
+                    VibratorController.ShowMenu();
+                });
+            }
+                
+            //prints info about the device
+            foreach (KeyValuePair<ServerMessage.Types.MessageAttributeType, ButtplugMessageAttributes> entry in device.AllowedMessages)
+                MelonLogger.Msg("[" + id + "] Allowed Message: " + entry.Key);
+
+            if (device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.VibrateCmd)) {
+                ButtplugMessageAttributes attributes = device.AllowedMessages[ServerMessage.Types.MessageAttributeType.VibrateCmd];
+
+                if (attributes.ActuatorType != null && attributes.ActuatorType.Length > 0)
+                    MelonLogger.Msg("[" + id +  "] ActuatorType " + string.Join(", ", attributes.ActuatorType));
+
+                if (attributes.StepCount != null && attributes.StepCount.Length > 0) {
+                    MelonLogger.Msg("[" + id + "] StepCount " + string.Join(", ", attributes.StepCount));
+                    maxSpeed = (int)attributes.StepCount[0];
+                }
+                    
+                if (attributes.Endpoints != null && attributes.Endpoints.Length > 0)
+                    MelonLogger.Msg("[" + id + "] Endpoints " + string.Join(", ", attributes.Endpoints));
+
+                if (attributes.MaxDuration != null && attributes.MaxDuration.Length > 0)
+                    MelonLogger.Msg("[" + id + "] MaxDuration " + string.Join(", ", attributes.MaxDuration));
+
+                if (attributes.Patterns != null && attributes.Patterns.Length > 0)
+                    foreach (string[] pattern in attributes.Patterns)
+                        MelonLogger.Msg("[" + id + "] Pattern " + string.Join(", ", pattern));
+            }
+
             CreateSlider();
 
             toys.Add(this);
             sharedToys.Add(id, this);
         }
 
-        internal Toy(string name, string id) {
-            toys.Add(this);
+        internal Toy(string name, string id, int maxSpeed, int maxSpeed2, int maxLinear, bool supportsRotate) {
+            if (maxSpeed2 != -1) supportsTwoVibrators = true;
+            if (maxLinear != -1) supportsLinear = true;
+
+            this.supportsRotate = supportsRotate;
+            this.maxSpeed = maxSpeed;
+            this.maxSpeed2 = maxSpeed2;
+            this.maxLinear = maxLinear;
             this.name = name;
             this.id = id;
+
+            MelonLogger.Msg($"Added toy Name: {name}, ID: {id} Max Speed: {maxSpeed}" + (supportsTwoVibrators ? $", Max Speed 2: {maxSpeed2}" : "") + (supportsLinear ? $", Max Linear Speed: {maxLinear}" : "") + (supportsRotate ? $", Supports Rotation" : ""));
+
+            toys.Add(this);
             CreateSlider();
         }
 
@@ -63,77 +130,76 @@ namespace Vibrator_Controller
 
             GameObject speedSliderObject = GameObject.Instantiate(slider, quickmenu.transform, true);
             speedSlider = speedSliderObject.GetComponent<UnityEngine.UI.Slider>();
-            speedSlider.maxValue = 20;
+            speedSlider.maxValue = maxSpeed;
             speedSlider.wholeNumbers = true;
             speedSlider.value = 0;
             speedSliderText = speedSlider.transform.Find("Fill Area/VolumeNumberText").GetComponent<UnityEngine.UI.Text>();
             speedSliderText.text = name + " Speed: 0%";
             speedSliderObject.SetActive(false);
 
-            if (name.Equals("Max")) {
+            if (supportsLinear) {
                 GameObject maxSliderObject = GameObject.Instantiate(slider, quickmenu.transform, true);
                 maxSliderObject.transform.localScale = new Vector3(0.7f, 1, 1);
                 maxSlider = maxSliderObject.GetComponent<UnityEngine.UI.Slider>();
-                maxSlider.maxValue = 3;
+                maxSlider.maxValue = maxLinear;
                 maxSlider.wholeNumbers = true;
                 maxSlider.value = 0;
                 Transform textTransform = maxSlider.transform.Find("Fill Area/VolumeNumberText");
                 textTransform.localScale = new Vector3(1, 1, 1);
                 maxSliderText = textTransform.GetComponent<UnityEngine.UI.Text>();
-                maxSliderText.text = "Max Contraction: 0";
+                maxSliderText.text = "Contraction: 0";
                 maxSliderObject.SetActive(false);
-            } else if (name.Equals("Nora")) {
-                rotateButton = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Rotate", "Rotate Nora", ButtonAPI.HorizontalPosition.LeftOfMenu, ButtonAPI.VerticalPosition.BelowBottomButton, ButtonAPI.ShortcutMenuTransform, delegate (bool a) {
+            }
+
+            if (supportsRotate) {
+                rotateButton = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Rotate", "Rotate", ButtonAPI.HorizontalPosition.LeftOfMenu, ButtonAPI.VerticalPosition.BelowBottomButton, ButtonAPI.ShortcutMenuTransform, delegate (bool a) {
                     rotate();
                 }, Color.white, Color.magenta, null, true, false, false, false, null, true);
                 rotateButton.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(720, 190);
                 rotateButton.gameObject.SetActive(false);
-            } else if (name.Equals("Edge")) {
+            }
+
+            if (supportsTwoVibrators) {
                 speedSlider.GetComponent<RectTransform>().sizeDelta = new Vector2(850, 160);
                 GameObject edgeSliderObject = GameObject.Instantiate(slider, quickmenu.transform, true);
                 edgeSliderObject.GetComponent<RectTransform>().sizeDelta = new Vector2(850, 160);
                 edgeSlider = edgeSliderObject.GetComponent<UnityEngine.UI.Slider>();
-                edgeSlider.maxValue = 20;
+                edgeSlider.maxValue = maxSpeed2;
                 edgeSlider.wholeNumbers = true;
                 edgeSlider.value = 0;
                 Transform textTransform = edgeSlider.transform.Find("Fill Area/VolumeNumberText");
                 textTransform.localScale = new Vector3(1, 1, 1);
                 edgeSliderText = textTransform.GetComponent<UnityEngine.UI.Text>();
-                edgeSliderText.text = "Edge Speed: 0%";
+                edgeSliderText.text = "Speed: 0%";
                 edgeSliderObject.SetActive(false);
             }
         }
 
-        internal void disable()
-        {
-            isActive = false;
-            MelonLogger.Msg("Disabled toy: " + name);
-
-            if (!isLocal()) {
+        internal void disable() {
+            if (isActive) {
+                isActive = false;
+                MelonLogger.Msg("Disabled toy: " + name);
                 hand = Hand.none;
+                fixSlider();
             }
-
-            fixSlider();
         }
 
-        internal void enable()
-        {
-            isActive = true;
-            MelonLogger.Msg("Enabled toy: " + name);
+        internal void enable() {
+            if (!isActive) {
+                isActive = true;
+                MelonLogger.Msg("Enabled toy: " + name);
+            }
         }
 
-        internal void setSpeed(int speed)
-        {
-            if (speed != lastSpeed)
-            {
+        internal void setSpeed(int speed) {
+            if (speed != lastSpeed) {
                 lastSpeed = speed;
-                speedSliderText.text = name + " Speed: " + (speed * 10) + "%";
-                //MelonLogger.Msg("Speed " + speed);
+                speedSliderText.text = $"{name} Speed: {(double)speed / maxSpeed * 100}%";
 
                 if (isLocal()) {
                     try {
-                        device.SendVibrateCmd((double)speed / 10);
-                        //MelonLogger.Msg("set device speed to " + ((double)speed / 10));
+                        device.SendVibrateCmd((double)speed / maxSpeed);
+                        //MelonLogger.Msg("set device speed to " + ((double)speed / maxSpeed));
                     } catch (ButtplugDeviceException) {
                         MelonLogger.Error("Toy not connected");
                     }
@@ -144,80 +210,99 @@ namespace Vibrator_Controller
             }
         }
 
-        internal void setEdgeSpeed(int speed)
-        {
-            if (speed != lastEdgeSpeed)
-            {
-                lastEdgeSpeed = (int)speed;
-                VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.SetSpeedEdge, this, speed));
-                edgeSliderText.text = name + " Speed: " + (speed * 10) + "%";
+        internal void setEdgeSpeed(int speed) {
+            if (speed != lastEdgeSpeed) {
+                lastEdgeSpeed = speed;
+                edgeSliderText.text = name + " Speed: " + (((double)speed /maxSpeed2) * 100) + "%";
+
+                if (isLocal()) {
+                    try {
+                        //TODO fix this. i'm not sure how to vibrate just the second motor
+                        device.SendVibrateCmd((double)speed / maxSpeed2);
+                    } catch (ButtplugDeviceException) {
+                        MelonLogger.Error("Toy not connected");
+                    }
+                } else {
+                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.SetSpeedEdge, this, speed));
+                }
+
+
             }
         }
 
-        internal void setContraction(int speed = -1)
-        {
-            if (speed == -1)
-            {
-                if (lastContraction != maxSlider.value)
-                {
+        internal void setContraction(int speed = -1) {
+            if (speed == -1) {
+                if (lastContraction != maxSlider.value) {
                     lastContraction = (int)maxSlider.value;
                     VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.SetAir, this, lastContraction));
-                    maxSliderText.text = "Max Contraction: " + lastContraction;
+                    maxSliderText.text = "Contraction: " + lastContraction;
                 }
-            }
-            else
-            {
-                if (speed != maxSlider.value)
-                {
+            } else {
+                if (speed != maxSlider.value) {
                     maxSlider.value = speed;
                     lastContraction = speed;
-                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.SetAir, this, (int)maxSlider.value));
-                    maxSliderText.text = "Max Contraction: " + maxSlider.value;
-                    
-                    //MelonLogger.Msg("Max Contraction: " + maxSlider.value);
+                    maxSliderText.text = "Contraction: " + maxSlider.value;
+
+                    //MelonLogger.Msg("Contraction: " + maxSlider.value);
+
+                    if (isLocal()) {
+                        try {
+                            //moves to new position in 1 second
+                            device.SendLinearCmd(1000, (double)speed / maxLinear);
+                        } catch (ButtplugDeviceException) {
+                            MelonLogger.Error("Toy not connected");
+                        }
+                    } else {
+                        VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.SetAir, this, (int)maxSlider.value));
+                    }
+
                 }
             }
         }
 
-        internal void rotate()
-        {
-            VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.SetRotate, this));
+        internal bool clockwise = false;
+        internal void rotate() {
+
+            if (isLocal()) {
+                try {
+                    clockwise = !clockwise;
+                    device.SendRotateCmd(lastSpeed, clockwise);
+                } catch (ButtplugDeviceException) {
+                    MelonLogger.Error("Toy not connected");
+                }
+            } else {
+                VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.SetRotate, this));
+            }
+            
         }
 
-        private void fixSlider()
-        {
+        private void fixSlider() {
             //MelonLogger.Msg("fixSlider " + name + " " + hand);
 
             float sliderY = 0;
 
-            if (hand != Hand.none && hand!=Hand.shared)
-            {
+            if (hand != Hand.none && hand != Hand.shared) {
                 speedSlider.transform.localPosition = new Vector3(-348.077f, 343.046f - sliderY, 0);
                 speedSlider.gameObject.SetActive(true);
 
-                //MelonLogger.Msg("fixSlider " + name + " enabled slider");
+                if (maxSlider != null) {
+                    maxSlider.transform.localPosition = new Vector3(492.955f, 343.046f - sliderY, 0);
+                    maxSlider.gameObject.SetActive(true);
+                }
 
-                switch (name)
-                {
-                    case "Edge":
-                        speedSlider.GetComponent<RectTransform>().anchoredPosition = new Vector2(-1260, -1340 - sliderY);
-                        edgeSlider.GetComponent<RectTransform>().anchoredPosition = new Vector2(-410, -1340 - sliderY);
-                        edgeSlider.gameObject.SetActive(true);
-                        break;
-                    case "Max":
-                        maxSlider.transform.localPosition = new Vector3(492.955f, 343.046f - sliderY, 0);
-                        maxSlider.gameObject.SetActive(true);
-                        break;
-                    case "Nora":
-                        rotateButton.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(1330, -1340 - sliderY);
-                        rotateButton.gameObject.SetActive(true);
-                        break;
+                if (rotateButton != null) {
+                    rotateButton.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(1330, -1340 - sliderY);
+                    rotateButton.gameObject.SetActive(true);
+                }
+
+                if (edgeSlider != null) {
+                    speedSlider.GetComponent<RectTransform>().anchoredPosition = new Vector2(-1260, -1340 - sliderY);
+                    edgeSlider.GetComponent<RectTransform>().anchoredPosition = new Vector2(-410, -1340 - sliderY);
+                    edgeSlider.gameObject.SetActive(true);
                 }
 
                 sliderY += 160;
-            }
-            else
-            {
+            } else {
                 speedSlider.gameObject.SetActive(false);
                 if (speedSlider != null) speedSlider.gameObject.SetActive(false);
                 if (maxSlider != null) maxSlider.gameObject.SetActive(false);
@@ -228,50 +313,26 @@ namespace Vibrator_Controller
             collider.size = new Vector3(collider.size.x, collider.size.y + sliderY, collider.size.z);
         }
 
-        internal void changeHand()
-        {
+        internal void changeHand() {
+            if (!isActive) return;
+
             hand++;
             if (hand > Enum.GetValues(typeof(Hand)).Cast<Hand>().Max())
                 hand = 0;
 
-
             if (hand == Hand.shared && !isLocal())
-                hand++; 
-            if (hand == Hand.both && !name.Equals("Edge"))
                 hand++;
-            /*
-            switch (hand)
-            {
-                case Hand.none:
-                    hand = Hand.left;
-                    break;
-                case Hand.left:
-                    if (isLocal()) {
-                        hand = Hand.shared;
-                        break;
-                    }
-                    hand = Hand.right;
-                    break;
-                case Hand.shared:
-                    hand = Hand.right;
-                    break;
-                case Hand.right:
-                    hand = Hand.either;
-                    break;
-                case Hand.either:
-                    hand = Hand.both;
-                    if (!name.Equals("Edge")) {
-                        changeHand();
-                        break;
-                    }
-                    break;
-                case Hand.both:
-                    hand = Hand.slider;
-                    break;
-                case Hand.slider:
-                    hand = Hand.none;
-                    break;
-            }*/
+            if (hand == Hand.both && !supportsTwoVibrators)
+                hand++;
+
+            if (isLocal()) {
+                if (hand == Hand.shared) {
+                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.AddToy, this));
+                } else {
+                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.RemoveToy, this));
+                }
+            }
+
             fixSlider();
         }
 
