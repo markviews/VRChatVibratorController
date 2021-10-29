@@ -47,7 +47,7 @@ namespace Vibrator_Controller {
             }
 
             hand = Hand.shared;
-
+            name = device.Name;
             //remove company name
             if (name.Split(' ').Length > 1) name = name.Split(' ')[1];
 
