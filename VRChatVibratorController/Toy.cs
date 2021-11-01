@@ -12,7 +12,7 @@ namespace Vibrator_Controller {
         none, shared, left, right, both, either, slider
     }
     public class Toy {
-        internal static ArrayList toys = new ArrayList();
+        internal static List<Toy> toys = new List<Toy>();
         internal static Dictionary<string, Toy> sharedToys = new Dictionary<string, Toy>();//id, Toy
 
         internal Hand hand = Hand.none;

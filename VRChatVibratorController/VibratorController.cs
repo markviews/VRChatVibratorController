@@ -24,7 +24,6 @@ namespace Vibrator_Controller {
         private static KeyCode lockButton, holdButton;
         private static GameObject quickMenu, menuContent;
         private static MelonPreferences_Category vibratorController;
-        private static ToyActionMenu toyActionMenu;
 
         private static bool scanning = false;
         private static ButtplugClient bpClient;
@@ -43,7 +42,7 @@ namespace Vibrator_Controller {
 
             if (useActionMenu && MelonHandler.Mods.Any(mod => mod.Info.Name == "ActionMenuApi")) {
                 try {
-                    toyActionMenu = new ToyActionMenu();
+                    new ToyActionMenu();
                 } catch (Exception) {
                     MelonLogger.Warning("Failed to add action menu button");
                 }
@@ -58,8 +57,7 @@ namespace Vibrator_Controller {
 
         private void onPlayerLeft(Player obj) {
             if (obj.prop_String_0 == VRCWSIntegration.connectedTo)
-                foreach (KeyValuePair<string, Toy> entry in Toy.sharedToys) {
-                    Toy toy = entry.Value;
+                foreach (Toy toy in Toy.toys.Where(x=> !x.isLocal())) {
                     toy.disable();
                 }
         }
