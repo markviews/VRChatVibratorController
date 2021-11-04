@@ -69,7 +69,8 @@ namespace Vibrator_Controller {
                 supportsLinear = true;
 
             if (device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.RotateCmd))
-                supportsRotate = true;
+                supportsRotate = true; 
+            
 
             if (device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.BatteryLevelCmd)) {
                 supportsBatteryLVL = true;
@@ -77,13 +78,15 @@ namespace Vibrator_Controller {
                     this.battery = battery.Result;
                 });
             }
-                
+
             //prints info about the device
             foreach (KeyValuePair<ServerMessage.Types.MessageAttributeType, ButtplugMessageAttributes> entry in device.AllowedMessages)
                 MelonLogger.Msg("[" + id + "] Allowed Message: " + entry.Key);
 
             if (device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.VibrateCmd)) {
                 ButtplugMessageAttributes attributes = device.AllowedMessages[ServerMessage.Types.MessageAttributeType.VibrateCmd];
+
+                
 
                 if (attributes.ActuatorType != null && attributes.ActuatorType.Length > 0)
                     MelonLogger.Msg("[" + id +  "] ActuatorType " + string.Join(", ", attributes.ActuatorType));
@@ -92,7 +95,12 @@ namespace Vibrator_Controller {
                     MelonLogger.Msg("[" + id + "] StepCount " + string.Join(", ", attributes.StepCount));
                     maxSpeed = (int)attributes.StepCount[0];
                 }
-                    
+                if (attributes.StepCount != null && attributes.StepCount.Length == 2)
+                {
+                    supportsTwoVibrators = true;
+                    maxSpeed2 = (int)attributes.StepCount[1];
+                }
+
                 if (attributes.Endpoints != null && attributes.Endpoints.Length > 0)
                     MelonLogger.Msg("[" + id + "] Endpoints " + string.Join(", ", attributes.Endpoints));
 
@@ -220,8 +228,11 @@ namespace Vibrator_Controller {
                 if (isLocal()) {
                     try
                     {
-                        device.SendVibrateCmd((double)speed / maxSpeed);
-                        device.SendVibrateCmd((double)speed / maxSpeed);
+                        if(supportsTwoVibrators)
+                            device.SendVibrateCmd(new List<double> { (double)lastSpeed / maxSpeed, (double)lastEdgeSpeed / maxSpeed2 });
+                        else
+                            device.SendVibrateCmd((double)speed / maxSpeed);
+
                         //MelonLogger.Msg("set device speed to " + ((double)speed / maxSpeed));
                     } catch (ButtplugDeviceException) {
                         MelonLogger.Error("Toy not connected");
@@ -241,7 +252,7 @@ namespace Vibrator_Controller {
                 if (isLocal()) {
                     try {
                         //TODO fix this. i'm not sure how to vibrate just the second motor
-                        device.SendVibrateCmd((double)speed / maxSpeed2);
+                        device.SendVibrateCmd(new List<double> { (double)lastSpeed / maxSpeed, (double)lastEdgeSpeed / maxSpeed2 });
                     } catch (ButtplugDeviceException) {
                         MelonLogger.Error("Toy not connected");
                     }
