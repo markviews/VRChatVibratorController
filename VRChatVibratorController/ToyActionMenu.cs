@@ -6,6 +6,7 @@ using System.Reflection;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using ActionMenuApi.Api;
+using System.Linq;
 
 namespace Vibrator_Controller {
     class ToyActionMenu {
@@ -50,10 +51,14 @@ namespace Vibrator_Controller {
 
         private static void SetupButtons() {
             VRCActionMenuPage.AddSubMenu(ActionMenuPage.Main, "Vibrator Controller", delegate {
-                foreach (Toy toy in Toy.toys) {
-                    try {
+                foreach (Toy toy in Toy.allToys)
+                {
+                    try
+                    {
                         if (toy.isActive && toy.hand != Hand.shared) ToysMenu(toy);
-                    } catch (Exception e) {
+                    }
+                    catch (Exception e)
+                    {
                         MelonLogger.Warning($"Error with toy {toy.name}: " + e.Message);
                     }
                 }

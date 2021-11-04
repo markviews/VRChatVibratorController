@@ -6,19 +6,24 @@ using Buttplug;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
+using VRChatUtilityKit.Utilities;
 
 namespace Vibrator_Controller {
     public enum Hand {
         none, shared, left, right, both, either, slider
     }
     public class Toy {
-        internal static List<Toy> toys = new List<Toy>();
-        internal static Dictionary<string, Toy> sharedToys = new Dictionary<string, Toy>();//id, Toy
+        internal static Dictionary<ulong, Toy> remoteToys { get; set; } = new Dictionary<ulong, Toy>();
+        internal static Dictionary<ulong, Toy> myToys { get; set; } = new Dictionary<ulong, Toy>();
+
+        internal static List<Toy> allToys => remoteToys.Select(x=>x.Value).Union(myToys.Select(x => x.Value)).ToList();
 
         internal Hand hand = Hand.none;
         internal string name;
-        internal string id;
+        internal ulong id;
         internal bool isActive = true;
+
         internal UnityEngine.UI.Slider speedSlider;//slider for vibrator speed
         internal UnityEngine.UI.Text speedSliderText;
         internal UnityEngine.UI.Slider maxSlider;//slider for max's contractions
@@ -31,7 +36,6 @@ namespace Vibrator_Controller {
 
         /* 
          * TODO
-         * fix network lag spikes 
          * support for toys with rotate, 2 vibrators, linear functions. (just need to set variables below)
          */
 
@@ -40,18 +44,24 @@ namespace Vibrator_Controller {
         internal double battery = -1;
 
         internal Toy(ButtplugClientDevice device) {
-            int count = 1;
-            id = device.Name.Replace(" ", "");
-            while (sharedToys.ContainsKey(id)) {
-                id = device.Name.Replace(" ", "") + count++;
-            }
-
+            id = device.Index;
             hand = Hand.shared;
             name = device.Name;
+            this.device = device;
+
             //remove company name
             if (name.Split(' ').Length > 1) name = name.Split(' ')[1];
 
-            this.device = device;
+            if (myToys.ContainsKey(id))
+            {
+                MelonLogger.Msg("Device reconnected: " + name + " [" + id + "]");
+                myToys[id].name = name; //id should be uniquie but just to be sure
+                myToys[id].device = device;
+                myToys[id].enable();
+                return;
+            }
+
+
 
             MelonLogger.Msg("Device connected: " + name + " [" + id + "]");
 
@@ -59,23 +69,24 @@ namespace Vibrator_Controller {
                 supportsLinear = true;
 
             if (device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.RotateCmd))
-                supportsRotate = true;
+                supportsRotate = true; 
+            
 
             if (device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.BatteryLevelCmd)) {
                 supportsBatteryLVL = true;
                 device.SendBatteryLevelCmd().ContinueWith(battery => { 
                     this.battery = battery.Result;
-                    VibratorController.menu.Hide();
-                    VibratorController.ShowMenu();
                 });
             }
-                
+
             //prints info about the device
             foreach (KeyValuePair<ServerMessage.Types.MessageAttributeType, ButtplugMessageAttributes> entry in device.AllowedMessages)
                 MelonLogger.Msg("[" + id + "] Allowed Message: " + entry.Key);
 
             if (device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.VibrateCmd)) {
                 ButtplugMessageAttributes attributes = device.AllowedMessages[ServerMessage.Types.MessageAttributeType.VibrateCmd];
+
+                
 
                 if (attributes.ActuatorType != null && attributes.ActuatorType.Length > 0)
                     MelonLogger.Msg("[" + id +  "] ActuatorType " + string.Join(", ", attributes.ActuatorType));
@@ -84,7 +95,12 @@ namespace Vibrator_Controller {
                     MelonLogger.Msg("[" + id + "] StepCount " + string.Join(", ", attributes.StepCount));
                     maxSpeed = (int)attributes.StepCount[0];
                 }
-                    
+                if (attributes.StepCount != null && attributes.StepCount.Length == 2)
+                {
+                    supportsTwoVibrators = true;
+                    maxSpeed2 = (int)attributes.StepCount[1];
+                }
+
                 if (attributes.Endpoints != null && attributes.Endpoints.Length > 0)
                     MelonLogger.Msg("[" + id + "] Endpoints " + string.Join(", ", attributes.Endpoints));
 
@@ -98,11 +114,28 @@ namespace Vibrator_Controller {
 
             CreateSlider();
 
-            toys.Add(this);
-            sharedToys.Add(id, this);
+
+            myToys.Add(id, this);
         }
 
-        internal Toy(string name, string id, int maxSpeed, int maxSpeed2, int maxLinear, bool supportsRotate) {
+        internal Toy(string name, ulong id, int maxSpeed, int maxSpeed2, int maxLinear, bool supportsRotate) {
+            
+
+            if (remoteToys.ContainsKey(id))
+            {
+                MelonLogger.Msg("Device reconnected: " + name + " [" + id + "]");
+                if (maxSpeed2 != -1) remoteToys[id].supportsTwoVibrators = true;
+                if (maxLinear != -1) remoteToys[id].supportsLinear = true;
+                remoteToys[id].name = name;
+                remoteToys[id].supportsRotate = supportsRotate;
+                remoteToys[id].maxSpeed = maxSpeed;
+                remoteToys[id].maxSpeed2 = maxSpeed2;
+                remoteToys[id].maxLinear = maxLinear;
+                remoteToys[id].enable();
+                MelonLogger.Msg($"Reconnected toy Name: {remoteToys[id].name}, ID: {remoteToys[id].id} Max Speed: {remoteToys[id].maxSpeed}" + (remoteToys[id].supportsTwoVibrators ? $", Max Speed 2: {remoteToys[id].maxSpeed2}" : "") + (remoteToys[id].supportsLinear ? $", Max Linear Speed: {remoteToys[id].maxLinear}" : "") + (remoteToys[id].supportsRotate ? $", Supports Rotation" : ""));
+                return;
+            }
+
             if (maxSpeed2 != -1) supportsTwoVibrators = true;
             if (maxLinear != -1) supportsLinear = true;
 
@@ -112,10 +145,10 @@ namespace Vibrator_Controller {
             this.maxLinear = maxLinear;
             this.name = name;
             this.id = id;
-
+            
             MelonLogger.Msg($"Added toy Name: {name}, ID: {id} Max Speed: {maxSpeed}" + (supportsTwoVibrators ? $", Max Speed 2: {maxSpeed2}" : "") + (supportsLinear ? $", Max Linear Speed: {maxLinear}" : "") + (supportsRotate ? $", Supports Rotation" : ""));
 
-            toys.Add(this);
+            remoteToys.Add(id, this);
             CreateSlider();
         }
 
@@ -176,6 +209,8 @@ namespace Vibrator_Controller {
                 MelonLogger.Msg("Disabled toy: " + name);
                 hand = Hand.none;
                 fixSlider();
+                if (isLocal())
+                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.RemoveToy, this));
             }
         }
 
@@ -190,10 +225,14 @@ namespace Vibrator_Controller {
             if (speed != lastSpeed) {
                 lastSpeed = speed;
                 speedSliderText.text = $"{name} Speed: {(double)speed / maxSpeed * 100}%";
-
                 if (isLocal()) {
-                    try {
-                        device.SendVibrateCmd((double)speed / maxSpeed);
+                    try
+                    {
+                        if(supportsTwoVibrators)
+                            device.SendVibrateCmd(new List<double> { (double)lastSpeed / maxSpeed, (double)lastEdgeSpeed / maxSpeed2 });
+                        else
+                            device.SendVibrateCmd((double)speed / maxSpeed);
+
                         //MelonLogger.Msg("set device speed to " + ((double)speed / maxSpeed));
                     } catch (ButtplugDeviceException) {
                         MelonLogger.Error("Toy not connected");
@@ -212,8 +251,7 @@ namespace Vibrator_Controller {
 
                 if (isLocal()) {
                     try {
-                        //TODO fix this. i'm not sure how to vibrate just the second motor
-                        device.SendVibrateCmd((double)speed / maxSpeed2);
+                        device.SendVibrateCmd(new List<double> { (double)lastSpeed / maxSpeed, (double)lastEdgeSpeed / maxSpeed2 });
                     } catch (ButtplugDeviceException) {
                         MelonLogger.Error("Toy not connected");
                     }
