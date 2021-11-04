@@ -263,9 +263,9 @@ namespace Vibrator_Controller {
         internal static void message(VibratorControllerMessage msg, string userID) {
 
             Toy toy = null;
-            if (Toy.remoteToys.ContainsKey(msg.ToyID))
+            if (Toy.myToys.ContainsKey(msg.ToyID))
             {
-                toy = Toy.remoteToys[msg.ToyID];
+                toy = Toy.myToys[msg.ToyID];
             }
 
             switch (msg.Command) {

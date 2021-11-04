@@ -124,15 +124,15 @@ namespace Vibrator_Controller {
             if (remoteToys.ContainsKey(id))
             {
                 MelonLogger.Msg("Device reconnected: " + name + " [" + id + "]");
-                if (maxSpeed2 != -1) myToys[id].supportsTwoVibrators = true;
-                if (maxLinear != -1) myToys[id].supportsLinear = true;
-                myToys[id].name = name;
-                myToys[id].supportsRotate = supportsRotate;
-                myToys[id].maxSpeed = maxSpeed;
-                myToys[id].maxSpeed2 = maxSpeed2;
-                myToys[id].maxLinear = maxLinear;
-                myToys[id].enable();
-                MelonLogger.Msg($"Reconnected toy Name: {name}, ID: {id} Max Speed: {maxSpeed}" + (supportsTwoVibrators ? $", Max Speed 2: {maxSpeed2}" : "") + (supportsLinear ? $", Max Linear Speed: {maxLinear}" : "") + (supportsRotate ? $", Supports Rotation" : ""));
+                if (maxSpeed2 != -1) remoteToys[id].supportsTwoVibrators = true;
+                if (maxLinear != -1) remoteToys[id].supportsLinear = true;
+                remoteToys[id].name = name;
+                remoteToys[id].supportsRotate = supportsRotate;
+                remoteToys[id].maxSpeed = maxSpeed;
+                remoteToys[id].maxSpeed2 = maxSpeed2;
+                remoteToys[id].maxLinear = maxLinear;
+                remoteToys[id].enable();
+                MelonLogger.Msg($"Reconnected toy Name: {remoteToys[id].name}, ID: {remoteToys[id].id} Max Speed: {remoteToys[id].maxSpeed}" + (remoteToys[id].supportsTwoVibrators ? $", Max Speed 2: {remoteToys[id].maxSpeed2}" : "") + (remoteToys[id].supportsLinear ? $", Max Linear Speed: {remoteToys[id].maxLinear}" : "") + (remoteToys[id].supportsRotate ? $", Supports Rotation" : ""));
                 return;
             }
 
@@ -251,7 +251,6 @@ namespace Vibrator_Controller {
 
                 if (isLocal()) {
                     try {
-                        //TODO fix this. i'm not sure how to vibrate just the second motor
                         device.SendVibrateCmd(new List<double> { (double)lastSpeed / maxSpeed, (double)lastEdgeSpeed / maxSpeed2 });
                     } catch (ButtplugDeviceException) {
                         MelonLogger.Error("Toy not connected");
