@@ -46,13 +46,6 @@ namespace Vibrator_Controller {
             hand = Hand.shared;
             name = device.Name;
 
-            Console.WriteLine("Already connedcted");
-            foreach (var item in myToys)
-            {
-                Console.WriteLine(item.Key + "::  " +item.Value);
-            }
-
-
             if (myToys.ContainsKey(id))
             {
                 MelonLogger.Msg("Device reconnected: " + name + " [" + id + "]");
