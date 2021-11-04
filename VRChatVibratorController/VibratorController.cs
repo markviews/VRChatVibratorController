@@ -13,7 +13,7 @@ using VRChatUtilityKit.Utilities;
 using VRC;
 using System.Threading.Tasks;
 
-[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.4.5", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
+[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.4.4", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
 [assembly: MelonGame("VRChat", "VRChat")]
 [assembly: MelonAdditionalDependencies("UIExpansionKit", "VRCWSLibary", "VRChatUtilityKit")]
 
@@ -184,12 +184,6 @@ namespace Vibrator_Controller {
             bpClient.DeviceAdded += (object aObj, DeviceAddedEventArgs args) => {
                 new Toy(args.Device);
                 bpClient.StopScanningAsync();
-                new Task(async () =>
-                {
-                    await AsyncUtils.YieldToMainThread();
-                    menu.Hide();
-                    ShowMenu();
-                });
             };
             
             bpClient.DeviceRemoved += (object aObj, DeviceRemovedEventArgs args) => {
@@ -197,13 +191,6 @@ namespace Vibrator_Controller {
                 {
                     Toy.myToys[args.Device.Index].disable();
                 }
-
-                new Task(async () =>
-                {
-                    await AsyncUtils.YieldToMainThread();
-                    menu.Hide();
-                    ShowMenu();
-                });
             };
         }
 
