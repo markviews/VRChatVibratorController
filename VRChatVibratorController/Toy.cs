@@ -6,6 +6,8 @@ using Buttplug;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
+using VRChatUtilityKit.Utilities;
 
 namespace Vibrator_Controller {
     public enum Hand {
@@ -73,8 +75,6 @@ namespace Vibrator_Controller {
                 supportsBatteryLVL = true;
                 device.SendBatteryLevelCmd().ContinueWith(battery => { 
                     this.battery = battery.Result;
-                    VibratorController.menu.Hide();
-                    VibratorController.ShowMenu();
                 });
             }
                 
