@@ -11,9 +11,8 @@ using System.Reflection;
 using System.Collections.Generic;
 using VRChatUtilityKit.Utilities;
 using VRC;
-using System.Threading.Tasks;
 
-[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.4.4", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
+[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.4.8", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
 [assembly: MelonGame("VRChat", "VRChat")]
 [assembly: MelonAdditionalDependencies("UIExpansionKit", "VRCWSLibary", "VRChatUtilityKit")]
 

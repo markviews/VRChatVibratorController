@@ -1,13 +1,10 @@
 ﻿using MelonLoader;
 using PlagueButtonAPI;
-using System.Collections;
 using UnityEngine;
 using Buttplug;
 using System.Collections.Generic;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
-using VRChatUtilityKit.Utilities;
 
 namespace Vibrator_Controller {
     public enum Hand {
@@ -33,11 +30,6 @@ namespace Vibrator_Controller {
         internal ButtonAPI.PlagueButton rotateButton;
         internal ButtplugClientDevice device;
         internal int lastSpeed = 0, lastEdgeSpeed = 0, lastContraction = 0;
-
-        /* 
-         * TODO
-         * support for toys with rotate, 2 vibrators, linear functions. (just need to set variables below)
-         */
 
         internal bool supportsRotate = false, supportsLinear = false, supportsTwoVibrators = false, supportsBatteryLVL = false;
         internal int maxSpeed = 20, maxSpeed2 = -1, maxLinear = -1;
