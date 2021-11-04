@@ -12,13 +12,16 @@ namespace Vibrator_Controller {
         none, shared, left, right, both, either, slider
     }
     public class Toy {
-        internal static List<Toy> toys = new List<Toy>();
-        internal static Dictionary<string, Toy> sharedToys = new Dictionary<string, Toy>();//id, Toy
+        internal static Dictionary<ulong, Toy> remoteToys { get; set; } = new Dictionary<ulong, Toy>();
+        internal static Dictionary<ulong, Toy> myToys { get; set; } = new Dictionary<ulong, Toy>();
+
+        internal static List<Toy> allToys => remoteToys.Select(x=>x.Value).Union(myToys.Select(x => x.Value)).ToList();
 
         internal Hand hand = Hand.none;
         internal string name;
-        internal string id;
+        internal ulong id;
         internal bool isActive = true;
+
         internal UnityEngine.UI.Slider speedSlider;//slider for vibrator speed
         internal UnityEngine.UI.Text speedSliderText;
         internal UnityEngine.UI.Slider maxSlider;//slider for max's contractions
@@ -31,7 +34,6 @@ namespace Vibrator_Controller {
 
         /* 
          * TODO
-         * fix network lag spikes 
          * support for toys with rotate, 2 vibrators, linear functions. (just need to set variables below)
          */
 
@@ -40,14 +42,25 @@ namespace Vibrator_Controller {
         internal double battery = -1;
 
         internal Toy(ButtplugClientDevice device) {
-            int count = 1;
-            id = device.Name.Replace(" ", "");
-            while (sharedToys.ContainsKey(id)) {
-                id = device.Name.Replace(" ", "") + count++;
-            }
-
+            id = device.Index;
             hand = Hand.shared;
             name = device.Name;
+
+            Console.WriteLine("Already connedcted");
+            foreach (var item in myToys)
+            {
+                Console.WriteLine(item.Key + "::  " +item.Value);
+            }
+
+
+            if (myToys.ContainsKey(id))
+            {
+                MelonLogger.Msg("Device reconnected: " + name + " [" + id + "]");
+                myToys[id].name = name; //id should be uniquie but just to be sure
+                myToys[id].enable();
+                return;
+            }
+
             //remove company name
             if (name.Split(' ').Length > 1) name = name.Split(' ')[1];
 
@@ -98,11 +111,28 @@ namespace Vibrator_Controller {
 
             CreateSlider();
 
-            toys.Add(this);
-            sharedToys.Add(id, this);
+
+            myToys.Add(id, this);
         }
 
-        internal Toy(string name, string id, int maxSpeed, int maxSpeed2, int maxLinear, bool supportsRotate) {
+        internal Toy(string name, ulong id, int maxSpeed, int maxSpeed2, int maxLinear, bool supportsRotate) {
+            
+
+            if (remoteToys.ContainsKey(id))
+            {
+                MelonLogger.Msg("Device reconnected: " + name + " [" + id + "]");
+                if (maxSpeed2 != -1) myToys[id].supportsTwoVibrators = true;
+                if (maxLinear != -1) myToys[id].supportsLinear = true;
+                myToys[id].name = name;
+                myToys[id].supportsRotate = supportsRotate;
+                myToys[id].maxSpeed = maxSpeed;
+                myToys[id].maxSpeed2 = maxSpeed2;
+                myToys[id].maxLinear = maxLinear;
+                myToys[id].enable();
+                MelonLogger.Msg($"Reconnected toy Name: {name}, ID: {id} Max Speed: {maxSpeed}" + (supportsTwoVibrators ? $", Max Speed 2: {maxSpeed2}" : "") + (supportsLinear ? $", Max Linear Speed: {maxLinear}" : "") + (supportsRotate ? $", Supports Rotation" : ""));
+                return;
+            }
+
             if (maxSpeed2 != -1) supportsTwoVibrators = true;
             if (maxLinear != -1) supportsLinear = true;
 
@@ -112,10 +142,10 @@ namespace Vibrator_Controller {
             this.maxLinear = maxLinear;
             this.name = name;
             this.id = id;
-
+            
             MelonLogger.Msg($"Added toy Name: {name}, ID: {id} Max Speed: {maxSpeed}" + (supportsTwoVibrators ? $", Max Speed 2: {maxSpeed2}" : "") + (supportsLinear ? $", Max Linear Speed: {maxLinear}" : "") + (supportsRotate ? $", Supports Rotation" : ""));
 
-            toys.Add(this);
+            remoteToys.Add(id, this);
             CreateSlider();
         }
 
@@ -176,6 +206,8 @@ namespace Vibrator_Controller {
                 MelonLogger.Msg("Disabled toy: " + name);
                 hand = Hand.none;
                 fixSlider();
+                if (isLocal())
+                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.RemoveToy, this));
             }
         }
 
@@ -190,7 +222,7 @@ namespace Vibrator_Controller {
             if (speed != lastSpeed) {
                 lastSpeed = speed;
                 speedSliderText.text = $"{name} Speed: {(double)speed / maxSpeed * 100}%";
-
+                Console.WriteLine(isLocal() + "   " + speed);
                 if (isLocal()) {
                     try {
                         device.SendVibrateCmd((double)speed / maxSpeed);
