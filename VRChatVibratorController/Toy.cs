@@ -216,9 +216,10 @@ namespace Vibrator_Controller {
             if (speed != lastSpeed) {
                 lastSpeed = speed;
                 speedSliderText.text = $"{name} Speed: {(double)speed / maxSpeed * 100}%";
-                Console.WriteLine(isLocal() + "   " + speed);
                 if (isLocal()) {
-                    try {
+                    try
+                    {
+                        device.SendVibrateCmd((double)speed / maxSpeed);
                         device.SendVibrateCmd((double)speed / maxSpeed);
                         //MelonLogger.Msg("set device speed to " + ((double)speed / maxSpeed));
                     } catch (ButtplugDeviceException) {

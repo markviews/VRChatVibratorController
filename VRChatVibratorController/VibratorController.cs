@@ -13,7 +13,7 @@ using VRChatUtilityKit.Utilities;
 using VRC;
 using System.Threading.Tasks;
 
-[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.4.4", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
+[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.4.5", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
 [assembly: MelonGame("VRChat", "VRChat")]
 [assembly: MelonAdditionalDependencies("UIExpansionKit", "VRCWSLibary", "VRChatUtilityKit")]
 
@@ -26,7 +26,6 @@ namespace Vibrator_Controller {
         private static GameObject quickMenu, menuContent;
         private static MelonPreferences_Category vibratorController;
 
-        private static bool scanning = false;
         private static ButtplugClient bpClient;
         internal static ICustomShowableLayoutedMenu menu;
 
@@ -123,10 +122,9 @@ namespace Vibrator_Controller {
                 return;
             }
 
-            if (scanning) {
+            if (bpClient.IsScanning) {
                 menu.AddSimpleButton("Scanning..\nPress To\nStop", () => {
                     MelonLogger.Msg("Done Scanning.");
-                    scanning = false;
                     bpClient.StopScanningAsync();
                     menu.Hide();
                     ShowMenu();
@@ -134,7 +132,6 @@ namespace Vibrator_Controller {
             } else {
                 menu.AddSimpleButton("Scan for\nLocal Toys\n(Bluetooth)", () => {
                     MelonLogger.Msg("Scanning for toys..");
-                    scanning = true;
                     bpClient.StartScanningAsync();
                     menu.Hide();
                     ShowMenu();
@@ -184,13 +181,16 @@ namespace Vibrator_Controller {
         private static void SetupBP() {
             bpClient = new ButtplugClient("VRCVibratorController");
             bpClient.ConnectAsync(new ButtplugEmbeddedConnectorOptions()).ContinueWith((t) => {
-                menu.Hide();
-                ShowMenu();
+                new Task(async () =>
+                {
+                    await AsyncUtils.YieldToMainThread();
+                    menu.Hide();
+                    ShowMenu();
+                });
             });
             bpClient.DeviceAdded += (object aObj, DeviceAddedEventArgs args) => {
                 new Toy(args.Device);
                 bpClient.StopScanningAsync();
-                scanning = false;
                 new Task(async () =>
                 {
                     await AsyncUtils.YieldToMainThread();
@@ -198,6 +198,7 @@ namespace Vibrator_Controller {
                     ShowMenu();
                 });
             };
+            
             bpClient.DeviceRemoved += (object aObj, DeviceRemovedEventArgs args) => {
                 if (Toy.myToys.ContainsKey(args.Device.Index))
                 {
@@ -209,7 +210,6 @@ namespace Vibrator_Controller {
                     await AsyncUtils.YieldToMainThread();
                     ShowMenu();
                 });
-                ShowMenu();
             };
         }
 
