@@ -180,14 +180,7 @@ namespace Vibrator_Controller {
 
         private static void SetupBP() {
             bpClient = new ButtplugClient("VRCVibratorController");
-            bpClient.ConnectAsync(new ButtplugEmbeddedConnectorOptions()).ContinueWith((t) => {
-                new Task(async () =>
-                {
-                    await AsyncUtils.YieldToMainThread();
-                    menu.Hide();
-                    ShowMenu();
-                });
-            });
+            bpClient.ConnectAsync(new ButtplugEmbeddedConnectorOptions());
             bpClient.DeviceAdded += (object aObj, DeviceAddedEventArgs args) => {
                 new Toy(args.Device);
                 bpClient.StopScanningAsync();
@@ -208,6 +201,7 @@ namespace Vibrator_Controller {
                 new Task(async () =>
                 {
                     await AsyncUtils.YieldToMainThread();
+                    menu.Hide();
                     ShowMenu();
                 });
             };

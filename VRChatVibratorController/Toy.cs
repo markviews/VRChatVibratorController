@@ -45,6 +45,7 @@ namespace Vibrator_Controller {
             id = device.Index;
             hand = Hand.shared;
             name = device.Name;
+            this.device = device;
 
             //remove company name
             if (name.Split(' ').Length > 1) name = name.Split(' ')[1];
@@ -53,12 +54,12 @@ namespace Vibrator_Controller {
             {
                 MelonLogger.Msg("Device reconnected: " + name + " [" + id + "]");
                 myToys[id].name = name; //id should be uniquie but just to be sure
+                myToys[id].device = device;
                 myToys[id].enable();
                 return;
             }
 
 
-            this.device = device;
 
             MelonLogger.Msg("Device connected: " + name + " [" + id + "]");
 
