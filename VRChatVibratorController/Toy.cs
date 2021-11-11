@@ -1,5 +1,4 @@
 ﻿using MelonLoader;
-using PlagueButtonAPI;
 using UnityEngine;
 using Buttplug;
 using System.Collections.Generic;
@@ -27,7 +26,7 @@ namespace Vibrator_Controller {
         internal UnityEngine.UI.Text maxSliderText;
         internal UnityEngine.UI.Slider edgeSlider;//slider for edge's 2nd speed
         internal UnityEngine.UI.Text edgeSliderText;
-        internal ButtonAPI.PlagueButton rotateButton;
+        //internal ButtonAPI.PlagueButton rotateButton;
         internal ButtplugClientDevice device;
         internal int lastSpeed = 0, lastEdgeSpeed = 0, lastContraction = 0;
 
@@ -172,11 +171,13 @@ namespace Vibrator_Controller {
             }
 
             if (supportsRotate) {
+                /*
                 rotateButton = ButtonAPI.CreateButton(ButtonAPI.ButtonType.Default, "Rotate", "Rotate", ButtonAPI.HorizontalPosition.LeftOfMenu, ButtonAPI.VerticalPosition.BelowBottomButton, ButtonAPI.ShortcutMenuTransform, delegate (bool a) {
                     rotate();
                 }, Color.white, Color.magenta, null, true, false, false, false, null, true);
                 rotateButton.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(720, 190);
                 rotateButton.gameObject.SetActive(false);
+                */
             }
 
             if (supportsTwoVibrators) {
@@ -314,12 +315,12 @@ namespace Vibrator_Controller {
                     maxSlider.transform.localPosition = new Vector3(492.955f, 343.046f - sliderY, 0);
                     maxSlider.gameObject.SetActive(true);
                 }
-
+                /*
                 if (rotateButton != null) {
                     rotateButton.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(1330, -1340 - sliderY);
                     rotateButton.gameObject.SetActive(true);
                 }
-
+                */
                 if (edgeSlider != null) {
                     speedSlider.GetComponent<RectTransform>().anchoredPosition = new Vector2(-1260, -1340 - sliderY);
                     edgeSlider.GetComponent<RectTransform>().anchoredPosition = new Vector2(-410, -1340 - sliderY);
@@ -331,7 +332,7 @@ namespace Vibrator_Controller {
                 speedSlider.gameObject.SetActive(false);
                 if (speedSlider != null) speedSlider.gameObject.SetActive(false);
                 if (maxSlider != null) maxSlider.gameObject.SetActive(false);
-                if (rotateButton != null) rotateButton.gameObject.SetActive(false);
+                //if (rotateButton != null) rotateButton.gameObject.SetActive(false);
             }
 
             BoxCollider collider = GameObject.Find("UserInterface/QuickMenu").GetComponent<BoxCollider>();

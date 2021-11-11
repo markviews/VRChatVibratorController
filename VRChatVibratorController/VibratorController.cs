@@ -9,8 +9,9 @@ using UnityEngine;
 using Vibrator_Controller;
 using System.Reflection;
 using System.Collections.Generic;
-using VRChatUtilityKit.Utilities;
+//using VRChatUtilityKit.Utilities;
 using VRC;
+using Friend_Notes;
 
 [assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.4.8", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
 [assembly: MelonGame("VRChat", "VRChat")]
@@ -50,8 +51,15 @@ namespace Vibrator_Controller {
             extractDLL();
 
             VRCWSIntegration.Init();
-            ExpansionKitApi.RegisterWaitConditionBeforeDecorating(CreateButton());
-            NetworkEvents.OnPlayerLeft += onPlayerLeft;
+            CreateButton();
+            UiManagerInitializer();
+        }
+
+        public IEnumerator UiManagerInitializer() {
+            while (VRCUiManager.prop_VRCUiManager_0 == null) yield return null;
+
+            NetworkManagerHooks.Initialize();
+            NetworkManagerHooks.OnLeave += onPlayerLeft;
         }
 
         private void onPlayerLeft(Player obj) {
@@ -73,15 +81,14 @@ namespace Vibrator_Controller {
             }
         }
 
-        private IEnumerator CreateButton() {
-            while (QuickMenu.prop_QuickMenu_0 == null) yield return null;
-
+        private void CreateButton() {
             quickMenu = GameObject.Find("UserInterface/QuickMenu/QuickMenu_NewElements");
             menuContent = GameObject.Find("UserInterface/MenuContent/Backdrop/Backdrop");
 
 
             ExpansionKitApi.GetExpandedMenu(ExpandedMenu.UserQuickMenu).AddSimpleButton("Get\nToys", () => {
-                VRCWSIntegration.connectedTo = VRCUtils.ActivePlayerInQuickMenu.prop_String_0;
+                String name = GameObject.Find("UserInterface/Canvas_QuickMenu(Clone)/Container/Window/QMParent/Menu_SelectedUser_Local").GetComponent<VRC.UI.Elements.Menus.SelectedUserMenuQM>().field_Private_IUser_0.prop_String_1;
+                VRCWSIntegration.connectedTo = name;
                 VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.GetToys));
             });
 
