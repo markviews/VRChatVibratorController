@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using VRC;
 using Friend_Notes;
 
-[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.4.8", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
+[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.4.9", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
 [assembly: MelonGame("VRChat", "VRChat")]
 [assembly: MelonAdditionalDependencies("UIExpansionKit", "VRCWSLibary", "VRChatUtilityKit")]
 
