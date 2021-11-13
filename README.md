@@ -15,7 +15,7 @@ Lets you control your friends bluetooth vibrator using your vr controllers.
 4. Friend that wants to control: set controll option in the mod menu
 
 ### Credits
-* Plague for [PlagueButtonAPI](https://github.com/PlagueVRC/PlagueButtonAPI) and helping with the project a bunch
+* Plague for helping with the project a bunch
 * abbeybabbey for UI improvments
 * Knah for [UIExpansionKit](https://github.com/knah/VRCMods) and AssetBundle code
 * gompocp for [ActionMenuApi](https://github.com/gompocp/ActionMenuApi)
