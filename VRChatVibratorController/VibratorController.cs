@@ -9,7 +9,6 @@ using UnityEngine;
 using Vibrator_Controller;
 using System.Reflection;
 using System.Collections.Generic;
-//using VRChatUtilityKit.Utilities;
 using VRC;
 using Friend_Notes;
 
@@ -22,12 +21,11 @@ namespace Vibrator_Controller {
 
         private static string findButton = null;
         private static bool useActionMenu, lockSpeed = false, pauseControl = false;
+        private static int buttonStep;
         private static KeyCode lockButton, holdButton;
-        private static GameObject quickMenu, menuContent;
+        private static GameObject quickMenu;
         private static MelonPreferences_Category vibratorController;
-
         private static ButtplugClient bpClient;
-        internal static ICustomShowableLayoutedMenu menu;
 
         public override void OnApplicationStart() {
             vibratorController = MelonPreferences.CreateCategory("VibratorController");
@@ -35,10 +33,12 @@ namespace Vibrator_Controller {
             MelonPreferences.CreateEntry(vibratorController.Identifier, "lockButton", 0, "Button to lock speed");
             MelonPreferences.CreateEntry(vibratorController.Identifier, "holdButton", 0, "Button to hold to use toy");
             MelonPreferences.CreateEntry(vibratorController.Identifier, "ActionMenu", true, "action menu integration");
+            MelonPreferences.CreateEntry(vibratorController.Identifier, "buttonStep", 5, "What % to change when pressing button");
 
             lockButton = (KeyCode)MelonPreferences.GetEntryValue<int>(vibratorController.Identifier, "lockButton");
             holdButton = (KeyCode)MelonPreferences.GetEntryValue<int>(vibratorController.Identifier, "holdButton");
             useActionMenu = MelonPreferences.GetEntryValue<bool>(vibratorController.Identifier, "ActionMenu");
+            buttonStep = MelonPreferences.GetEntryValue<int>(vibratorController.Identifier, "buttonStep");
 
             if (useActionMenu && MelonHandler.Mods.Any(mod => mod.Info.Name == "ActionMenuApi")) {
                 try {
@@ -49,17 +49,30 @@ namespace Vibrator_Controller {
             }
 
             extractDLL();
-
             VRCWSIntegration.Init();
+            MelonCoroutines.Start(UiManagerInitializer());
             CreateButton();
-            UiManagerInitializer();
         }
 
         public IEnumerator UiManagerInitializer() {
             while (VRCUiManager.prop_VRCUiManager_0 == null) yield return null;
 
+            quickMenu = GameObject.Find("UserInterface/Canvas_QuickMenu(Clone)");
+
             NetworkManagerHooks.Initialize();
             NetworkManagerHooks.OnLeave += onPlayerLeft;
+        }
+
+        private void CreateButton() {
+            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.UserQuickMenu).AddSimpleButton("Get\nToys", () => {
+                String name = GameObject.Find("UserInterface/Canvas_QuickMenu(Clone)/Container/Window/QMParent/Menu_SelectedUser_Local").GetComponent<VRC.UI.Elements.Menus.SelectedUserMenuQM>().field_Private_IUser_0.prop_String_1;
+                VRCWSIntegration.connectedTo = name;
+                VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.GetToys));
+            });
+
+            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.QuickMenu).AddSimpleButton("Vibrator\nController", () => {
+                ShowMenu();
+            });
         }
 
         private void onPlayerLeft(Player obj) {
@@ -81,24 +94,9 @@ namespace Vibrator_Controller {
             }
         }
 
-        private void CreateButton() {
-            quickMenu = GameObject.Find("UserInterface/QuickMenu/QuickMenu_NewElements");
-            menuContent = GameObject.Find("UserInterface/MenuContent/Backdrop/Backdrop");
-
-
-            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.UserQuickMenu).AddSimpleButton("Get\nToys", () => {
-                String name = GameObject.Find("UserInterface/Canvas_QuickMenu(Clone)/Container/Window/QMParent/Menu_SelectedUser_Local").GetComponent<VRC.UI.Elements.Menus.SelectedUserMenuQM>().field_Private_IUser_0.prop_String_1;
-                VRCWSIntegration.connectedTo = name;
-                VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.GetToys));
-            });
-
-            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.QuickMenu).AddSimpleButton("Vibrator\nController", () => {
-                ShowMenu();
-            });
-        }
-
         internal static void ShowMenu() {
-            menu = ExpansionKitApi.CreateCustomQuickMenuPage(LayoutDescription.QuickMenu4Columns);
+            ICustomShowableLayoutedMenu menu = ExpansionKitApi.CreateCustomQuickMenuPage(LayoutDescription.QuickMenu4Columns);
+
             menu.AddSimpleButton(findButton == "lockButton" ? "Press Now" : "Lock Speed\nButton\n" + lockButton.ToString(), () => {
                 if (findButton == "lockButton") {
                     lockButton = KeyCode.None;
@@ -144,15 +142,16 @@ namespace Vibrator_Controller {
                 });
             }
 
+            menu.AddSpacer();
+
             foreach (Toy toy in Toy.allToys) {
+                string text = toy.name + "\n" + toy.hand;
 
                 if (toy.isLocal()) {
+                    text = toy.name + "\n" + toy.hand;
 
-                    string text = toy.name + "\n" + toy.hand;
-
-                    if (!toy.isActive) {
+                    if (!toy.isActive)
                         text = toy.name + "\n" + "<color=red>Not Shared</color>";
-                    }
 
                     if (toy.supportsBatteryLVL && toy.battery != -1) {
                         text += "\n" + (toy.battery * 100) + "%";
@@ -165,19 +164,33 @@ namespace Vibrator_Controller {
                             }
                         });
                     }
-                    
-                    menu.AddSimpleButton(text, () => {
-                        toy.changeHand();
-                        menu.Hide();
-                        ShowMenu();
-                    });
                 } else {
-                    menu.AddSimpleButton(toy.name + "\n" + toy.hand, () => {
-                        toy.changeHand();
+                    text = toy.name + "\n" + toy.hand;
+                }
+
+                int step = (int)(toy.maxSpeed * ((float)buttonStep / 100));
+
+                menu.AddSimpleButton("-", () => {
+                    if (toy.lastSpeed - step >= 0) {
+                        toy.setSpeed(toy.lastSpeed - step);
                         menu.Hide();
                         ShowMenu();
-                    });
-                }
+                    }
+                });
+                menu.AddSimpleButton("+", () => {
+                    if (toy.lastSpeed + step <= toy.maxSpeed) {
+                        toy.setSpeed(toy.lastSpeed + step);
+                        menu.Hide();
+                        ShowMenu();
+                    }
+                });
+                menu.AddLabel($"{(double)toy.lastSpeed / toy.maxSpeed * 100}%");
+
+                menu.AddSimpleButton(text, () => {
+                    toy.changeHand();
+                    menu.Hide();
+                    ShowMenu();
+                });
 
             }
 
@@ -210,59 +223,44 @@ namespace Vibrator_Controller {
 
             foreach (Toy toy in Toy.allToys) {
                 if (toy.hand == Hand.shared) return;
-                if (menuOpen()) {
-                    toy.setSpeed((int)toy.speedSlider.value);
+                if (lockSpeed) return;
+                if (menuOpen()) return;
 
-                    if (toy.maxSlider != null)
-                        toy.setContraction();
-                    if (toy.edgeSlider != null) {
-                        if (toy.lastEdgeSpeed != toy.edgeSlider.value)
-                            toy.setEdgeSpeed((int)toy.edgeSlider.value);
-                    }
-                    pauseControl = true;
-                } else {
-                    if (lockSpeed) return;
-                    if (holdButton != KeyCode.None && !pauseControl)
-                        if (!Input.GetKey(holdButton)) {
-                            toy.setSpeed(0);
-                            return;
-                        }
-                    int left = (int)(toy.maxSpeed * Input.GetAxis("Oculus_CrossPlatform_PrimaryIndexTrigger"));
-                    int right = (int)(toy.maxSpeed * Input.GetAxis("Oculus_CrossPlatform_SecondaryIndexTrigger"));
-
-                    if (pauseControl) {
-                        if (left != 0 || right != 0) {
-                            Console.WriteLine(left + " " + right);
-                            pauseControl = false;
-                        } else return;
+                if (holdButton != KeyCode.None && !pauseControl)
+                    if (!Input.GetKey(holdButton)) {
+                        toy.setSpeed(0);
+                        return;
                     }
 
-                    switch (toy.hand) {
-                        case Hand.left:
-                            right = left;
-                            break;
-                        case Hand.right:
-                            left = right;
-                            break;
-                        case Hand.either:
-                            if (left > right) right = left;
-                            else left = right;
-                            break;
-                        case Hand.both:
-                            break;
-                    }
-                    if (toy.supportsTwoVibrators) {
-                        toy.setEdgeSpeed(right);
-                    }
-                    toy.setSpeed(left);
+                int left = (int)(toy.maxSpeed * Input.GetAxis("Oculus_CrossPlatform_PrimaryIndexTrigger"));
+                int right = (int)(toy.maxSpeed * Input.GetAxis("Oculus_CrossPlatform_SecondaryIndexTrigger"));
+
+                if (pauseControl) {
+                    if (left != 0 || right != 0) {
+                        //Console.WriteLine(left + " " + right);
+                        pauseControl = false;
+                    } else return;
                 }
-            }
-        }
 
-        private static bool menuOpen() {
-            if (quickMenu.active || menuContent.active)
-                return true;
-            return false;
+                switch (toy.hand) {
+                    case Hand.left:
+                        right = left;
+                        break;
+                    case Hand.right:
+                        left = right;
+                        break;
+                    case Hand.either:
+                        if (left > right) right = left;
+                        else left = right;
+                        break;
+                    case Hand.both:
+                        break;
+                }
+                if (toy.supportsTwoVibrators) {
+                    toy.setEdgeSpeed(right);
+                }
+                toy.setSpeed(left);
+            }
         }
 
         //message from server
@@ -324,6 +322,19 @@ namespace Vibrator_Controller {
 
                     break;
             }
+        }
+
+        private static bool menuOpen() {
+            if (quickMenu == null) {
+                quickMenu = GameObject.Find("UserInterface/Canvas_QuickMenu(Clone)");
+                return true;
+            }
+
+            if (quickMenu.activeSelf) {
+                return true;
+            }
+                
+            return false;
         }
 
         private void getButton() {
