@@ -3,10 +3,11 @@ using Buttplug;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using UnityEngine.XR;
 
 namespace Vibrator_Controller {
     public enum Hand {
-        none, shared, left, right, both, either
+        none, shared, left, right, both, either, actionmenu
     }
     public class Toy {
         internal static Dictionary<ulong, Toy> remoteToys { get; set; } = new Dictionary<ulong, Toy>();
@@ -233,6 +234,9 @@ namespace Vibrator_Controller {
                 hand++;
             if (hand == Hand.both && !supportsTwoVibrators)
                 hand++;
+
+            if (!XRDevice.isPresent && (hand == Hand.both || hand == Hand.either || hand == Hand.left || hand == Hand.right))
+                hand = Hand.actionmenu;
 
             if (isLocal()) {
                 if (hand == Hand.shared) {
