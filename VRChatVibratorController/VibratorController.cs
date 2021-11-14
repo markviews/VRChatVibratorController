@@ -222,7 +222,7 @@ namespace Vibrator_Controller {
             }
 
             foreach (Toy toy in Toy.allToys) {
-                if (toy.hand == Hand.shared) return;
+                if (toy.hand == Hand.shared || toy.hand == Hand.none || toy.hand == Hand.actionmenu) return;
                 if (lockSpeed) return;
                 if (menuOpen()) return;
 
