@@ -236,8 +236,8 @@ namespace Vibrator_Controller {
         }
 
         //message from server
-        internal static void message(VibratorControllerMessage msg, string userID) {
-
+        internal static async void message(VibratorControllerMessage msg, string userID) {
+            await AsyncUtils.YieldToMainThread();
             Toy toy = null;
             if (Toy.myToys.ContainsKey(msg.ToyID))
             {
@@ -259,6 +259,10 @@ namespace Vibrator_Controller {
 
                     break;
                 case Commands.RemoveToy:
+                    if (Toy.remoteToys.ContainsKey(msg.ToyID))
+                    {
+                        toy = Toy.remoteToys[msg.ToyID];
+                    }
                     toy?.disable();
 
                     break;
@@ -287,7 +291,7 @@ namespace Vibrator_Controller {
                 case Commands.GetToys:
                     MelonLogger.Msg("Control Client connected");
                     //maybe check
-                    foreach (KeyValuePair<ulong, Toy> entry in Toy.myToys) {
+                    foreach (KeyValuePair<ulong, Toy> entry in Toy.myToys.Where(x=>x.Value.hand == Hand.shared)) {
                         VRCWSIntegration.connectedTo = userID;
                         VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.AddToy, entry.Value));
                     }

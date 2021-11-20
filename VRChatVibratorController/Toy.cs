@@ -151,7 +151,7 @@ namespace Vibrator_Controller {
             int step = (int)(maxSpeed * ((float)VibratorController.buttonStep / 100));
 
                 
-            changeMode = new SingleButton(() => changeHand(), VibratorController.CreateSpriteFromTexture2D(GetTexture()), "Mode\nnone", "mode", "Tooltip");
+            changeMode = new SingleButton(() => changeHand(), VibratorController.CreateSpriteFromTexture2D(GetTexture()), $"Mode\n{hand}", "mode", "Tooltip");
             inc = new SingleButton(() => { if (lastSpeed + step <= maxSpeed) setSpeed(lastSpeed + step); }, VibratorController.CreateSpriteFromTexture2D(GetTexture()), "Inc", "inc", "Tooltip");
             dec = new SingleButton(() => { if (lastSpeed - step >= 0) setSpeed(lastSpeed - step); }, VibratorController.CreateSpriteFromTexture2D(GetTexture()), "Dec", "dec", "Tooltip");
             label = new Label($"Current Speed: {lastSpeed}", "Battery not available" , "Tooltip");
@@ -213,7 +213,10 @@ namespace Vibrator_Controller {
                     supportsBatteryLVL = true;
                     UpdateBattery();
                 }
-
+                if (isLocal() && hand == Hand.shared)
+                {
+                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.AddToy, this));
+                }
                 MelonLogger.Msg("Enabled toy: " + name);
             }
         }
