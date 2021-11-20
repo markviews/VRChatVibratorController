@@ -32,6 +32,7 @@ namespace Vibrator_Controller {
 
         private static Dictionary<(Commands, ulong), VibratorControllerMessage> messagesToSend = new Dictionary<(Commands, ulong), VibratorControllerMessage>();
 
+
         public static void Init() {
             var category = MelonPreferences.CreateCategory("VibratorController");
             onlyTrusted = category.CreateEntry("Only Trusted", false);
