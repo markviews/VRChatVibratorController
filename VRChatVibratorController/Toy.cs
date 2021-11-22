@@ -4,6 +4,10 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using UnityEngine.XR;
+using VRChatUtilityKit.Ui;
+using UnityEngine;
+using System.Threading.Tasks;
+using VRChatUtilityKit.Utilities;
 
 namespace Vibrator_Controller {
     public enum Hand {
@@ -12,8 +16,15 @@ namespace Vibrator_Controller {
     public class Toy {
         internal static Dictionary<ulong, Toy> remoteToys { get; set; } = new Dictionary<ulong, Toy>();
         internal static Dictionary<ulong, Toy> myToys { get; set; } = new Dictionary<ulong, Toy>();
-
         internal static List<Toy> allToys => remoteToys.Select(x=>x.Value).Union(myToys.Select(x => x.Value)).ToList();
+
+        internal SingleButton changeMode;
+        internal SingleButton inc;
+        internal SingleButton dec;
+        internal Label label;
+
+        internal ButtonGroup toys;
+        internal SubMenu menu;
 
         internal Hand hand = Hand.none;
         internal string name;
@@ -27,7 +38,9 @@ namespace Vibrator_Controller {
         internal int maxSpeed = 20, maxSpeed2 = -1, maxLinear = -1;
         internal double battery = -1;
 
-        internal Toy(ButtplugClientDevice device) {
+        internal Toy(ButtplugClientDevice device, SubMenu menu)
+        {
+            this.menu = menu;
             id = device.Index;
             hand = Hand.shared;
             name = device.Name;
@@ -58,9 +71,8 @@ namespace Vibrator_Controller {
 
             if (device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.BatteryLevelCmd)) {
                 supportsBatteryLVL = true;
-                device.SendBatteryLevelCmd().ContinueWith(battery => { 
-                    this.battery = battery.Result;
-                });
+                UpdateBattery();
+
             }
 
             //prints info about the device
@@ -95,10 +107,12 @@ namespace Vibrator_Controller {
             }
 
             myToys.Add(id, this);
+            createMenu();
         }
 
-        internal Toy(string name, ulong id, int maxSpeed, int maxSpeed2, int maxLinear, bool supportsRotate) {
-
+        internal Toy(string name, ulong id, int maxSpeed, int maxSpeed2, int maxLinear, bool supportsRotate, SubMenu menu)
+        {
+            this.menu = menu;
             if (remoteToys.ContainsKey(id))
             {
                 MelonLogger.Msg("Device reconnected: " + name + " [" + id + "]");
@@ -123,10 +137,55 @@ namespace Vibrator_Controller {
             this.maxLinear = maxLinear;
             this.name = name;
             this.id = id;
-            
+
             MelonLogger.Msg($"Added toy Name: {name}, ID: {id} Max Speed: {maxSpeed}" + (supportsTwoVibrators ? $", Max Speed 2: {maxSpeed2}" : "") + (supportsLinear ? $", Max Linear Speed: {maxLinear}" : "") + (supportsRotate ? $", Supports Rotation" : ""));
 
             remoteToys.Add(id, this);
+            createMenu();
+
+        }
+
+        private void createMenu()
+        {
+            toys = new ButtonGroup("Toy" + id, name);
+            int step = (int)(maxSpeed * ((float)VibratorController.buttonStep / 100));
+
+                
+            changeMode = new SingleButton(() => changeHand(), VibratorController.CreateSpriteFromTexture2D(GetTexture()), $"Mode\n{hand}", "mode", "Tooltip");
+            inc = new SingleButton(() => { if (lastSpeed + step <= maxSpeed) setSpeed(lastSpeed + step); }, VibratorController.CreateSpriteFromTexture2D(GetTexture()), "Inc", "inc", "Tooltip");
+            dec = new SingleButton(() => { if (lastSpeed - step >= 0) setSpeed(lastSpeed - step); }, VibratorController.CreateSpriteFromTexture2D(GetTexture()), "Dec", "dec", "Tooltip");
+            label = new Label($"Current Speed: {lastSpeed}", "Battery not available" , "Tooltip");
+            
+            label.TextComponent.fontSize = 24;
+            toys.AddButton(changeMode);
+            toys.AddButton(inc);
+            toys.AddButton(dec);
+            toys.AddButton(label);
+
+            menu.AddButtonGroup(toys);
+
+
+            //fix if added after init phase
+            toys.gameObject.transform.localScale = Vector3.one;
+            toys.Header.gameObject.transform.localScale = Vector3.one;
+
+            toys.gameObject.transform.localRotation = Quaternion.Euler(0, 0, 0);
+            toys.Header.gameObject.transform.localRotation = Quaternion.Euler(0, 0, 0);
+
+            var pos = toys.gameObject.transform.localPosition;
+            var pos2 = toys.Header.gameObject.transform.localPosition;
+
+            toys.gameObject.transform.localPosition = new Vector3(0, pos.y, 0);
+            toys.Header.gameObject.transform.localPosition = new Vector3(0, pos2.y, 0);
+
+        }
+
+        public Texture2D GetTexture()
+        {
+            if (VibratorController.toy_icons.ContainsKey(name))
+                return VibratorController.toy_icons[name];
+
+            return null;
         }
 
         internal void disable() {
@@ -134,7 +193,8 @@ namespace Vibrator_Controller {
                 isActive = false;
                 MelonLogger.Msg("Disabled toy: " + name);
                 hand = Hand.none;
-
+                toys.rectTransform.gameObject.active = false;
+                toys.Header.gameObject.active = false;
                 if (isLocal()) {
                     VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.RemoveToy, this));
                 }
@@ -145,6 +205,18 @@ namespace Vibrator_Controller {
         internal void enable() {
             if (!isActive) {
                 isActive = true;
+                toys.rectTransform.gameObject.active = true;
+                toys.Header.gameObject.active = true;
+
+                if (device != null && device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.BatteryLevelCmd))
+                {
+                    supportsBatteryLVL = true;
+                    UpdateBattery();
+                }
+                if (isLocal() && hand == Hand.shared)
+                {
+                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.AddToy, this));
+                }
                 MelonLogger.Msg("Enabled toy: " + name);
             }
         }
@@ -167,7 +239,7 @@ namespace Vibrator_Controller {
                 } else {
                     VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.SetSpeed, this, speed));
                 }
-
+                label.Text = $"Current Speed: {speed}";
             }
         }
 
@@ -245,11 +317,32 @@ namespace Vibrator_Controller {
                     VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.RemoveToy, this));
                 }
             }
+            changeMode.Text = "Mode\n"+ hand;
         }
 
         //returns true if this is a local bluetooth device (controlled by someone else)
         internal bool isLocal() {
             return device != null;
+        }
+
+        internal async void UpdateBattery()
+        {
+            try
+            {
+                while (isActive)
+                {
+                    battery = await device.SendBatteryLevelCmd();
+                    await AsyncUtils.YieldToMainThread();
+                    if (label != null)
+                        label.SubtitleText = $"Battery: {battery * 100}";
+                    await Task.Delay(1000 * 10);
+                }
+            }
+            catch (Exception)
+            {
+                //maybe device dissconnected during cmd
+            }
+            
         }
 
     }
