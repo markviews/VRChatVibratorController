@@ -151,10 +151,10 @@ namespace Vibrator_Controller {
             int step = (int)(maxSpeed * ((float)VibratorController.buttonStep / 100));
 
                 
-            changeMode = new SingleButton(() => changeHand(), VibratorController.CreateSpriteFromTexture2D(GetTexture()), $"Mode\n{hand}", "mode", "Tooltip");
-            inc = new SingleButton(() => { if (lastSpeed + step <= maxSpeed) setSpeed(lastSpeed + step); }, VibratorController.CreateSpriteFromTexture2D(GetTexture()), "Inc", "inc", "Tooltip");
-            dec = new SingleButton(() => { if (lastSpeed - step >= 0) setSpeed(lastSpeed - step); }, VibratorController.CreateSpriteFromTexture2D(GetTexture()), "Dec", "dec", "Tooltip");
-            label = new Label($"Current Speed: {lastSpeed}", "Battery not available" , "Tooltip");
+            changeMode = new SingleButton(() => changeHand(), VibratorController.CreateSpriteFromTexture2D(GetTexture()), $"Mode\n{hand}", "mode", "Change Mode");
+            inc = new SingleButton(() => { if (lastSpeed + step <= maxSpeed) setSpeed(lastSpeed + step); }, VibratorController.CreateSpriteFromTexture2D(GetTexture()), "Inc", "inc", "Increment Speed");
+            dec = new SingleButton(() => { if (lastSpeed - step >= 0) setSpeed(lastSpeed - step); }, VibratorController.CreateSpriteFromTexture2D(GetTexture()), "Dec", "dec", "Decrement Speed");
+            label = new Label($"Current Speed: {lastSpeed}", "Battery not available" , "BatteryStatus");
             
             label.TextComponent.fontSize = 24;
             toys.AddButton(changeMode);
