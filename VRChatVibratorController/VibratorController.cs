@@ -160,7 +160,7 @@ namespace Vibrator_Controller {
                     bpClient.StopScanningAsync();
                 }
             },
-            CreateSpriteFromTexture2D(logo), null, "Scan for toys", "BPToggle", "Tooltip", "Alt Tooltip");
+            CreateSpriteFromTexture2D(logo), null, "Scan for toys", "BPToggle", "Scan for connected toys", "Scaning for connected toys");
             status = new Label("Network", Client.ClientAvailable() ? "Connected" : "Not\nConnected", "status");
             status.TextComponent.fontSize = 24;
             Client.GetClient().ConnectRecieved += async() => {
