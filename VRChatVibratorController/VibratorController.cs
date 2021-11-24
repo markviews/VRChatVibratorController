@@ -181,6 +181,8 @@ namespace Vibrator_Controller {
 
         public static Sprite CreateSpriteFromTexture2D(Texture2D texture)
         {
+            if (texture == null) 
+                return null;
             Rect size = new Rect(0, 0, texture.width, texture.height);
             Vector2 pivot = new Vector2(0.5f, 0.5f);
             return Sprite.CreateSprite(texture, size, pivot, 100, 0, SpriteMeshType.Tight, Vector4.zero, false);
