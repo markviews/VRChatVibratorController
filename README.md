@@ -10,9 +10,9 @@ Lets you control your friends bluetooth vibrator using your vr controllers.
 
 ### How to use
 1. Friend with toy: connect toy to computer's bluetooth and press "Scan for toys (Bluetooth)" in the mod menu
-2. [Connect to friend using VRCWS](https://github.com/Er1807/VRCWS#trust-another-user)
+2. [Connect to friend using VRCWS](https://github.com/Er1807/VRCWS#trust-another-user)  (optional by default not needed)
 3. Friend that wants to control: Select friend and click "Get Toys" in the quick menu
-4. Friend that wants to control: set controll option in the mod menu
+4. Friend that wants to control: set control option in the mod menu
 
 ### Credits
 * Plague for helping with the project a bunch
