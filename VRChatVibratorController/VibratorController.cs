@@ -29,7 +29,8 @@ namespace Vibrator_Controller {
         private static GameObject quickMenu { get; set; }
         public static TabButton TabButton { get; private set; }
         private static ToggleButton search;
-        private static Label status;
+        private static Label networkStatus;
+        private static Label buttplugError;
 
         private static MelonPreferences_Category vibratorController;
         private static ButtplugClient bpClient;
@@ -161,16 +162,19 @@ namespace Vibrator_Controller {
                 }
             },
             CreateSpriteFromTexture2D(logo), null, "Scan for toys", "BPToggle", "Scan for connected toys", "Scaning for connected toys");
-            status = new Label("Network", Client.ClientAvailable() ? "Connected" : "Not\nConnected", "status");
-            status.TextComponent.fontSize = 24;
+            networkStatus = new Label("Network", Client.ClientAvailable() ? "Connected" : "Not\nConnected", "networkstatus");
+            networkStatus.TextComponent.fontSize = 24;
+            buttplugError = new Label("Buttplug", "No Error", "status");
+            buttplugError.TextComponent.fontSize = 24;
             Client.GetClient().ConnectRecieved += async() => {
                 await AsyncUtils.YieldToMainThread();
-                status.SubtitleText = Client.ClientAvailable() ? "Connected" : "Not\nConnected"; 
+                networkStatus.SubtitleText = Client.ClientAvailable() ? "Connected" : "Not\nConnected"; 
             };
             TabButton = new TabButton(CreateSpriteFromTexture2D(logo), "Vibrator Controller", "VibratorControllerMenu", "Vibrator Controller", "Vibrator Controller Menu");
             TabButton.SubMenu
               .AddButtonGroup(new ButtonGroup("ControlsGrp", "Controls", new List<IButtonGroupElement>()
-              {search, status}));
+              {search, networkStatus, buttplugError, new SingleButton(() => { ResetBP(); }, CreateSpriteFromTexture2D(logo), "Reset Connector", "reset", "Resets the underlyung buttplug connector")
+        }));
 
             //new Toy("Edge", 100, 20, 20, 0, false, TabButton.SubMenu);
             //new Toy("Edge", 200, 20, 0, 0, false, TabButton.SubMenu);
@@ -203,6 +207,28 @@ namespace Vibrator_Controller {
                     Toy.myToys[args.Device.Index].disable();
                 }
             };
+
+            bpClient.ErrorReceived += async(object aObj, ButtplugExceptionEventArgs args) =>
+            {
+                MelonLogger.Msg($"Buttplug Client recieved error: {args.Exception.Message}");
+                await AsyncUtils.YieldToMainThread();
+
+                buttplugError.SubtitleText = "Error occured";
+            };
+        }
+
+
+        private static void ResetBP()
+        {
+            MelonLogger.Msg("Restetting Buttplug Connector");
+            if (bpClient != null)
+            {
+                bpClient.DisconnectAsync().Wait();
+                bpClient = null;
+                Toy.allToys.ForEach(x => x.disable());
+            }
+            buttplugError.SubtitleText = "No Error";
+            SetupBP();
         }
 
         public override void OnUpdate() {

@@ -66,10 +66,11 @@ namespace Vibrator_Controller {
                 supportsLinear = true;
 
             if (device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.RotateCmd))
-                supportsRotate = true; 
-            
+                supportsRotate = true;
 
-            if (device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.BatteryLevelCmd)) {
+
+            if (device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.BatteryLevelCmd))
+            {
                 supportsBatteryLVL = true;
                 UpdateBattery();
 
@@ -79,13 +80,15 @@ namespace Vibrator_Controller {
             foreach (KeyValuePair<ServerMessage.Types.MessageAttributeType, ButtplugMessageAttributes> entry in device.AllowedMessages)
                 MelonLogger.Msg("[" + id + "] Allowed Message: " + entry.Key);
 
-            if (device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.VibrateCmd)) {
+            if (device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.VibrateCmd))
+            {
                 ButtplugMessageAttributes attributes = device.AllowedMessages[ServerMessage.Types.MessageAttributeType.VibrateCmd];
 
                 if (attributes.ActuatorType != null && attributes.ActuatorType.Length > 0)
-                    MelonLogger.Msg("[" + id +  "] ActuatorType " + string.Join(", ", attributes.ActuatorType));
+                    MelonLogger.Msg("[" + id + "] ActuatorType " + string.Join(", ", attributes.ActuatorType));
 
-                if (attributes.StepCount != null && attributes.StepCount.Length > 0) {
+                if (attributes.StepCount != null && attributes.StepCount.Length > 0)
+                {
                     MelonLogger.Msg("[" + id + "] StepCount " + string.Join(", ", attributes.StepCount));
                     maxSpeed = (int)attributes.StepCount[0];
                 }
@@ -108,6 +111,11 @@ namespace Vibrator_Controller {
 
             myToys.Add(id, this);
             createMenu();
+
+            if (hand == Hand.shared)
+            {
+                VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.AddToy, this));
+            }
         }
 
         internal Toy(string name, ulong id, int maxSpeed, int maxSpeed2, int maxLinear, bool supportsRotate, SubMenu menu)
