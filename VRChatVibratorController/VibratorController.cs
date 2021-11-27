@@ -220,7 +220,7 @@ namespace Vibrator_Controller {
 
         private static void ResetBP()
         {
-            MelonLogger.Msg("Restetting Buttplug Connector");
+            MelonLogger.Msg("Resetting Buttplug Connector");
             if (bpClient != null)
             {
                 bpClient.DisconnectAsync().Wait();
