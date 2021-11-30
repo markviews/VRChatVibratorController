@@ -17,7 +17,7 @@ using UnhollowerRuntimeLib;
 using UnityEngine.UI;
 using VRCWSLibary;
 
-[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.5.2", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
+[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.5.3", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
 [assembly: MelonGame("VRChat", "VRChat")]
 [assembly: MelonAdditionalDependencies("UIExpansionKit", "VRCWSLibary", "VRChatUtilityKit")]
 
