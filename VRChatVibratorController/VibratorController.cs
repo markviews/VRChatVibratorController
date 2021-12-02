@@ -116,18 +116,16 @@ namespace Vibrator_Controller {
 
         private void CreateButton() {
             ExpansionKitApi.GetExpandedMenu(ExpandedMenu.UserQuickMenu).AddSimpleButton("Get\nToys", () => {
-                String name = GameObject.Find("UserInterface/Canvas_QuickMenu(Clone)/Container/Window/QMParent/Menu_SelectedUser_Local").GetComponent<VRC.UI.Elements.Menus.SelectedUserMenuQM>().field_Private_IUser_0.prop_String_0;
-                VRCWSIntegration.connectedTo = name;
-                VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.GetToys));
+                string name = GameObject.Find("UserInterface/Canvas_QuickMenu(Clone)/Container/Window/QMParent/Menu_SelectedUser_Local").GetComponent<VRC.UI.Elements.Menus.SelectedUserMenuQM>().field_Private_IUser_0.prop_String_0;
+                VRCWSIntegration.SendMessage(new VibratorControllerMessage(name, Commands.GetToys));
             });
 
         }
 
         private void onPlayerLeft(Player obj) {
-            if (obj.prop_String_0 == VRCWSIntegration.connectedTo)
-                foreach (Toy toy in Toy.remoteToys.Select(x=>x.Value)) {
-                    toy.disable();
-                }
+            foreach (Toy toy in Toy.remoteToys.Where(x=>x.Value.connectedTo == obj.prop_String_0).Select(x=>x.Value)) {
+                toy.disable();
+            }
         }
 
         private void extractDLL() {
@@ -271,19 +269,16 @@ namespace Vibrator_Controller {
             {
                 toy = Toy.myToys[msg.ToyID];
             }
-
+            MelonLogger.Msg(msg.Command);
+            MelonLogger.Msg(msg.ToyName);
+            MelonLogger.Msg(msg.ToyID);
             switch (msg.Command) {
 
                 //remote toy commands
                 case Commands.AddToy:
-                    
-                    if (msg.ToyID == ulong.MaxValue) {
-                        MelonLogger.Error("Connected but no toys found..");
-                        return;
-                    }
 
                     MelonLogger.Msg($"Adding : {msg.ToyName} : {msg.ToyID}");
-                    new Toy(msg.ToyName, msg.ToyID, msg.ToyMaxSpeed, msg.ToyMaxSpeed2, msg.ToyMaxLinear, msg.ToySupportsRotate, TabButton.SubMenu);
+                    new Toy(msg.ToyName, msg.ToyID, userID, msg.ToyMaxSpeed, msg.ToyMaxSpeed2, msg.ToyMaxLinear, msg.ToySupportsRotate, TabButton.SubMenu);
 
                     break;
                 case Commands.RemoveToy:
@@ -317,11 +312,11 @@ namespace Vibrator_Controller {
                     
                     break;
                 case Commands.GetToys:
-                    MelonLogger.Msg("Control Client connected");
+                    MelonLogger.Msg("Control Client requested toys");
                     //maybe check
                     foreach (KeyValuePair<ulong, Toy> entry in Toy.myToys.Where(x=>x.Value.hand == Hand.shared)) {
-                        VRCWSIntegration.connectedTo = userID;
-                        VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.AddToy, entry.Value));
+                        entry.Value.connectedTo = userID;
+                        VRCWSIntegration.SendMessage(new VibratorControllerMessage(userID, Commands.AddToy, entry.Value));
                     }
 
                     break;

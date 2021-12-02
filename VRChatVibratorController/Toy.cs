@@ -8,6 +8,7 @@ using VRChatUtilityKit.Ui;
 using UnityEngine;
 using System.Threading.Tasks;
 using VRChatUtilityKit.Utilities;
+using VRC;
 
 namespace Vibrator_Controller {
     public enum Hand {
@@ -32,6 +33,8 @@ namespace Vibrator_Controller {
         internal bool isActive = true;
 
         internal ButtplugClientDevice device;
+        internal string connectedTo;
+
         internal int lastSpeed = 0, lastEdgeSpeed = 0, lastContraction = 0;
 
         internal bool supportsRotate = false, supportsLinear = false, supportsTwoVibrators = false, supportsBatteryLVL = false;
@@ -41,7 +44,7 @@ namespace Vibrator_Controller {
         internal Toy(ButtplugClientDevice device, SubMenu menu)
         {
             this.menu = menu;
-            id = device.Index;
+            id = (device.Index + (ulong) Player.prop_Player_0.prop_String_0.GetHashCode()) % long.MaxValue;
             hand = Hand.shared;
             name = device.Name;
             this.device = device;
@@ -114,11 +117,11 @@ namespace Vibrator_Controller {
 
             if (hand == Hand.shared)
             {
-                VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.AddToy, this));
+                VRCWSIntegration.SendMessage(new VibratorControllerMessage(connectedTo, Commands.AddToy, this));
             }
         }
 
-        internal Toy(string name, ulong id, int maxSpeed, int maxSpeed2, int maxLinear, bool supportsRotate, SubMenu menu)
+        internal Toy(string name, ulong id, string connectedTo, int maxSpeed, int maxSpeed2, int maxLinear, bool supportsRotate, SubMenu menu)
         {
             this.menu = menu;
             if (remoteToys.ContainsKey(id))
@@ -127,6 +130,7 @@ namespace Vibrator_Controller {
                 if (maxSpeed2 != -1) remoteToys[id].supportsTwoVibrators = true;
                 if (maxLinear != -1) remoteToys[id].supportsLinear = true;
                 remoteToys[id].name = name;
+                remoteToys[id].connectedTo = connectedTo;
                 remoteToys[id].supportsRotate = supportsRotate;
                 remoteToys[id].maxSpeed = maxSpeed;
                 remoteToys[id].maxSpeed2 = maxSpeed2;
@@ -144,6 +148,7 @@ namespace Vibrator_Controller {
             this.maxSpeed2 = maxSpeed2;
             this.maxLinear = maxLinear;
             this.name = name;
+            this.connectedTo = connectedTo;
             this.id = id;
 
             MelonLogger.Msg($"Added toy Name: {name}, ID: {id} Max Speed: {maxSpeed}" + (supportsTwoVibrators ? $", Max Speed 2: {maxSpeed2}" : "") + (supportsLinear ? $", Max Linear Speed: {maxLinear}" : "") + (supportsRotate ? $", Supports Rotation" : ""));
@@ -204,7 +209,7 @@ namespace Vibrator_Controller {
                 toys.rectTransform.gameObject.active = false;
                 toys.Header.gameObject.active = false;
                 if (isLocal()) {
-                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.RemoveToy, this));
+                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(connectedTo, Commands.RemoveToy, this));
                 }
                     
             }
@@ -223,7 +228,7 @@ namespace Vibrator_Controller {
                 }
                 if (isLocal() && hand == Hand.shared)
                 {
-                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.AddToy, this));
+                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(connectedTo, Commands.AddToy, this));
                 }
                 MelonLogger.Msg("Enabled toy: " + name);
             }
@@ -245,7 +250,7 @@ namespace Vibrator_Controller {
                         MelonLogger.Error("Toy not connected");
                     }
                 } else {
-                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.SetSpeed, this, speed));
+                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(connectedTo, Commands.SetSpeed, this, speed));
                 }
                 label.Text = $"Current Speed: {speed}";
             }
@@ -262,7 +267,7 @@ namespace Vibrator_Controller {
                         MelonLogger.Error("Toy not connected");
                     }
                 } else {
-                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.SetSpeedEdge, this, speed));
+                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(connectedTo, Commands.SetSpeedEdge, this, speed));
                 }
 
 
@@ -281,7 +286,7 @@ namespace Vibrator_Controller {
                         MelonLogger.Error("Toy not connected");
                     }
                 } else {
-                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.SetAir, this, speed));
+                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(connectedTo, Commands.SetAir, this, speed));
                 }
 
             }
@@ -298,7 +303,7 @@ namespace Vibrator_Controller {
                     MelonLogger.Error("Toy not connected");
                 }
             } else {
-                VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.SetRotate, this));
+                VRCWSIntegration.SendMessage(new VibratorControllerMessage(connectedTo, Commands.SetRotate, this));
             }
             
         }
@@ -320,9 +325,9 @@ namespace Vibrator_Controller {
 
             if (isLocal()) {
                 if (hand == Hand.shared) {
-                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.AddToy, this));
+                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(connectedTo, Commands.AddToy, this));
                 } else {
-                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(Commands.RemoveToy, this));
+                    VRCWSIntegration.SendMessage(new VibratorControllerMessage(connectedTo, Commands.RemoveToy, this));
                 }
             }
             changeMode.Text = "Mode\n"+ hand;

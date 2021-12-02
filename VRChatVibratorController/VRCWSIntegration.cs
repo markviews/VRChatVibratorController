@@ -10,11 +10,14 @@ namespace Vibrator_Controller {
         AddToy, RemoveToy, SetSpeed, SetSpeedEdge, SetAir, SetRotate, GetToys
     }
 
-    public class VibratorControllerMessage {
+    public class VibratorControllerMessage
+    {
         public VibratorControllerMessage() { }
-        public VibratorControllerMessage(Commands command) { Command = command; }
-        public VibratorControllerMessage(Commands command, Toy toy) { Command = command; ToyID = toy.id; ToyName = toy.name; ToyMaxSpeed = toy.maxSpeed; ToyMaxSpeed2 = toy.maxSpeed2; ToyMaxLinear = toy.maxLinear; ToySupportsRotate = toy.supportsRotate; }
-        public VibratorControllerMessage(Commands command, Toy toy, int strength) { Command = command; ToyID = toy.id; ToyName = toy.name; Strength = strength; }
+        public VibratorControllerMessage(string target, Commands command) { Target = target; Command = command; }
+        public VibratorControllerMessage(string target, Commands command, Toy toy) { Target = target; Command = command; ToyID = toy.id; ToyName = toy.name; ToyMaxSpeed = toy.maxSpeed; ToyMaxSpeed2 = toy.maxSpeed2; ToyMaxLinear = toy.maxLinear; ToySupportsRotate = toy.supportsRotate; }
+        public VibratorControllerMessage(string target, Commands command, Toy toy, int strength) { Target = target; Command = command; ToyID = toy.id; ToyName = toy.name; Strength = strength; }
+
+        public string Target { get; set; }
         public Commands Command { get; set; }
         public ulong ToyID { get; set; }
         public string ToyName { get; set; }
@@ -25,7 +28,6 @@ namespace Vibrator_Controller {
         public bool ToySupportsRotate { get; set; }
     }
     public class VRCWSIntegration {
-        public static string connectedTo;
 
         private static Client client;
         private static MelonPreferences_Entry<bool> onlyTrusted;
@@ -39,14 +41,14 @@ namespace Vibrator_Controller {
             MelonCoroutines.Start(LoadClient());
             Timer timer = new Timer(200);
             timer.Elapsed += (_,__) => {
-                if (client == null || connectedTo == null)
+                if (client == null)
                     return;
 
                 lock (messagesToSend)
                 {
                     foreach (var message in messagesToSend)
                     {
-                        client.Send(new Message() { Method = "VibratorControllerMessage", Target = connectedTo, Content = JsonConvert.SerializeObject(message.Value) });
+                        client.Send(new Message() { Method = "VibratorControllerMessage", Target = message.Value.Target, Content = JsonConvert.SerializeObject(message.Value) });
                     }
                     messagesToSend.Clear();
                 }
@@ -55,7 +57,7 @@ namespace Vibrator_Controller {
         }
 
         public static void SendMessage(VibratorControllerMessage message) {
-            if (client == null || connectedTo == null)
+            if (client == null || message.Target == null)
                 return;
             if (   message.Command == Commands.SetSpeed
                 || message.Command == Commands.SetSpeedEdge
@@ -67,7 +69,7 @@ namespace Vibrator_Controller {
                 return;
             }
 
-            client.Send(new Message() { Method = "VibratorControllerMessage", Target = connectedTo, Content = JsonConvert.SerializeObject(message) });
+            client.Send(new Message() { Method = "VibratorControllerMessage", Target = message.Target, Content = JsonConvert.SerializeObject(message) });
         }
 
         private static IEnumerator LoadClient() {
@@ -99,7 +101,9 @@ namespace Vibrator_Controller {
 
             if (msg.TimeStamp.Ticks > lastTick) {
                 lastTick = msg.TimeStamp.Ticks;
-                VibratorController.message(msg.GetContentAs<VibratorControllerMessage>() ?? new VibratorControllerMessage(), msg.Target); //ignore null message
+                var messagecontent = msg.GetContentAs<VibratorControllerMessage>();
+                if(messagecontent != null)
+                    VibratorController.message(messagecontent, msg.Target);
             }
         }
 
