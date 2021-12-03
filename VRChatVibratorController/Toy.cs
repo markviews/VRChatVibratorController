@@ -195,6 +195,8 @@ namespace Vibrator_Controller {
 
         public Texture2D GetTexture()
         {
+            if (connectedTo == "all")
+                return VibratorController.logo;
             if (VibratorController.toy_icons.ContainsKey(name))
                 return VibratorController.toy_icons[name];
 
@@ -237,6 +239,18 @@ namespace Vibrator_Controller {
         internal void setSpeed(int speed) {
             if (speed != lastSpeed) {
                 lastSpeed = speed;
+                label.Text = $"Current Speed: {speed}";
+
+                if (connectedTo == "all")
+                {
+                    foreach (var toy in allToys.Where(x=>x.connectedTo != "all"))
+                    {
+                        toy.setSpeed(speed);
+                        if(toy.supportsTwoVibrators)
+                            toy.setEdgeSpeed(speed);
+                    }
+                    return;
+                }
                 if (isLocal()) {
                     try
                     {
@@ -252,7 +266,6 @@ namespace Vibrator_Controller {
                 } else {
                     VRCWSIntegration.SendMessage(new VibratorControllerMessage(connectedTo, Commands.SetSpeed, this, speed));
                 }
-                label.Text = $"Current Speed: {speed}";
             }
         }
 

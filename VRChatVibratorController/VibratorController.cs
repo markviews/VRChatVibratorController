@@ -172,10 +172,10 @@ namespace Vibrator_Controller {
             TabButton.SubMenu
               .AddButtonGroup(new ButtonGroup("ControlsGrp", "Controls", new List<IButtonGroupElement>()
               {search, networkStatus, buttplugError, new SingleButton(() => { ResetBP(); }, CreateSpriteFromTexture2D(logo), "Reset Connector", "reset", "Resets the underlyung buttplug connector")
-        }));
+            }));
 
-            //new Toy("Edge", 100, 20, 20, 0, false, TabButton.SubMenu);
-            //new Toy("Edge", 200, 20, 0, 0, false, TabButton.SubMenu);
+            //Control all toys (vibrate only)
+            new Toy("All Toys", long.MaxValue, "all", 20, 0, 0, false, TabButton.SubMenu);
 
             //activate scroll
             TabButton.SubMenu.ToggleScrollbar(true);
