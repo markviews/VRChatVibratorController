@@ -264,63 +264,96 @@ namespace Vibrator_Controller {
         //message from server
         internal static async void message(VibratorControllerMessage msg, string userID) {
             await AsyncUtils.YieldToMainThread();
-            Toy toy = null;
-            if (Toy.myToys.ContainsKey(msg.ToyID))
+
+            switch (msg.Command)
             {
-                toy = Toy.myToys[msg.ToyID];
-            }
-            MelonLogger.Msg(msg.Command);
-            MelonLogger.Msg(msg.ToyName);
-            MelonLogger.Msg(msg.ToyID);
-            switch (msg.Command) {
-
-                //remote toy commands
-                case Commands.AddToy:
-
-                    MelonLogger.Msg($"Adding : {msg.ToyName} : {msg.ToyID}");
-                    new Toy(msg.ToyName, msg.ToyID, userID, msg.ToyMaxSpeed, msg.ToyMaxSpeed2, msg.ToyMaxLinear, msg.ToySupportsRotate, TabButton.SubMenu);
-
-                    break;
-                case Commands.RemoveToy:
-                    if (Toy.remoteToys.ContainsKey(msg.ToyID))
-                    {
-                        toy = Toy.remoteToys[msg.ToyID];
-                    }
-                    toy?.disable();
-
-                    break;
-
-                //Local toy commands
-                case Commands.SetSpeed:
-                    if(toy?.hand == Hand.shared)
-                        toy?.setSpeed(msg.Strength);
-                    
-                    break;
-                case Commands.SetSpeedEdge:
-                    if (toy?.hand == Hand.shared)
-                        toy?.setEdgeSpeed(msg.Strength);
-                    
-                    break;
-                case Commands.SetAir:
-                    if (toy?.hand == Hand.shared)
-                        toy?.setContraction(msg.Strength);
-
-                    break;
-                case Commands.SetRotate:
-                    if (toy?.hand == Hand.shared)
-                        toy?.rotate();
-                    
-                    break;
                 case Commands.GetToys:
-                    MelonLogger.Msg("Control Client requested toys");
-                    //maybe check
-                    foreach (KeyValuePair<ulong, Toy> entry in Toy.myToys.Where(x=>x.Value.hand == Hand.shared)) {
-                        entry.Value.connectedTo = userID;
-                        VRCWSIntegration.SendMessage(new VibratorControllerMessage(userID, Commands.AddToy, entry.Value));
-                    }
-
+                    handleGetToys(userID);
+                    break;
+                case Commands.ToyUpdate:
+                    handleToyUpdate(msg, userID);
+                    break;
+                case Commands.SetSpeeds:
+                    handleSetSpeeds(msg);
                     break;
             }
+        }
+
+        private static void handleSetSpeeds(VibratorControllerMessage msg)
+        {
+            foreach (var toymessage in msg.messages.Select(x => x.Value))
+            {
+                if (!Toy.myToys.ContainsKey(toymessage.ToyID))
+                    continue;
+
+                Toy toy = Toy.myToys[toymessage.ToyID];
+
+                switch (toymessage.Command)
+                {
+                    //Local toy commands
+                    case Commands.SetSpeed:
+                        if (toy?.hand == Hand.shared)
+                            toy?.setSpeed(toymessage.Strength);
+
+                        break;
+                    case Commands.SetSpeedEdge:
+                        if (toy?.hand == Hand.shared)
+                            toy?.setEdgeSpeed(toymessage.Strength);
+
+                        break;
+                    case Commands.SetAir:
+                        if (toy?.hand == Hand.shared)
+                            toy?.setContraction(toymessage.Strength);
+
+                        break;
+                    case Commands.SetRotate:
+                        if (toy?.hand == Hand.shared)
+                            toy?.rotate();
+
+                        break;
+                }
+            }
+        }
+
+        private static void handleToyUpdate(VibratorControllerMessage msg, string userID)
+        {
+            foreach (var toy in msg.messages.Select(x => x.Value))
+            {
+                switch (toy.Command)
+                {
+
+                    //remote toy commands
+                    case Commands.AddToy:
+
+                        MelonLogger.Msg($"Adding : {toy.ToyName} : {toy.ToyID}");
+                        new Toy(toy.ToyName, toy.ToyID, userID, toy.ToyMaxSpeed, toy.ToyMaxSpeed2, toy.ToyMaxLinear, toy.ToySupportsRotate, TabButton.SubMenu);
+
+                        break;
+                    case Commands.RemoveToy:
+
+                        if (Toy.remoteToys.ContainsKey(toy.ToyID))
+                            Toy.remoteToys[toy.ToyID].disable();
+                        break;
+                }
+            }
+        }
+
+        private static void handleGetToys(string userID)
+        {
+            MelonLogger.Msg("Control Client requested toys");
+            VibratorControllerMessage messageToSend = null;
+            foreach (KeyValuePair<ulong, Toy> entry in Toy.myToys.Where(x => x.Value.hand == Hand.shared))
+            {
+                entry.Value.connectedTo = userID;
+                if (messageToSend == null)
+                    messageToSend = new VibratorControllerMessage(userID, Commands.AddToy, entry.Value);
+                else
+                    messageToSend.Merge(new VibratorControllerMessage(userID, Commands.AddToy, entry.Value));
+
+            }
+
+            if (messageToSend != null)
+                VRCWSIntegration.SendMessage(messageToSend);
         }
 
         private static bool menuOpen() {
