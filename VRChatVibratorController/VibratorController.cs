@@ -175,7 +175,7 @@ namespace Vibrator_Controller {
             }));
 
             //Control all toys (vibrate only)
-            new Toy("All Toys", long.MaxValue, "all", 20, 0, 0, false, TabButton.SubMenu);
+            new Toy("All Toys", 1000, "all", 20, 0, 0, false, TabButton.SubMenu);
 
             //activate scroll
             TabButton.SubMenu.ToggleScrollbar(true);
