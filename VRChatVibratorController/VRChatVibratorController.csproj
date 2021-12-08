@@ -113,7 +113,7 @@
     </Reference>
     <Reference Include="Unity.TextMeshPro">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\VRChat\MelonLoader\Managed\Unity.TextMeshPro.dll</HintPath>
-	  <Private>False</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\VRChat\MelonLoader\Managed\UnityEngine.dll</HintPath>
@@ -145,11 +145,11 @@
     </Reference>
     <Reference Include="UnityEngine.VRModule">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\VRChat\MelonLoader\Managed\UnityEngine.VRModule.dll</HintPath>
-	  <Private>False</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.XRModule">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\VRChat\MelonLoader\Managed\UnityEngine.XRModule.dll</HintPath>
-	  <Private>False</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="VRC.UI.Elements">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\VRChat\MelonLoader\Managed\VRC.UI.Elements.dll</HintPath>
@@ -162,7 +162,7 @@
     <Reference Include="VRChatUtilityKit, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\VRChat\Mods\VRChatUtilityKit.dll</HintPath>
-	  <Private>False</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="VRCWSLibary">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\VRChat\Mods\VRCWSLibary.dll</HintPath>
