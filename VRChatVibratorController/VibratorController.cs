@@ -18,7 +18,7 @@ using UnityEngine.UI;
 using VRCWSLibary;
 using System.Runtime.InteropServices;
 
-[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.5.3", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
+[assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.5.4", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
 [assembly: MelonGame("VRChat", "VRChat")]
 [assembly: MelonAdditionalDependencies("UIExpansionKit", "VRCWSLibary", "VRChatUtilityKit")]
 

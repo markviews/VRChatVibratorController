@@ -4,7 +4,7 @@ Lets you control your friends bluetooth vibrator using your vr controllers.
 
 ### How to install
 1. Download and install [MelonLoader](https://melonwiki.xyz/#/README)
-2. Download [VibratorController](https://github.com/markviews/VRChatVibratorController/releases), [UIExpansionKit](https://github.com/knah/VRCMods) and [VRCWS](https://github.com/Er1807/VRCWS)
+2. Download [VibratorController](https://github.com/markviews/VRChatVibratorController/releases), [UIExpansionKit](https://github.com/knah/VRCMods), [VRCWS](https://github.com/Er1807/VRCWS) and [VRCUK](https://github.com/loukylor/VRC-Mods)
 4. Download [ActionMenuAPI](https://github.com/gompocp/ActionMenuApi/releases) if you want action menu integration
 5. Drag dlls into `VRChat/Mods`
 
@@ -16,11 +16,10 @@ Lets you control your friends bluetooth vibrator using your vr controllers.
 
 ### Credits
 * Plague for helping with the project a bunch
-* abbeybabbey for UI improvments
-* Knah for [UIExpansionKit](https://github.com/knah/VRCMods) and AssetBundle code
-* gompocp for [ActionMenuApi](https://github.com/gompocp/ActionMenuApi)
-* miiss-neko for action menu integration
-* Eric van Fandenfart for fixing edge vibrator controls and adding VRCWS support
+* Eric van Fandenfart adding VRCWS support and a bunch more stuff
+* Knah for AssetBundle code
+* miiss-neko for original action menu integration
+* Mod authors of the mods listed above & MelonLoader
 * [Buttplug C# FFI](https://github.com/buttplugio/buttplug-rs-ffi/tree/master/csharp)
 
 ### Notes
