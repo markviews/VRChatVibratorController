@@ -210,7 +210,7 @@ namespace Vibrator_Controller {
             TabButton = new TabButton(CreateSpriteFromTexture2D(logo), "Vibrator Controller", "VibratorControllerMenu", "Vibrator Controller", "Vibrator Controller Menu");
             TabButton.SubMenu
               .AddButtonGroup(new ButtonGroup("ControlsGrp", "Controls", new List<IButtonGroupElement>()
-              {search, networkStatus, buttplugError, new SingleButton(() => { ResetBP(); }, CreateSpriteFromTexture2D(logo), "Reset Connector", "reset", "Resets the underlyung buttplug connector")
+              {search, networkStatus, buttplugError
             }));
 
             //Control all toys (vibrate only)
@@ -252,20 +252,6 @@ namespace Vibrator_Controller {
 
                 buttplugError.SubtitleText = "Error occured";
             };
-        }
-
-
-        private static void ResetBP()
-        {
-            MelonLogger.Msg("Resetting Buttplug Connector");
-            if (bpClient != null)
-            {
-                bpClient.DisconnectAsync().Wait();
-                bpClient = null;
-                Toy.allToys.ForEach(x => x.disable());
-            }
-            buttplugError.SubtitleText = "No Error";
-            SetupBP();
         }
 
         public override void OnUpdate() {
