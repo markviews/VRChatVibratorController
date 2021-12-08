@@ -16,6 +16,7 @@ using VRChatUtilityKit.Utilities;
 using UnhollowerRuntimeLib;
 using UnityEngine.UI;
 using VRCWSLibary;
+using System.Runtime.InteropServices;
 
 [assembly: MelonInfo(typeof(VibratorController), "Vibrator Controller", "1.5.3", "MarkViews", "https://github.com/markviews/VRChatVibratorController")]
 [assembly: MelonGame("VRChat", "VRChat")]
@@ -43,8 +44,50 @@ namespace Vibrator_Controller {
         public static string[] available_toys = { "Ambi", "Osci", "Edge", "Domi", "Hush", "Nora", "Lush", "Max", "Diamo" };
         public static Dictionary<string, Texture2D> toy_icons = new Dictionary<string, Texture2D>();
 
+        public static bool VGBPresent = false;
+
+        //https://gitlab.com/jacefax/vibegoesbrrr/-/blob/master/VibeGoesBrrrMod.cs#L27
+        static public class NativeMethods
+        {
+            public static string TempPath
+            {
+                get
+                {
+                    string tempPath = Path.Combine(Path.GetTempPath(), $"VibratorController-1");
+                    if (!Directory.Exists(tempPath))
+                    {
+                        Directory.CreateDirectory(tempPath);
+                    }
+                    return tempPath;
+                }
+            }
+
+            [DllImport("kernel32.dll")]
+            public static extern IntPtr LoadLibrary(string dllToLoad);
+
+            public static string LoadUnmanagedLibraryFromResource(Assembly assembly, string libraryResourceName, string libraryName)
+            {
+                string assemblyPath = Path.Combine(TempPath, libraryName);
+
+                MelonLogger.Msg($"Unpacking and loading {libraryName}");
+
+                using (Stream s = assembly.GetManifestResourceStream(libraryResourceName))
+                {
+                    var data = new BinaryReader(s).ReadBytes((int)s.Length);
+                    File.WriteAllBytes(assemblyPath, data);
+                }
+
+                LoadLibrary(assemblyPath);
+
+                return assemblyPath;
+            }
+        }
+
         static VibratorController()
         {
+            //Clean up old file, call as earlöy as possible so file isnt loaded by VibeGoBrr
+            if (File.Exists(Environment.CurrentDirectory + @"\buttplug_rs_ffi.dll"))
+                File.Delete(Environment.CurrentDirectory + @"\buttplug_rs_ffi.dll");
             try
             {
                 //Adapted from knah's JoinNotifier mod found here: https://github.com/knah/VRCMods/blob/master/JoinNotifier/JoinNotifierMod.cs 
@@ -81,6 +124,15 @@ namespace Vibrator_Controller {
 
         public override void OnApplicationStart()
         {
+            if (MelonHandler.Mods.Any(mod => mod.Info.Name == "VibeGoesBrrr"))
+            {
+                MelonLogger.Warning("VibeGoesBrrr detected. Disabling Vibrator Controller since these mods are incompatible");
+                return;
+            }
+
+            
+            NativeMethods.LoadUnmanagedLibraryFromResource(Assembly.GetExecutingAssembly(), "Vibrator_Controller.buttplug_rs_ffi.dll", "buttplug_rs_ffi.dll");
+
             vibratorController = MelonPreferences.CreateCategory("VibratorController");
 
             MelonPreferences.CreateEntry(vibratorController.Identifier, "ActionMenu", true, "action menu integration");
@@ -97,7 +149,6 @@ namespace Vibrator_Controller {
                 }
             }
 
-            extractDLL();
             VRCWSIntegration.Init();
             MelonCoroutines.Start(UiManagerInitializer());
             CreateButton();
@@ -125,18 +176,6 @@ namespace Vibrator_Controller {
         private void onPlayerLeft(Player obj) {
             foreach (Toy toy in Toy.remoteToys.Where(x=>x.Value.connectedTo == obj.prop_String_0).Select(x=>x.Value)) {
                 toy.disable();
-            }
-        }
-
-        private void extractDLL() {
-            try {
-                using (Stream s = Assembly.GetCallingAssembly().GetManifestResourceStream("Vibrator_Controller.buttplug_rs_ffi.dll"))
-                using (BinaryReader r = new BinaryReader(s))
-                using (FileStream fs = new FileStream(Environment.CurrentDirectory + @"\buttplug_rs_ffi.dll", FileMode.OpenOrCreate))
-                using (BinaryWriter w = new BinaryWriter(fs))
-                    w.Write(r.ReadBytes((int)s.Length));
-            } catch (Exception) {
-                MelonLogger.Msg("Couldnt extract buttplug_rs_ffi. Maybe a second process is already using that file");
             }
         }
 
